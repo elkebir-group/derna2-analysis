@@ -1,0 +1,175 @@
+{
+ "out_dir": "{out}",
+ "bins": {
+  "derna": "{bin}/run_design_per_lambda",
+  "walk_front": "{bin}/scope35_walk_front",
+  "mfe_fold": "{bin}/mfe_fold",
+  "derna1": "{bin}/derna1",
+  "derna1_table": "{bin}/derna1_codon_usage_human.csv",
+  "derna1_params": "{derna1_params}",
+  "lineardesign": "{bin_e1}/LinearDesign/bin/LinearDesign_2D",
+  "lineardesign_dir": "{bin_e1}/LinearDesign",
+  "lineardesign_table": "./codon_usage_freq_table_human.csv",
+  "lcds": "{bin_e1}/LinearCDSfold/LinearCDSfold",
+  "lcds_dir": "{bin_e1}/LinearCDSfold",
+  "lcds_table": "{bin_e1}/LinearCDSfold/codon_usage_freq_table_human.csv",
+  "mrnafold": "{bin_e1}/mrnafold_fold_codon_graph",
+  "mrnafold_parallel": "{bin_e1}/mrnafold_fold_codon_graph_tbb"
+ },
+ "tables": {
+  "derna": "{inputs}/codon_usage_human.csv",
+  "canonical": "{inputs}/codon_usage_human.csv"
+ },
+ "epsilon": 1.1920928955078125e-07,
+ "corners": [
+  "mfe",
+  "cai"
+ ],
+ "reference_arm": "derna2-walk",
+ "timeout_s": 43200,
+ "limit_s": 43200,
+ "mem_cap_gb": 200,
+ "mem_budget_gb": 200,
+ "mem_headroom_gb": 30,
+ "concurrency": 2,
+ "hull_threads": 1,
+ "verify_s": 1800,
+ "rescore_cores": "1,3,5,7",
+ "cores": [
+  0,
+  2,
+  4,
+  6,
+  8,
+  10,
+  12,
+  14,
+  16,
+  18,
+  20,
+  22,
+  24,
+  26
+ ],
+ "arms": {
+  "derna2-hull": {
+   "kind": "derna",
+   "lambdas": "hull",
+   "exact": true
+  },
+  "derna1-own": {
+   "kind": "derna1",
+   "lambdas": "own"
+  },
+  "derna1-hull": {
+   "kind": "derna1",
+   "lambdas": "hull"
+  },
+  "lineardesign-hull": {
+   "kind": "lineardesign",
+   "lambdas": "hull",
+   "exact": true
+  },
+  "lcds-exact-hull": {
+   "kind": "lcds",
+   "mode": "exact",
+   "lambdas": "hull",
+   "exact": true
+  },
+  "mrnafold-hull": {
+   "kind": "mrnafold",
+   "lambdas": "hull",
+   "exact": true
+  }
+ },
+ "instances": {
+  "protein_dirs": [
+   {
+    "dir": "{inputs}/uniprot",
+    "max_aa": 500
+   }
+  ],
+  "protein_files": [
+   "{inputs}/prt/PRT-03.fasta",
+   "{inputs}/prt/PRT-04.fasta",
+   "{inputs}/prt/PRT-05.fasta",
+   "{inputs}/prt/PRT-06.fasta",
+   "{inputs}/prt/PRT-07.fasta"
+  ],
+  "ladder": {
+   "fasta": "{inputs}/P0DTC2.fasta",
+   "lengths": [
+    32,
+    41,
+    51,
+    64,
+    81,
+    102,
+    128,
+    161,
+    203,
+    255,
+    321,
+    404,
+    508,
+    640,
+    804,
+    1012,
+    1273
+   ]
+  }
+ },
+ "work": {
+  "cores": [
+   0,
+   2,
+   4,
+   6,
+   8,
+   10,
+   12,
+   14,
+   16,
+   18,
+   20,
+   22,
+   24,
+   26
+  ]
+ },
+ "time": {
+  "cores": [
+   0,
+   2,
+   4,
+   6,
+   8,
+   10,
+   12,
+   14,
+   16,
+   18,
+   20,
+   22,
+   24,
+   26
+  ],
+  "reps": 1,
+  "sample_s": 5,
+  "gate": {
+   "samples": 20,
+   "interval_s": 30,
+   "busy_max": 0.05
+  },
+  "gate_between": {
+   "samples": 2,
+   "interval_s": 5,
+   "busy_max": 0.05
+  },
+  "contamination_busy_max": 0.05,
+  "retries": 2
+ },
+ "repo": "{root}",
+ "walk_arm": "derna2-walk",
+ "derna2_pin": "acfaae60"
+}

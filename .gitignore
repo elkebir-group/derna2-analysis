@@ -1,0 +1,11 @@
+# Everything the pipeline reads from a deposit or writes itself.
+data/
+# Host-specific paths (binaries, deposit location, reserved cores).
+pipelines/config/host.yaml
+.snakemake/
+.venv
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/

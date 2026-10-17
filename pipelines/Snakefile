@@ -1,0 +1,57 @@
+# The derna2 paper pipeline. Run it through pipelines/run.sh; README.md lists the targets.
+#
+# Two kinds of target:
+#   figure targets  read deposited results (or this checkout's own runs, `figures_from`)
+#                   and need no binaries. `all` is these.
+#   run targets     regenerate the results from pinned binaries. Opt-in: they take hours
+#                   to days, and the timed passes need a reserved socket.
+
+import sys
+from pathlib import Path
+
+configfile: "pipelines/config/config.yaml"
+
+ROOT = Path(workflow.basedir).parent
+# Data paths stay relative to the repository root (the working directory), so a target given
+# on the command line as data/derived/... matches the rule that makes it.
+workdir: ROOT
+INPUTS = Path(config["inputs_root"])
+RESULTS = Path(config["results_root"])
+DERIVED = Path(config["derived_root"])
+RUNS = DERIVED / "runs"
+FIGURES = DERIVED / "figures"
+STAMPS = DERIVED / "stamps"
+DRIVERS = ROOT / "drivers"
+SCRIPTS = ROOT / "pipelines" / "scripts"
+# Library scripts run in this environment; the vendored drivers are standard-library only.
+PY = sys.executable
+DRIVER_PY = config["driver_python"]
+
+
+def source(exp):
+    """Where an experiment's figures read their results from."""
+    if config["figures_from"] == "deposit":
+        return RESULTS / exp
+    if config["figures_from"] == "runs":
+        return RUNS / exp
+    raise ValueError(f"figures_from: {config['figures_from']!r}, want deposit or runs")
+
+
+def source_ok(exp):
+    """The stamp a figure waits on: the deposit's checksums, or the run's own summary."""
+    if config["figures_from"] == "deposit":
+        return STAMPS / f"results_{exp}.ok"
+    return RUNS / exp / "summary.txt"
+
+
+include: "rules/common.smk"
+include: "rules/e1.smk"
+include: "rules/e2.smk"
+include: "rules/fig1.smk"
+
+
+rule all:
+    input:
+        rules.e1_figures.input,
+        rules.e2_figures.input,
+        rules.fig1_figures.input,

@@ -1,0 +1,55 @@
+# Configuration of the derna2 paper pipeline. Paths are relative to the repository root.
+# Host-specific values (where the frozen binaries and the deposit live, which cores are
+# reserved) go in pipelines/config/host.yaml, which run.sh loads after this file; see
+# host.example.yaml.
+
+inputs_root: inputs
+# Deposited results: what the figure targets read. Link or unpack the deposit here.
+results_root: data/results
+# Everything the pipeline writes: run outputs, tables, figures.
+derived_root: data/derived
+# Figures read the deposit (`deposit`) or this checkout's own runs (`runs`).
+figures_from: deposit
+
+# The drivers under drivers/ are standard-library Python, run outside the venv's packages.
+driver_python: python3
+
+derna2:
+  repo: git@github.com:elkebir-group/derna2.git
+
+# Single-λ correctness, runtime and memory (E1). The grid itself (arms, instances, ε,
+# limits) is drivers/benchmark/e1.config.json, the configuration the deposited run used.
+e1:
+  pin: 17ee9d8b
+  manifest: pins/e1.sha256
+  # Frozen binaries: the derna2 ones built at `pin` by build_derna2, the comparators as
+  # pins/e1-PROVENANCE.md describes. Set in host.yaml.
+  bin_dir: data/derived/bin/e1
+  # The time pass runs on one reserved socket; the driver itself on the other.
+  time_cores: "1,3,5,7,9,11,13,15,17,19,21,23,25,27"
+  driver_cpus: "0-26:2"
+  rows: {work: 3465, time_cells: 3465}
+
+# Whole-front runtime (E2). Grid: drivers/benchmark/e2.config.json.
+e2:
+  pin: acfaae60
+  manifest: pins/e2.sha256
+  bin_dir: data/derived/bin/e2
+  # derna2's binaries come from bin_dir; the comparators are E1's freeze.
+  comparator_bin_dir: data/derived/bin/e1
+  # DERNA v1's energy parameter directory (data/InputFiles of its source tree).
+  derna1_params: data/derived/derna1/InputFiles
+  driver_cpus: "1-27:2"
+
+# Overview figure (GLPE_HUMAN with hbb UTRs).
+fig1:
+  # The commit these binaries were built from was not recorded; the manifest pins the
+  # binaries themselves. See README "Open items".
+  pin: null
+  manifest: pins/fig1.sha256
+  bin_dir: data/derived/bin/fig1
+  n_aa: 78
+  # arm -> extra flags of scope35_walk_front
+  fronts:
+    cdsonly: ""
+    symmetric: "--utr5 {utr5} --utr3 {utr3} --region 5-cds,cds-3"

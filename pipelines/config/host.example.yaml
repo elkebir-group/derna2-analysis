@@ -1,0 +1,11 @@
+# Copy to host.yaml (gitignored) and fill in. run.sh loads it after config.yaml, so any
+# key here overrides that file's.
+
+# results_root: /path/to/unpacked/deposit
+# e1:
+#   bin_dir: /scratch/<user>/paper-e1-bin
+# e2:
+#   bin_dir: /scratch/<user>/paper-e2-bin
+#   comparator_bin_dir: /scratch/<user>/paper-e1-bin
+# fig1:
+#   bin_dir: /scratch/<user>/fig1-glpe-hbb/bin

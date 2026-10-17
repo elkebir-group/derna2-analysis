@@ -1,0 +1,241 @@
+{
+ "out_dir": "{out}",
+ "bins": {
+  "derna": "{bin}/run_design_per_lambda",
+  "mfe_fold": "{bin}/mfe_fold",
+  "lineardesign": "{bin}/LinearDesign/bin/LinearDesign_2D",
+  "lineardesign_dir": "{bin}/LinearDesign",
+  "lineardesign_table": "./codon_usage_freq_table_human.csv",
+  "lcds": "{bin}/LinearCDSfold/LinearCDSfold",
+  "lcds_dir": "{bin}/LinearCDSfold",
+  "lcds_table": "{bin}/LinearCDSfold/codon_usage_freq_table_human.csv",
+  "cdsfold": "{bin}/CDSfold/CDSfold",
+  "mrnafold": "{bin}/mrnafold_fold_codon_graph",
+  "mrnafold_parallel": "{bin}/mrnafold_fold_codon_graph_tbb"
+ },
+ "tables": {
+  "derna": "{inputs}/codon_usage_human.csv",
+  "canonical": "{inputs}/codon_usage_human.csv"
+ },
+ "epsilon": 1.1920928955078125e-07,
+ "instances": {
+  "protein_dirs": [
+   {
+    "dir": "{inputs}/uniprot",
+    "max_aa": 500
+   }
+  ],
+  "ladder": {
+   "fasta": "{inputs}/P0DTC2.fasta",
+   "lengths": [
+    30,
+    32,
+    35,
+    38,
+    41,
+    44,
+    47,
+    51,
+    55,
+    60,
+    64,
+    70,
+    75,
+    81,
+    88,
+    94,
+    102,
+    110,
+    119,
+    128,
+    139,
+    150,
+    161,
+    174,
+    188,
+    203,
+    219,
+    237,
+    255,
+    276,
+    298,
+    321,
+    347,
+    374,
+    404,
+    436,
+    471,
+    508,
+    549,
+    592,
+    640,
+    690,
+    745,
+    804,
+    868,
+    937,
+    1012,
+    1092,
+    1179,
+    1273
+   ]
+  },
+  "protein_files": []
+ },
+ "corners": [
+  "mfe",
+  "cai"
+ ],
+ "reference_arm": "derna-exact-30",
+ "arms": {
+  "lineardesign": {
+   "kind": "lineardesign",
+   "exact": true
+  },
+  "lcds-exact": {
+   "kind": "lcds",
+   "mode": "exact",
+   "exact": true
+  },
+  "lcds-beam": {
+   "kind": "lcds",
+   "mode": "beam",
+   "widths": [
+    100,
+    500,
+    2000
+   ]
+  },
+  "derna-exact-30": {
+   "kind": "derna",
+   "exact": true
+  },
+  "derna-exact-20": {
+   "kind": "derna",
+   "exact": true,
+   "args": [
+    "--single-max-len",
+    "20"
+   ]
+  },
+  "derna-open2": {
+   "kind": "derna",
+   "widths": [
+    100,
+    500,
+    2000
+   ],
+   "args": [
+    "--cap",
+    "{w}",
+    "--per-open",
+    "2",
+    "--rank",
+    "mfe"
+   ],
+   "rss_k": 9.2
+  },
+  "derna-open5": {
+   "kind": "derna",
+   "widths": [
+    100,
+    500,
+    2000
+   ],
+   "args": [
+    "--cap",
+    "{w}",
+    "--per-open",
+    "5",
+    "--rank",
+    "mfe"
+   ],
+   "rss_k": 9.2
+  },
+  "derna-threaded": {
+   "kind": "derna",
+   "exact": true,
+   "threads": [
+    8
+   ]
+  },
+  "cdsfold": {
+   "kind": "cdsfold",
+   "exact": true,
+   "corners": [
+    "mfe"
+   ]
+  },
+  "mrnafold": {
+   "kind": "mrnafold",
+   "exact": true
+  },
+  "mrnafold-threaded": {
+   "kind": "mrnafold",
+   "exact": true,
+   "threads": [
+    8
+   ]
+  }
+ },
+ "timeout_s": 14400,
+ "mem_budget_gb": 200,
+ "mem_headroom_gb": 30,
+ "rescore_cores": "0,2,4,6",
+ "work": {
+  "cores": [
+   10,
+   12,
+   14,
+   16,
+   18,
+   20,
+   22,
+   24
+  ]
+ },
+ "time": {
+  "cores": [
+   1,
+   3,
+   5,
+   7,
+   9,
+   11,
+   13,
+   15,
+   17,
+   19,
+   21,
+   23,
+   25,
+   27
+  ],
+  "reps": 1,
+  "concurrency": 2,
+  "retries": 2,
+  "sample_s": 5,
+  "gate": {
+   "samples": 20,
+   "interval_s": 30,
+   "busy_max": 0.05
+  },
+  "gate_between": {
+   "samples": 2,
+   "interval_s": 5,
+   "busy_max": 0.05
+  },
+  "gate_after_contamination": {
+   "samples": 6,
+   "interval_s": 10,
+   "busy_max": 0.05
+  },
+  "contamination_busy_max": 0.05,
+  "contamination_peak_max": 0.25,
+  "min_cpu_share": 0.95,
+  "cpu_share_after_s": 5,
+  "tpi_window": 1.25,
+  "tpi_max": 1.2,
+  "contamination_peak_window_s": 60
+ }
+}

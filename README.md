@@ -1,0 +1,176 @@
+# derna2-analysis
+
+The analyses and figures of the derna2 paper: exact Pareto-optimal mRNA codon design, its cost
+against the other design tools, and constrained design with UTRs. The method itself lives in
+[derna2](https://github.com/elkebir-group/derna2); this repository holds what the paper
+measured with it and how.
+
+- **`derna2_analysis/`**: the shared library: result rows (`io.py`), Pareto fronts, hull
+  vertices and hypervolume (`fronts.py`), checksums against `pins/` (`provenance.py`), one module
+  per experiment (`e1.py`, `fig1.py`) and the figure style (`figures.py`).
+- **`pipelines/`**: a Snakemake pipeline from the inputs, or from the deposited results, to the
+  figures. See "Running the pipeline".
+- **`drivers/`**: the benchmark drivers that produced the deposited results, copied from the
+  derna2 repository (`drivers/README.md` names the commits and the one change).
+- **`pins/`**: what every result depends on, as checksums: the frozen binaries of each
+  experiment, their provenance, and the deposited results.
+- **`inputs/`**: the protein sequences, UTRs and codon table, committed.
+
+## Install
+
+Python 3.11–3.13. On a host whose glibc is older than 2.28 (CentOS 7), the numpy cap in
+`pyproject.toml` keeps pip on wheels it can install.
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.lock
+.venv/bin/pip install -e '.[dev,pipeline]' --no-deps
+```
+
+`requirements.lock` pins every package version the published figures were made with. Install
+from it, not from `pyproject.toml`'s ranges, to reproduce them.
+
+## Data
+
+The deposited results go under `data/results/` (or set `results_root` in
+`pipelines/config/host.yaml`). The figure targets check every file against
+`pins/results-<experiment>.sha256` before drawing anything.
+
+```
+data/results/
+├── e1/
+│   ├── config.json          # the grid as run (arms, instances, ε, limits, host paths)
+│   ├── work.jsonl           # correctness, peak RSS, instructions: 3,465 rows, one per cell
+│   ├── time.jsonl           # wall-clock and CPU time on a reserved socket: 3,918 rows (retries)
+│   └── structures.jsonl     # every design: sequence, tool structure, re-folded structure
+├── e2/                      # in progress: no checksum manifest yet
+│   ├── sweep.jsonl          # one row per λ, per front point and per cell, stamped with its pin
+│   └── hull/                # derna2's hull vertices and replay λs per instance
+└── fig1/
+    ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
+    ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
+    ├── cd_symmetric_guarded_front.scored.jsonl  # exact guarded front
+    ├── d_so_front.jsonl                         # exact structurally optimal front
+    ├── so_windows/          # the window walks that found it, by round
+    └── top_exhaustive/      # the stretch above the most adapted seed, by enumeration
+```
+
+Nothing under `data/` is committed.
+
+## Running the pipeline
+
+`pipelines/run.sh` runs `pipelines/Snakefile` with `pipelines/config/config.yaml`, then
+`pipelines/config/host.yaml` if it exists (copy `host.example.yaml`). A target is a rule name or
+an output path relative to the repository root.
+
+```bash
+pipelines/run.sh --dry-run                                     # what would run
+pipelines/run.sh                                               # every figure, from the deposit
+pipelines/run.sh -- fig1_figures                               # one experiment's figures
+pipelines/run.sh -- data/derived/figures/e1_scaling.pdf        # one output
+pipelines/run.sh -- e1_runs                                    # regenerate E1 from binaries
+```
+
+`run.sh` passes `--rerun-triggers mtime`, so a code or config change never reruns an existing
+output by itself: delete it, or add `--forcerun <rule>`. Outputs go to `data/derived/`.
+
+There are two kinds of target. **Figure targets** read results and need no binaries; `all` is
+these. Set `figures_from: runs` to draw from this checkout's own runs instead of the deposit.
+**Run targets** regenerate the results from frozen binaries. They take hours to days, and the
+timed passes need a reserved socket, so they run only when named.
+
+### Provenance
+
+| Rule | Output | Content |
+|---|---|---|
+| `check_results` | `stamps/results_{exp}.ok` | every deposited file of an experiment against `pins/results-{exp}.sha256` |
+| `check_bins` | `stamps/bins_{exp}.ok` | the frozen binaries in the experiment's `bin_dir` against `pins/{exp}.sha256` |
+| `build_derna2` | `bin/derna2-{pin}/` | derna2's benchmark binaries rebuilt from a fresh clone at a commit |
+| `check_derna2_build` | `bin/derna2-{exp}.compare.txt` | whether that rebuild is byte-identical to the frozen binaries of the experiment |
+| `package_deposit` | `deposit/{exp}.tar` | the deposit of one experiment: exactly the files its manifest names, checked, without the run logs and working scripts beside them |
+
+### E1: single-λ correctness, runtime and memory
+
+Every method at both corners of the objective (λ = ε and 1 − ε, ε = 2⁻²³) on 55 UniProt
+proteins up to 500 aa and a 50-rung prefix ladder of P0DTC2 up to 1,273 aa. Arms: derna2 exact
+(internal-loop cap 30 and 20), its beam modes, 8 threads; LinearDesign; LinearCDSfold exact and
+beam; CDSfold (MFE corner only); mRNAfold serial and threaded. Every design is re-folded by one
+folder, and correctness is judged on that re-scored MFE. `drivers/benchmark/BENCHMARK.md`
+describes the two passes, the socket isolation and the known tool discrepancies. derna2 is
+pinned at `17ee9d8b`.
+
+| Rule | Output | Content |
+|---|---|---|
+| `e1_tables` | `e1/cells.tsv`, `e1/correctness.tsv` | one row per cell; per method and corner: cells, re-scored MFE equal to / above / below derna2 exact, the largest gap, CAI = 1 at the CAI corner, cells without a clean timed run |
+| `e1_plot_scaling` | `figures/e1_scaling.pdf` | wall time and peak RSS against length, exact serial methods, both corners |
+| `e1_plot_speed_quality` | `figures/e1_speed_quality.pdf` | the beam modes: MFE gap to the exact optimum and wall time relative to derna2 exact, per width |
+| `e1_figures` | | the three above |
+| `e1_config` | `runs/e1/config.json` | `drivers/benchmark/e1.config.json` with this host's paths |
+| `e1_selftest` | `runs/e1/selftest.log` | every arm on a 30-residue protein: exits, parses, translates back, re-scores |
+| `e1_epscheck` | `runs/e1/epscheck.log` | ε against its bound, and every exact arm unchanged at ε/2 |
+| `e1_work` | `runs/e1/work.jsonl` | the work pass: correctness, memory, instructions; load-insensitive |
+| `e1_time` | `runs/e1/time.jsonl` | the time pass on the reserved socket, gated on it being idle |
+| `e1_summarize` | `runs/e1/summary.txt` | row counts against the plan, exits, contamination, exact arms against the reference |
+| `e1_runs` | | the run chain above |
+
+### E2: the whole front
+
+What the whole Pareto front costs each method. derna2 enumerates it (`derna2-walk`); every other
+method sweeps its scalarization weight, at derna2's hull λs (one per hull vertex plus the
+corners) or, for DERNA v1, also by its own adaptive sweep. Instances: the 55 UniProt proteins,
+every third P0DTC2 rung and five Cas orthologs (PRT-03 to PRT-07, 1,000–1,629 aa). Limits: 12 h
+and 200 GB per cell, with partial fronts kept. Design: `drivers/benchmark/E2-PLAN.md`. derna2
+is pinned at `acfaae60`. **The grid has not been run**; the deposit holds the n = 32 pilot.
+
+| Rule | Output | Content |
+|---|---|---|
+| `e2_plot_fronts` | `figures/e2_fronts.pdf`, `e2/cells.tsv` | wall time and Pareto points recovered per cell against length; rows of the configured pin only |
+| `e2_figures` | | the figure above |
+| `e2_config` | `runs/e2/config.json` | `drivers/benchmark/e2.config.json` with this host's paths |
+| `e2_hull` | `runs/e2/hull.done` | derna2's chord sweep: hull vertices and the replay λs |
+| `e2_verify` | `runs/e2/verify.done` | each comparator's λ map against derna2 at interior λs |
+| `e2_sweep` | `runs/e2/sweep.jsonl` | the grid |
+| `e2_summarize` | `runs/e2/summary.txt` | fronts, recovery against the reference, anytime curves |
+| `e2_runs` | | the run chain above |
+
+### Figure 1: GLPE_HUMAN with the hbb UTRs
+
+One real instance (P15421, 78 aa; hbb UTRs, 50 nt 5′ and 132 nt 3′) carrying both
+contributions: the exact CDS-only front, what attaching the UTRs does to its designs, a guarded
+front with no CDS–UTR pairs, and the exact structurally optimal front under that guard (free
+MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
+
+| Rule | Output | Content |
+|---|---|---|
+| `fig1_so_front` | `fig1/so_front.jsonl` | the structurally optimal front reassembled from its window reports; fails unless the windows settle the whole log-CAI range and the front equals the deposited one |
+| `fig1_plot` | `figures/fig1_glpe_hbb.pdf` | panels a–d |
+| `fig1_figures` | | the two above |
+| `fig1_front` | `runs/fig1/{arm}/front.jsonl` | the CDS-only (`cdsonly`) or symmetric-guarded (`symmetric`) front, re-walked |
+| `fig1_check_front` | `runs/fig1/{arm}/check.txt` | that front against the deposited one, energy at every log-CAI level |
+| `fig1_runs` | | both fronts, re-walked and checked |
+
+## Tests
+
+```bash
+.venv/bin/pytest
+```
+
+The pipeline tests dry-run every target the tables above name, and run `run.sh` with no
+arguments.
+
+## Open items
+
+- **Figure 1's binaries have no recorded commit.** `pins/fig1.sha256` pins the binaries
+  themselves, so the figure is reproducible from the freeze, but they cannot be rebuilt from
+  source until the commit is identified. Their window reports carry a `binary_fnv64` that can
+  confirm a candidate.
+- **Figure 1 panel b's scoring and the window search are not pipeline rules.** The scored files
+  (free and guarded folds of each design) and the window rounds were produced by the scripts in
+  `drivers/fig1/`, which carry absolute paths to a derna2 checkout. The pipeline checks their
+  output (`fig1_so_front`) but does not rerun them.
+- **E2 is in progress.** Its deposit has no checksum manifest until the grid finishes.
+- **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold, DERNA v1) are
+  described in `pins/e1-PROVENANCE.md` and `pins/e2-PROVENANCE.md`, not automated.
+- **A rebuild of derna2 at a pin has not been compared** with the frozen binaries
+  (`check_derna2_build`).
+- **License**: none chosen yet.
