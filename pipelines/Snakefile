@@ -47,6 +47,7 @@ def source_ok(exp):
 include: "rules/common.smk"
 include: "rules/e1.smk"
 include: "rules/e2.smk"
+include: "rules/e3.smk"
 include: "rules/fig1.smk"
 
 
@@ -54,4 +55,5 @@ rule all:
     input:
         rules.e1_figures.input,
         rules.e2_figures.input,
+        rules.e3_tables.input,
         rules.fig1_figures.input,

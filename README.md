@@ -15,7 +15,7 @@ measured with it and how.
   changes).
 - **`pins/`**: what every result depends on, as checksums: the frozen binaries of each
   experiment, their provenance, and the deposited results.
-- **`inputs/`**: the protein sequences, UTRs and codon table, committed.
+- **`inputs/`**: the protein sequences, UTRs, codon table and E3's motif sets, committed.
 
 ## Install
 
@@ -48,6 +48,10 @@ data/results/
 │   ├── sweep.jsonl          # one row per λ, per front point and per cell, stamped with its pin
 │   └── hull/                # derna2's hull vertices and replay λs per instance (partial if the
 │                            # walk was stopped)
+├── e3/                      # in progress: no checksum manifest yet
+│   ├── e3-probe/            # hull probe round 1: per rung the walk's rows, its measurement
+│   │                        # record and summary.csv; forced.jsonl, the forced-motif census
+│   └── e3-probe2/           # round 2: the n = 200 load control, n = 150, 250 and 300
 └── fig1/
     ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
     ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
@@ -139,6 +143,49 @@ CLI merge; **the pin is `pending` until launch** and the binaries are not frozen
 | `e2_summarize` | `runs/e2/summary.txt` | fronts, recovery against the reference, anytime curves, for the configured pin |
 | `e2_runs` | | the run chain above |
 
+### E3: the price of motif-freedom
+
+What excluding motifs costs: the exact Pareto front over every design, then over the designs
+that avoid each of four cumulative motif sets (`inputs/motifs/`: manufacturing sites,
+processing signals, repeats, internal initiation), five nested fronts per instance, no UTRs.
+No other tool can express the constraint, so there are no comparator arms. Design and
+pre-registered rules: `drivers/e3/E3-PLAN.md`. **The grid has not run**: the nested fronts need
+`derna front --motif`, built on derna2's `scope/38-motif-front` and not yet in a pinned build.
+What has run, and is here:
+
+- **the forced-motif census**: no entry of the four sets is forced by any peptide, so every
+  set is satisfiable on every protein; the rejected thresholds `GGGG` and `CCNCCN` are forced
+  by `WG` and `PP`;
+- **the hull probe** (plan § 3a): the exact motif hull on P31645 prefixes, a lower bound on the
+  front's cost. Peak RSS grows as n^1.95 (≈15 GB at 984 aa, ≈39 GB at 1,629 aa, extrapolated);
+  the wall is not a power law, and n = 300 did not finish inside an hour.
+
+| Rule | Output | Content |
+|---|---|---|
+| `e3_forced_motifs` | `e3/forced_motifs.jsonl` | the census recomputed from the motif sets and the codon table, and checked entry by entry against the recorded one |
+| `e3_probe_table` | `e3/probe.tsv`, `e3/probe_fit.txt` | one row per rung: exit, wall, peak RSS, vertices, probes, folds per probe and the cost of one fold (all probes, the λ = 10⁻⁴ probe, the ordinary ones); the peak-RSS fit and the wall's consecutive-rung exponents |
+| `e3_tables` | | the two above |
+
+### E4: UTR-aware design (planned)
+
+Four fronts per protein and UTR pair, all re-scored on the whole molecule by one folder: the
+CDS designed alone with the UTRs pasted on afterwards, the UTRs inside the DP with CDS–UTR pairs
+forbidden (`--forbid 5-cds,cds-3`; 5′–3′ pairs allowed), mRNAfold with the UTRs in its energy
+model, and the structurally optimal front. Instances: the five Cas orthologs at native length
+and six therapeutic natives (188–239 aa), each with five UTR pairs used in practice. Design:
+`drivers/e4/E4-PLAN.md`; its three gates (two-class exactness, mRNAfold with UTRs, the
+three-class control) passed on 2026-10-19. **Nothing else has run**, and E4 has no driver, pin or
+UTR sequence file yet, so it has no rule.
+
+### E5: one design, start to finish (planned)
+
+A ladder of four cumulative practices on one short instance (SARS-CoV-2 RBD with the `bnt`
+pair) and one long one (`PRT-03` with `hbb`): no constraint, the UTRs attached, E3's motif sets,
+the start window kept accessible (`--access 4,30`). The pooled designs are summarized with MASS
+into structural classes, and practical filters (GC and GC3 windows, uridine, CpG, `+4 = G`) are
+applied to the front. Design: `drivers/e5/E5-PLAN.md`. **Nothing has run**; E5 consumes E3's
+motif sets and E4's UTR pin and gate, and has no driver or rule.
+
 ### Figure 1: GLPE_HUMAN with the hbb UTRs
 
 One real instance (P15421, 78 aa; hbb UTRs, 50 nt 5′ and 132 nt 3′) carrying both
@@ -178,6 +225,12 @@ arguments.
 - **E2's freeze.** When the second host chooses its commit, set `e2.pin`, fill
   `pins/e2.sha256` with every binary in `e2.bin_dir` (derna2's and the comparators') and add
   `pins/e2-PROVENANCE.md`. Rows of the first host's pilot (`acfaae60`) are not part of the grid.
+- **E3's grid** waits on `derna front --motif` with `--stream`, `--max-secs` and
+  `--max-rss-gb` in a pinned build. The probe's binary (`motif_hull` at `5d12df5f`) is not
+  frozen here, so the probe is a record, not a run target. The union rows of the forced-motif
+  census came from code the plan does not include, and are not checked.
+- **E4 and E5** need their drivers, a pin, the UTR pairs' sequence file with its provenance,
+  and the six therapeutic natives' sequences, none of which exists yet; E5 also pins MASS.
 - **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold) are described in
   `pins/e1-PROVENANCE.md`, not automated.
 - **A rebuild of derna2 at a pin has not been compared** with the frozen binaries

@@ -1,0 +1,25 @@
+# E3 set I — manufacturing / cloning. The protocol constraint.
+# T is read as U. One pattern per line; `#` begins a comment.
+
+# Type IIS sites and their reverse complements (Golden Gate assembly).
+# This is the `p8` set every prior motif speed measurement used.
+GGTCTC    # BsaI
+GAGACC    # BsaI, reverse complement
+CGTCTC    # BsmBI / Esp3I
+GAGACG    # BsmBI / Esp3I, reverse complement
+GAAGAC    # BbsI
+GTCTTC    # BbsI, reverse complement
+GCTCTTC   # SapI
+GAAGAGC   # SapI, reverse complement
+
+# Common six-cutters used for vector insertion and linearization.
+# Palindromic, so each is its own reverse complement.
+GAATTC    # EcoRI
+GGATCC    # BamHI
+AAGCTT    # HindIII
+CTGCAG    # PstI
+GTCGAC    # SalI
+TCTAGA    # XbaI
+GAGCTC    # SacI
+CCCGGG    # SmaI
+GCGGCCGC  # NotI

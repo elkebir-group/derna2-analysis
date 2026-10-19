@@ -42,6 +42,19 @@ e2:
   lineardesign_dir: data/derived/comparators/LinearDesign
   lcds_dir: data/derived/comparators/LinearCDSfold
 
+# The price of motif-freedom (E3). Design: drivers/e3/E3-PLAN.md. The nested fronts need
+# `derna front --motif`, not in a pinned build yet; what is here is the forced-motif census
+# and the hull probe, read from the results without a checksum manifest while it runs.
+e3:
+  pin: null
+  # Cumulative order F1..F4, files under inputs/motifs/.
+  motif_sets: [set1-manufacturing, set2-processing, set3-repeats, set4-initiation]
+  probe_dirs: [e3-probe, e3-probe2]
+
+# E4 (UTR-aware design, four fronts per instance) and E5 (the combined ladder and its MASS
+# summary) are plans: drivers/e4/E4-PLAN.md, drivers/e5/E5-PLAN.md. Neither has a driver,
+# a pin or a result yet, so neither has a rule.
+
 # Overview figure (GLPE_HUMAN with hbb UTRs).
 fig1:
   # The commit these binaries were built from was not recorded; the manifest pins the

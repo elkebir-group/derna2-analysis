@@ -1,0 +1,17 @@
+# E3 set III — composition / repeats. T is read as U.
+
+# Homopolymer runs. A fixed 6-mer is exactly equivalent to the run-length
+# rule A{6,} on the exclusion axis, because every longer run contains the
+# 6-mer; no separate instrument is needed for the family.
+AAAAAA
+TTTTTT
+CCCCCC
+
+# G-runs. The threshold is 5, not the 4 that G-quadruplex propensity would
+# argue for, and the genetic code fixes that: Trp has only UGG and Gly is GGN,
+# so a Trp immediately followed by a Gly spells UGG|GGN and carries a 4-G run
+# at every synonymous choice. GGGG is therefore infeasible for any protein
+# containing WG, measured on P31645 at residue 82. Only Trp and Met are
+# single-codon, so 4 is the longest run the code can force and 5 is always
+# satisfiable, which this instance confirms.
+GGGGG

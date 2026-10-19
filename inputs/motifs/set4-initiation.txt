@@ -1,0 +1,15 @@
+# E3 set IV — translation / initiation. T is read as U.
+#
+# Internal Kozak-like initiation contexts: a purine at -3 and G at +4 around
+# an internal AUG, which is where alternative initiation is most likely. This
+# is the only member of the translation category that hard substring
+# exclusion can state; the rest is a limitation, with evidence, in the plan.
+#
+# It is expressible AND satisfiable: the AUG itself is fixed by the protein,
+# but the context around it is designed, so a run has somewhere to go.
+RCCATGG
+#
+# The fuller consensus GCCRCCATGG is NOT listed, because it would be vacuous
+# beside the line above: every occurrence of the 10-mer contains the 7-mer, so
+# the 7-mer forbids strictly more and the 10-mer could never be the entry that
+# removed anything. Of two nested patterns the shorter is the constraint.
