@@ -28,9 +28,14 @@ def verify(manifest, root):
     Returns the checked relative paths; raises on the first missing or changed file, since
     a figure drawn from a different build or a different deposit is a different result.
     """
+    entries = read_manifest(manifest)
+    if not entries:
+        # A manifest with no entries is a freeze that has not happened yet; passing it would
+        # stamp every file under root as pinned.
+        raise ValueError(f"{manifest}: names no files")
     root = Path(root)
     checked = []
-    for digest, rel in read_manifest(manifest):
+    for digest, rel in entries:
         path = root / rel
         if not path.is_file():
             raise FileNotFoundError(f"{path}: named in {manifest}, missing")

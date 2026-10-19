@@ -4,14 +4,17 @@
 
 Only the named placeholders are replaced ({bin}, {out}, ...): the templates also carry the
 drivers' own format fields, such as the beam width {w}, which must reach the driver as
-written. Every value is made absolute, since the drivers resolve relative paths against
-their own location. A placeholder left unfilled is an error.
+written. Every value except the derna2 pin is a path and is made absolute, since the drivers
+resolve relative paths against their own location. A placeholder left unfilled is an error.
 """
 
 import json
 import re
 import sys
 from pathlib import Path
+
+# Placeholders whose value is written as given rather than as a path.
+LITERAL = {"pin"}
 
 
 def render(text, values):
@@ -25,7 +28,7 @@ def main():
     values = {}
     for pair in pairs:
         key, value = pair.split("=", 1)
-        values[key] = str(Path(value).resolve())
+        values[key] = value if key in LITERAL else str(Path(value).resolve())
     text = render(Path(template).read_text(), values)
     known = set(re.findall(r"\{([a-z0-9_]+)\}", Path(template).read_text()))
     # {w} and its kind are the drivers' own fields; anything else unfilled is a missing path.

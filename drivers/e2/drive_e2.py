@@ -96,7 +96,9 @@ class PinnedResults(e1.Results):
 
 def map_lambda(kind, lam):
     """A derna2 convex weight as the parameter `kind` takes."""
-    if kind == "derna":
+    if kind in ("derna", "derna1rs"):
+        # The Rust port of v1 scores lambda*E_dcal - (1-lambda)*round(100*sum
+        # ln w): derna2's scale, so the same weight (`verify` checks it).
         return lam
     if kind in ("lineardesign", "mrnafold"):
         return (1.0 - lam) / lam
@@ -154,6 +156,15 @@ def command_at(cfg, arm, label, prot, lam, work, stem):
                 "--machine", str(e1.ext(stem, ".machine.json")),
                 "--threads", str(arm.get("threads", 1))]
         argv += arm.get("args", [])
+        return (argv, str(e1.REPO), None,
+                lambda _s: e1.parse_derna(out, e1.ext(stem, ".machine.json")))
+    if kind == "derna1rs":
+        lamf = e1.ext(stem, ".lambda.jsonl")
+        lamf.write_text(json.dumps({"lambda": tool_lam}) + "\n")
+        out = e1.ext(stem, ".out.jsonl")
+        argv = [bins["derna1rs"], "--fasta", str(fasta),
+                "--codon-usage", cfg["tables"]["derna"],
+                "--lambdas", str(lamf), "--out", str(out)]
         return (argv, str(e1.REPO), None,
                 lambda _s: e1.parse_derna(out, e1.ext(stem, ".machine.json")))
     if kind == "derna1":
@@ -313,9 +324,27 @@ def hull_path(cfg, label):
     return Path(cfg["out_dir"]) / "hull" / f"{label}.vertices.json"
 
 
+def has_hull(cfg, label):
+    """Whether a replay arm has lambdas for `label`: a complete hull, or,
+    under `replay_partial_hull`, the vertices a stopped walk streamed."""
+    return hull_path(cfg, label).exists() or bool(
+        cfg.get("replay_partial_hull")
+        and partial_hull_path(cfg, label).exists())
+
+
+def partial_hull_path(cfg, label):
+    return Path(cfg["out_dir"]) / "hull" / f"{label}.vertices.partial.json"
+
+
 def hull_lambdas(cfg, label):
-    """The replay lambdas for one instance, from its hull run."""
+    """The replay lambdas for one instance, from its hull run.
+
+    With `replay_partial_hull` set, an instance whose walk was stopped takes
+    its lambdas from the vertices the walk streamed before it stopped.
+    """
     path = hull_path(cfg, label)
+    if not path.exists() and cfg.get("replay_partial_hull"):
+        path = partial_hull_path(cfg, label)
     if not path.exists():
         raise SystemExit(f"no hull for {label}: run `hull` first ({path})")
     rec = json.loads(path.read_text())
@@ -342,6 +371,8 @@ def run_sweep(cfg, args, log):
         for name, arm in cfg["arms"].items():
             if not arm.get("enabled", True) or (want and name not in want):
                 continue
+            if not in_phase(args, arm.get("threads", 1)):
+                continue
             if (name, label) in done:
                 continue
             cells.append((name, arm, label, prot))
@@ -352,7 +383,7 @@ def run_sweep(cfg, args, log):
     def one(spec):
         name, arm, label, prot = spec
         replay = arm.get("lambdas", "hull") == "hull"
-        if replay and not hull_path(cfg, label).exists():
+        if replay and not has_hull(cfg, label):
             # One instance whose walk timed out must not take the grid with
             # it: the cell is recorded as blocked and the other 538 go on.
             # A blocked cell is not a measurement of this arm and `summarize`
@@ -395,6 +426,9 @@ def run_own_sweep(cfg, name, arm, label, prot, pool, out_dir, results,
     stem = work / f"{name}.{label}"
     fasta = e1.ext(stem, ".fasta")
     fasta.write_text(f">{label}\n{prot}\n")
+    if arm["kind"] == "derna1rs":
+        return run_own_sweep_rs(cfg, name, arm, label, prot, pool, stem,
+                                fasta, results, rescore, log)
     csv = e1.ext(stem, ".sweep")
     argv = [cfg["bins"]["derna1"], "-i", str(fasta),
             "-o", str(e1.ext(stem, ".out.txt")), "-m", "1", "-s", "3",
@@ -443,6 +477,63 @@ def run_own_sweep(cfg, name, arm, label, prot, pool, out_dir, results,
     summary = dict(kind="cell", arm=name, protein=label, n_aa=len(prot),
                    lambdas_planned=None, lambdas_done=len(rows),
                    exit=m["exit"], wall_s=time.time() - started, ncores=1,
+                   maxrss_kb=m["maxrss_kb"], instructions=m["instructions"],
+                   load=os.getloadavg()[0])
+    results.append(summary)
+    log(f"{name}.{label}: {m['exit']}, {len(rows)} lambdas of its own in "
+        f"{summary['wall_s'] / 60:.1f} min")
+    return summary
+
+
+def run_own_sweep_rs(cfg, name, arm, label, prot, pool, stem, fasta, results,
+                     rescore, log):
+    """The Rust port of DERNA v1 choosing its own lambdas (`run_glpe78`).
+
+    Its search is v1's adaptive one with v1's thresholds, read on the port's
+    CAI scale, so it places more lambdas than the C++ binary does; the arm
+    reports the port's search as it is. `--stream` writes each solve as it
+    finishes, synced, so a cell stopped at the limit keeps every lambda it
+    solved; the rows are read from the stream whether or not the run ended.
+    """
+    stream = e1.ext(stem, ".stream.jsonl")
+    argv = [cfg["bins"]["derna1rs_sweep"], "--fasta", str(fasta),
+            "--codon-usage", cfg["tables"]["derna"],
+            "--out", str(e1.ext(stem, ".front.jsonl")),
+            "--stream", str(stream)]
+    meas = e1.ext(stem, ".measure.json")
+    started = time.time()
+    cores = pool.take(1)
+    try:
+        subprocess.run(
+            ["taskset", "-c", ",".join(map(str, cores)),
+             sys.executable, str(MEASURE), str(meas),
+             "--timeout", str(arm.get("limit_s", cfg["limit_s"])),
+             "--stdout", str(e1.ext(stem, ".stdout")),
+             "--stderr", str(e1.ext(stem, ".stderr")), "--"] + argv,
+            cwd=str(e1.REPO))
+    finally:
+        pool.give(cores)
+    m = json.loads(meas.read_text())
+    rows = []
+    for ln in (stream.read_text().splitlines() if stream.exists() else []):
+        try:
+            rec = json.loads(ln)
+        except json.JSONDecodeError:
+            continue
+        rows.append(dict(lam=rec["lambda"], seq=rec["rna_seq"],
+                         mfe_reported=rec["mfe_kcal_mol"],
+                         cai_reported=rec["cai"], solve_s=rec.get("solve_s"),
+                         elapsed_at_finish_s=rec.get("elapsed_s")))
+    for r in rows:
+        r.update(arm=name, kind=arm["kind"], protein=label, n_aa=len(prot),
+                 ncores=1)
+        if r.get("seq"):
+            r.update(rescore(r["seq"], prot))
+        results.append(r)
+    summary = dict(kind="cell", arm=name, protein=label, n_aa=len(prot),
+                   lambdas_planned=None, lambdas_done=len(rows),
+                   exit=m["exit"], wall_s=time.time() - started, ncores=1,
+                   user_s=m.get("user_s"), sys_s=m.get("sys_s"),
                    maxrss_kb=m["maxrss_kb"], instructions=m["instructions"],
                    load=os.getloadavg()[0])
     results.append(summary)
@@ -559,82 +650,163 @@ def run_hull(cfg, args, log):
     stamp = provenance(cfg)
     results = PinnedResults(Path(cfg["out_dir"]) / "sweep.jsonl", stamp)
     rescore = e1.Rescorer(cfg)
-    arm_name = cfg.get("walk_arm", "derna2-walk")
-    threads = cfg.get("hull_threads", 1)
+    done = {(r["arm"], r["protein"]) for r in results.rows()
+            if r.get("kind") == "cell" and r.get("pin") == stamp["pin"]}
     for label, prot in e1.instances(cfg):
         if args.max_n and len(prot) > args.max_n:
             continue
-        dest = out_dir / f"{label}.vertices.json"
-        if dest.exists():
-            log(f"{label}: hull already present")
-            continue
         fasta = out_dir / f"{label}.fasta"
         fasta.write_text(f">{label}\n{prot}\n")
-        report = out_dir / f"{label}.walk.json"
-        front = out_dir / f"{label}.front.jsonl"
-        argv = [cfg["bins"]["walk_front"], "--fasta", str(fasta),
-                "--n", str(len(prot)),
-                "--lo", repr(cfg["epsilon"]), "--hi", repr(1 - cfg["epsilon"]),
-                "--threads", str(threads),
-                "--out", str(report), "--front", str(front)]
-        stem = work / f"{arm_name}.{label}"
-        meas = e1.ext(stem, ".measure.json")
-        started = time.time()
-        cores = pool.take(threads)
-        try:
-            subprocess.run(
-                ["taskset", "-c", ",".join(map(str, cores)),
-                 sys.executable, str(MEASURE), str(meas),
-                 "--timeout", str(cfg["limit_s"]),
-                 "--stdout", str(e1.ext(stem, ".stdout")),
-                 "--stderr", str(e1.ext(stem, ".stderr")), "--"] + argv,
-                cwd=str(e1.REPO))
-        finally:
-            pool.give(cores)
-        m = json.loads(meas.read_text())
-        wall_min = (time.time() - started) / 60
-        log(f"{label}: walk {m['exit']} in {wall_min:.1f} min")
-        if m["exit"] != "ok":
-            # No report means no hull and so no replay lambdas: record the
-            # cell, leave the instance without a `.vertices.json`, and let the
-            # replay arms refuse it rather than invent lambdas for it.
-            results.append(dict(kind="cell", arm=arm_name, protein=label,
-                                n_aa=len(prot), lambdas_planned=0,
-                                lambdas_done=0, exit=m["exit"],
-                                wall_s=m["wall_s"], ncores=len(cores),
-                                load=os.getloadavg()[0]))
-            continue
-        points = [json.loads(ln) for ln in
-                  front.read_text().splitlines() if ln.strip()]
-        for i, pt in enumerate(points):
-            row = dict(kind="front_point", arm=arm_name, protein=label,
-                       n_aa=len(prot), point_index=i, ncores=len(cores),
-                       mfe=pt.get("mfe_kcal_mol"), cai=pt.get("cai"),
-                       seq=pt.get("sequence"))
-            if row["seq"]:
-                row.update(rescore(row["seq"], prot))
-            results.append(row)
-        vertices, breaks = vertices_from(report, len(prot))
-        walk = json.loads(report.read_text())
-        # One run, so the whole front shares the cell's wall and peak: the arm
-        # has no per-lambda cost to report and `lambdas_done` would be a
-        # category error. The point count is what it produced.
+        for i, (arm_name, threads) in enumerate(walk_arms(cfg)):
+            if args.arms and arm_name not in args.arms.split(","):
+                continue
+            if not in_phase(args, threads):
+                continue
+            if i == 0 and (out_dir / f"{label}.vertices.json").exists():
+                log(f"{label}: hull already present")
+                continue
+            if i > 0 and (arm_name, label) in done:
+                log(f"{arm_name}.{label}: already run")
+                continue
+            walk_cell(cfg, arm_name, threads, label, prot, fasta, out_dir,
+                      work, pool, results, rescore, log, reference=i == 0)
+
+
+def in_phase(args, threads):
+    """Whether an arm on `threads` threads runs in this invocation's phase.
+
+    The multi-core arms run in a phase of their own, after the single-core
+    grid and one cell at a time, so a cell holding every timing core never
+    shares the socket with another cell. `--phase` unset runs both.
+    """
+    phase = getattr(args, "phase", None)
+    if phase is None:
+        return True
+    return (threads > 1) == (phase == "par")
+
+
+def walk_arms(cfg):
+    """(name, threads) of every walk arm, the reference first.
+
+    The reference walk's hull is the one every replay arm takes its lambdas
+    from; the others enumerate the same front and are timed only. A config
+    without `walk_arms` has one walk, `walk_arm` on `hull_threads`.
+    """
+    arms = cfg.get("walk_arms") or {
+        cfg.get("walk_arm", "derna2-walk"): {"threads": cfg.get("hull_threads", 1)}}
+    return [(name, spec.get("threads", 1)) for name, spec in arms.items()
+            if spec.get("enabled", True)]
+
+
+def walk_cell(cfg, arm_name, threads, label, prot, fasta, out_dir, work, pool,
+              results, rescore, log, reference):
+    """One walk arm on one instance: its front rows and cell row, and, for the
+    reference walk, the hull the replay arms read."""
+    # The reference walk keeps the unprefixed names the replay arms and
+    # `summarize` read; every other walk writes beside it under its own name.
+    base = out_dir / (label if reference else f"{label}.{arm_name}")
+    dest = out_dir / f"{label}.vertices.json"
+    report = Path(f"{base}.walk.json")
+    front = Path(f"{base}.front.jsonl")
+    stream = Path(f"{base}.stream.jsonl")
+    # The walk's levers come from the config so the timed walk is the one
+    # the run names; `--stream` writes each vertex and gap as it is found,
+    # so a walk the limit stops still reports what it found.
+    argv = [cfg["bins"]["walk_front"], "--fasta", str(fasta),
+            "--n", str(len(prot)),
+            "--lo", repr(cfg["epsilon"]), "--hi", repr(1 - cfg["epsilon"]),
+            "--threads", str(threads)] + list(cfg.get("walk_flags", [])) + [
+            "--out", str(report), "--front", str(front),
+            "--stream", str(stream)]
+    stem = work / f"{arm_name}.{label}"
+    meas = e1.ext(stem, ".measure.json")
+    started = time.time()
+    cores = pool.take(threads)
+    try:
+        subprocess.run(
+            ["taskset", "-c", ",".join(map(str, cores)),
+             sys.executable, str(MEASURE), str(meas),
+             "--timeout", str(cfg["limit_s"]),
+             "--stdout", str(e1.ext(stem, ".stdout")),
+             "--stderr", str(e1.ext(stem, ".stderr")), "--"] + argv,
+            cwd=str(e1.REPO))
+    finally:
+        pool.give(cores)
+    m = json.loads(meas.read_text())
+    wall_min = (time.time() - started) / 60
+    log(f"{arm_name}.{label}: walk {m['exit']} in {wall_min:.1f} min")
+    if m["exit"] != "ok":
+        # No report means no certified hull: record what the stream holds
+        # as a partial cell, write its vertices beside (not as) the
+        # `.vertices.json`, and let the replay arms refuse the instance
+        # unless the config opts into the partial hull's lambdas.
+        vertices, breaks, gaps = partial_from(stream, len(prot))
+        npoints = 0
+        for gap in gaps:
+            for pt in gap.get("front", []):
+                row = dict(kind="front_point", arm=arm_name, protein=label,
+                           n_aa=len(prot), point_index=npoints,
+                           ncores=len(cores), partial=True,
+                           found_s=gap.get("elapsed_s"),
+                           mfe=pt.get("mfe_kcal_mol"), cai=pt.get("cai"),
+                           seq=pt.get("sequence"))
+                if row["seq"]:
+                    row.update(rescore(row["seq"], prot))
+                results.append(row)
+                npoints += 1
         results.append(dict(kind="cell", arm=arm_name, protein=label,
                             n_aa=len(prot), lambdas_planned=0,
-                            lambdas_done=len(points), exit=m["exit"],
-                            wall_s=m["wall_s"], user_s=m["user_s"],
-                            sys_s=m["sys_s"], maxrss_kb=m["maxrss_kb"],
-                            instructions=m["instructions"],
-                            cycles=m["cycles"], ncores=len(cores),
-                            vertices=len(vertices), front_points=len(points),
+                            lambdas_done=npoints, exit=m["exit"],
+                            wall_s=m["wall_s"], user_s=m.get("user_s"),
+                            sys_s=m.get("sys_s"),
+                            maxrss_kb=m.get("maxrss_kb"),
+                            ncores=len(cores), partial=True,
+                            vertices=len(vertices), gaps=len(gaps),
+                            front_points=npoints,
                             load=os.getloadavg()[0]))
-        dest.write_text(json.dumps(
-            dict(instance=label, n_aa=len(prot), vertices=vertices,
-                 breakpoints=breaks,
-                 replay_lambdas=replay_lambdas(breaks, cfg["epsilon"]),
-                 walk_wall_s=walk.get("wall_s"),
-                 walk_peak_rss_kb=walk.get("peak_rss_kb"),
-                 walk_points=walk.get("points")), indent=1))
+        if vertices and reference:
+            partial_hull_path(cfg, label).write_text(json.dumps(
+                dict(instance=label, n_aa=len(prot), complete=False,
+                     vertices=vertices, breakpoints=breaks,
+                     replay_lambdas=replay_lambdas(breaks, cfg["epsilon"]),
+                     gaps_solved=len(gaps), walk_exit=m["exit"]),
+                indent=1))
+        return
+    points = [json.loads(ln) for ln in
+              front.read_text().splitlines() if ln.strip()]
+    for i, pt in enumerate(points):
+        row = dict(kind="front_point", arm=arm_name, protein=label,
+                   n_aa=len(prot), point_index=i, ncores=len(cores),
+                   mfe=pt.get("mfe_kcal_mol"), cai=pt.get("cai"),
+                   seq=pt.get("sequence"))
+        if row["seq"]:
+            row.update(rescore(row["seq"], prot))
+        results.append(row)
+    vertices, breaks = vertices_from(report, len(prot))
+    walk = json.loads(report.read_text())
+    # One run, so the whole front shares the cell's wall and peak: the arm
+    # has no per-lambda cost to report and `lambdas_done` would be a
+    # category error. The point count is what it produced.
+    results.append(dict(kind="cell", arm=arm_name, protein=label,
+                        n_aa=len(prot), lambdas_planned=0,
+                        lambdas_done=len(points), exit=m["exit"],
+                        wall_s=m["wall_s"], user_s=m["user_s"],
+                        sys_s=m["sys_s"], maxrss_kb=m["maxrss_kb"],
+                        instructions=m["instructions"],
+                        cycles=m["cycles"], ncores=len(cores),
+                        vertices=len(vertices), front_points=len(points),
+                        load=os.getloadavg()[0]))
+    if not reference:
+        return
+    dest.write_text(json.dumps(
+        dict(instance=label, n_aa=len(prot), vertices=vertices,
+             breakpoints=breaks,
+             replay_lambdas=replay_lambdas(breaks, cfg["epsilon"]),
+             walk_wall_s=walk.get("wall_s"),
+             walk_peak_rss_kb=walk.get("peak_rss_kb"),
+             walk_points=walk.get("points")), indent=1))
+
+
 
 
 def vertices_from(report, n_aa):
@@ -667,6 +839,45 @@ def vertices_from(report, n_aa):
         print(f"warning: {len(vertices)} vertices against {len(breaks)} "
               f"breakpoints in {report}")
     return vertices, breaks
+
+
+def partial_from(stream, n_aa):
+    """What a stopped walk's `--stream` file holds: its vertices, the tie
+    weights between consecutive ones, and its solved gaps.
+
+    Every streamed vertex is an exact optimum at some weight, so it is a hull
+    vertex; consecutive ones need not be adjacent yet, so the weights between
+    them are breakpoints of the hull found so far, not of the final one. A
+    line cut short by the kill is skipped.
+    """
+    seen, vertices, gaps = set(), [], []
+    path = Path(stream)
+    lines = path.read_text().splitlines() if path.exists() else []
+    for ln in lines:
+        try:
+            ev = json.loads(ln)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("event") == "gap":
+            gaps.append(ev)
+        elif ev.get("event") == "vertex":
+            key = round(ev["mfe_kcal_mol"] * 100)
+            if key not in seen:
+                seen.add(key)
+                log_w = ev["adaptation_log"]
+                vertices.append(dict(mfe=ev["mfe_kcal_mol"], sum_ln_w=log_w,
+                                     cai=math.exp(log_w / n_aa),
+                                     found_s=ev.get("elapsed_s")))
+    vertices.sort(key=lambda v: v["mfe"])
+    # The walk's own tie weight (`derna_lib::tie_weight`): energies in
+    # dekacalories, adaptation scaled by 100.
+    breaks = []
+    for a, b in zip(vertices, vertices[1:]):
+        de = round(b["mfe"] * 100) - round(a["mfe"] * 100)
+        dl = 100.0 * (b["sum_ln_w"] - a["sum_ln_w"])
+        if de > 0 and dl > 0:
+            breaks.append(dl / (de + dl))
+    return vertices, sorted(breaks, reverse=True), gaps
 
 
 def verify(cfg, args, log):
@@ -732,9 +943,9 @@ def plan(cfg, args, log):
             if r.get("kind") == "cell" and r.get("pin") == stamp["pin"]}
     other = [r for r in rows if r.get("kind") == "cell"
              and r.get("pin") != stamp["pin"]]
-    walk_arm = cfg.get("walk_arm", "derna2-walk")
-    arms = [walk_arm] + [a for a in cfg["arms"]
-                         if cfg["arms"][a].get("enabled", True)]
+    walks = [name for name, _ in walk_arms(cfg)]
+    arms = walks + [a for a in cfg["arms"]
+                    if cfg["arms"][a].get("enabled", True)]
     want, missing, hull_missing = [], [], []
     for label, prot in e1.instances(cfg):
         if args.max_n and len(prot) > args.max_n:
@@ -746,9 +957,9 @@ def plan(cfg, args, log):
                 missing.append((arm, label, len(prot)))
                 # A replay arm with no hull cannot even be planned: its lambda
                 # list comes from the hull run, so it is blocked, not pending.
-                if (arm != walk_arm
+                if (arm not in walks
                         and cfg["arms"].get(arm, {}).get("lambdas", "hull")
-                        == "hull" and not hull.exists()):
+                        == "hull" and not has_hull(cfg, label)):
                     hull_missing.append((arm, label))
     present = set(have) & set(want)
     log(f"{len(want)} cells planned: {len(arms)} arms over "
@@ -879,6 +1090,9 @@ def main():
     ap.add_argument("--arms")
     ap.add_argument("--lambdas")
     ap.add_argument("--max-n", type=int)
+    ap.add_argument("--phase", choices=["single", "par"],
+                    help="run only the single-core arms, or only the "
+                         "multi-core ones")
     ap.add_argument("--pin", help="summarize this pin's rows; 'all' pools "
                                   "every build, which is not one experiment")
     args = ap.parse_args()

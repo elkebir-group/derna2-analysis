@@ -4,17 +4,16 @@
   "derna": "{bin}/run_design_per_lambda",
   "walk_front": "{bin}/scope35_walk_front",
   "mfe_fold": "{bin}/mfe_fold",
-  "derna1": "{bin}/derna1",
-  "derna1_table": "{bin}/derna1_codon_usage_human.csv",
-  "derna1_params": "{derna1_params}",
-  "lineardesign": "{bin_e1}/LinearDesign/bin/LinearDesign_2D",
-  "lineardesign_dir": "{bin_e1}/LinearDesign",
+  "derna1rs": "{bin}/run_brd_per_lambda",
+  "derna1rs_sweep": "{bin}/run_glpe78",
+  "lineardesign": "{bin}/LinearDesign_2D",
+  "lineardesign_dir": "{lineardesign_dir}",
   "lineardesign_table": "./codon_usage_freq_table_human.csv",
-  "lcds": "{bin_e1}/LinearCDSfold/LinearCDSfold",
-  "lcds_dir": "{bin_e1}/LinearCDSfold",
-  "lcds_table": "{bin_e1}/LinearCDSfold/codon_usage_freq_table_human.csv",
-  "mrnafold": "{bin_e1}/mrnafold_fold_codon_graph",
-  "mrnafold_parallel": "{bin_e1}/mrnafold_fold_codon_graph_tbb"
+  "lcds": "{bin}/LinearCDSfold",
+  "lcds_dir": "{lcds_dir}",
+  "lcds_table": "{lcds_dir}/codon_usage_freq_table_human.csv",
+  "mrnafold": "{bin}/mrnafold_fold_codon_graph",
+  "mrnafold_parallel": "{bin}/mrnafold_fold_codon_graph_tbb"
  },
  "tables": {
   "derna": "{inputs}/codon_usage_human.csv",
@@ -28,13 +27,13 @@
  "reference_arm": "derna2-walk",
  "timeout_s": 43200,
  "limit_s": 43200,
- "mem_cap_gb": 200,
- "mem_budget_gb": 200,
- "mem_headroom_gb": 30,
- "concurrency": 2,
+ "mem_cap_gb": 52,
+ "mem_budget_gb": 52,
+ "mem_headroom_gb": 6,
+ "concurrency": 1,
  "hull_threads": 1,
  "verify_s": 1800,
- "rescore_cores": "1,3,5,7",
+ "rescore_cores": "16,17,18,19",
  "cores": [
   0,
   2,
@@ -43,13 +42,7 @@
   8,
   10,
   12,
-  14,
-  16,
-  18,
-  20,
-  22,
-  24,
-  26
+  14
  ],
  "arms": {
   "derna2-hull": {
@@ -58,11 +51,11 @@
    "exact": true
   },
   "derna1-own": {
-   "kind": "derna1",
+   "kind": "derna1rs",
    "lambdas": "own"
   },
   "derna1-hull": {
-   "kind": "derna1",
+   "kind": "derna1rs",
    "lambdas": "hull"
   },
   "lineardesign-hull": {
@@ -80,6 +73,12 @@
    "kind": "mrnafold",
    "lambdas": "hull",
    "exact": true
+  },
+  "mrnafold-hull-par": {
+   "kind": "mrnafold",
+   "lambdas": "hull",
+   "exact": true,
+   "threads": 8
   }
  },
  "instances": {
@@ -171,5 +170,21 @@
  },
  "repo": "{root}",
  "walk_arm": "derna2-walk",
- "derna2_pin": "acfaae60"
+ "walk_arms": {
+  "derna2-walk": {
+   "threads": 1
+  },
+  "derna2-walk-par": {
+   "threads": 8
+  }
+ },
+ "walk_flags": [
+  "--pass-grid",
+  "auto",
+  "--seed-sweep",
+  "--cut-probes",
+  "--lend-idle"
+ ],
+ "replay_partial_hull": true,
+ "derna2_pin": "{pin}"
 }

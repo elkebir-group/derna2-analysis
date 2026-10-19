@@ -1,9 +1,9 @@
-# E1: single-λ correctness, runtime and memory. The grid is drivers/benchmark/e1.config.json;
-# drivers/benchmark/BENCHMARK.md explains the two passes and the socket isolation.
+# E1: single-λ correctness, runtime and memory. The grid is drivers/e1/e1.config.json;
+# drivers/e1/BENCHMARK.md explains the two passes and the socket isolation.
 
 E1 = config["e1"]
 E1_RUNS = RUNS / "e1"
-E1_DRIVE = DRIVERS / "benchmark" / "drive.py"
+E1_DRIVE = DRIVERS / "e1" / "drive.py"
 
 
 rule e1_figures:
@@ -59,7 +59,7 @@ rule e1_plot_speed_quality:
 
 rule e1_config:
     input:
-        template=DRIVERS / "benchmark" / "e1.config.json",
+        template=DRIVERS / "e1" / "e1.config.json",
         bins=STAMPS / "bins_e1.ok",
     output:
         E1_RUNS / "config.json",

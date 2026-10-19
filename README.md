@@ -10,8 +10,9 @@ measured with it and how.
   per experiment (`e1.py`, `fig1.py`) and the figure style (`figures.py`).
 - **`pipelines/`**: a Snakemake pipeline from the inputs, or from the deposited results, to the
   figures. See "Running the pipeline".
-- **`drivers/`**: the benchmark drivers that produced the deposited results, copied from the
-  derna2 repository (`drivers/README.md` names the commits and the one change).
+- **`drivers/`**: the benchmark drivers that produced the results, one directory per
+  experiment, copied from the derna2 repository (`drivers/README.md` names the commits and the
+  changes).
 - **`pins/`**: what every result depends on, as checksums: the frozen binaries of each
   experiment, their provenance, and the deposited results.
 - **`inputs/`**: the protein sequences, UTRs and codon table, committed.
@@ -45,7 +46,8 @@ data/results/
 │   └── structures.jsonl     # every design: sequence, tool structure, re-folded structure
 ├── e2/                      # in progress: no checksum manifest yet
 │   ├── sweep.jsonl          # one row per λ, per front point and per cell, stamped with its pin
-│   └── hull/                # derna2's hull vertices and replay λs per instance
+│   └── hull/                # derna2's hull vertices and replay λs per instance (partial if the
+│                            # walk was stopped)
 └── fig1/
     ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
     ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
@@ -95,7 +97,7 @@ Every method at both corners of the objective (λ = ε and 1 − ε, ε = 2⁻²
 proteins up to 500 aa and a 50-rung prefix ladder of P0DTC2 up to 1,273 aa. Arms: derna2 exact
 (internal-loop cap 30 and 20), its beam modes, 8 threads; LinearDesign; LinearCDSfold exact and
 beam; CDSfold (MFE corner only); mRNAfold serial and threaded. Every design is re-folded by one
-folder, and correctness is judged on that re-scored MFE. `drivers/benchmark/BENCHMARK.md`
+folder, and correctness is judged on that re-scored MFE. `drivers/e1/BENCHMARK.md`
 describes the two passes, the socket isolation and the known tool discrepancies. derna2 is
 pinned at `17ee9d8b`.
 
@@ -105,7 +107,7 @@ pinned at `17ee9d8b`.
 | `e1_plot_scaling` | `figures/e1_scaling.pdf` | wall time and peak RSS against length, exact serial methods, both corners |
 | `e1_plot_speed_quality` | `figures/e1_speed_quality.pdf` | the beam modes: MFE gap to the exact optimum and wall time relative to derna2 exact, per width |
 | `e1_figures` | | the three above |
-| `e1_config` | `runs/e1/config.json` | `drivers/benchmark/e1.config.json` with this host's paths |
+| `e1_config` | `runs/e1/config.json` | `drivers/e1/e1.config.json` with this host's paths |
 | `e1_selftest` | `runs/e1/selftest.log` | every arm on a 30-residue protein: exits, parses, translates back, re-scores |
 | `e1_epscheck` | `runs/e1/epscheck.log` | ε against its bound, and every exact arm unchanged at ε/2 |
 | `e1_work` | `runs/e1/work.jsonl` | the work pass: correctness, memory, instructions; load-insensitive |
@@ -115,22 +117,26 @@ pinned at `17ee9d8b`.
 
 ### E2: the whole front
 
-What the whole Pareto front costs each method. derna2 enumerates it (`derna2-walk`); every other
-method sweeps its scalarization weight, at derna2's hull λs (one per hull vertex plus the
-corners) or, for DERNA v1, also by its own adaptive sweep. Instances: the 55 UniProt proteins,
-every third P0DTC2 rung and five Cas orthologs (PRT-03 to PRT-07, 1,000–1,629 aa). Limits: 12 h
-and 200 GB per cell, with partial fronts kept. Design: `drivers/benchmark/E2-PLAN.md`. derna2
-is pinned at `acfaae60`. **The grid has not been run**; the deposit holds the n = 32 pilot.
+What the whole Pareto front costs each method. derna2 enumerates it (`derna2-walk`, the walk
+`derna front` ships: `--pass-grid auto --seed-sweep --cut-probes --lend-idle`); every other
+method sweeps its scalarization weight at derna2's hull λs (one per hull vertex plus the
+corners), and DERNA v1, through its Rust port, also by its own adaptive sweep. derna2's walk
+and mRNAfold run once on one core, against every other single-core arm, and once on eight
+(`-par`). Instances: the 55 UniProt proteins, 17 P0DTC2 prefix rungs (32–1,273 aa) and five
+Cas orthologs (PRT-03 to PRT-07, 1,000–1,629 aa). Limits: 12 h and 52 GB per cell; a walk the
+limit stops keeps its partial front, and the replay arms then run at its partial hull. Design:
+`drivers/e2/E2-PLAN.md`. The grid runs on a second host, re-pinned on derna2 after the `derna`
+CLI merge; **the pin is `pending` until launch** and the binaries are not frozen yet, so
+`check_bins` refuses `pins/e2.sha256` and the run targets stop there.
 
 | Rule | Output | Content |
 |---|---|---|
-| `e2_plot_fronts` | `figures/e2_fronts.pdf`, `e2/cells.tsv` | wall time and Pareto points recovered per cell against length; rows of the configured pin only |
+| `e2_plot_fronts` | `figures/e2_fronts.pdf`, `e2/cells.tsv` | wall time and Pareto points recovered per cell against length, eight-core arms hollow and dashed; rows of the configured pin only |
 | `e2_figures` | | the figure above |
-| `e2_config` | `runs/e2/config.json` | `drivers/benchmark/e2.config.json` with this host's paths |
-| `e2_hull` | `runs/e2/hull.done` | derna2's chord sweep: hull vertices and the replay λs |
+| `e2_config` | `runs/e2/config.json` | `drivers/e2/e2.config.json` with this host's paths and the pin |
 | `e2_verify` | `runs/e2/verify.done` | each comparator's λ map against derna2 at interior λs |
-| `e2_sweep` | `runs/e2/sweep.jsonl` | the grid |
-| `e2_summarize` | `runs/e2/summary.txt` | fronts, recovery against the reference, anytime curves |
+| `e2_grid` | `runs/e2/grid.done` | `run_e2_grid.sh`: refuses to start while a timing core or its hyperthread sibling is busy, then the four passes in order (single-core walk, single-core replays, eight-core walk, eight-core replays) into `runs/e2/sweep.jsonl`; resumable |
+| `e2_summarize` | `runs/e2/summary.txt` | fronts, recovery against the reference, anytime curves, for the configured pin |
 | `e2_runs` | | the run chain above |
 
 ### Figure 1: GLPE_HUMAN with the hbb UTRs
@@ -169,8 +175,11 @@ arguments.
   `drivers/fig1/`, which carry absolute paths to a derna2 checkout. The pipeline checks their
   output (`fig1_so_front`) but does not rerun them.
 - **E2 is in progress.** Its deposit has no checksum manifest until the grid finishes.
-- **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold, DERNA v1) are
-  described in `pins/e1-PROVENANCE.md` and `pins/e2-PROVENANCE.md`, not automated.
+- **E2's freeze.** When the second host chooses its commit, set `e2.pin`, fill
+  `pins/e2.sha256` with every binary in `e2.bin_dir` (derna2's and the comparators') and add
+  `pins/e2-PROVENANCE.md`. Rows of the first host's pilot (`acfaae60`) are not part of the grid.
+- **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold) are described in
+  `pins/e1-PROVENANCE.md`, not automated.
 - **A rebuild of derna2 at a pin has not been compared** with the frozen binaries
   (`check_derna2_build`).
 - **License**: none chosen yet.

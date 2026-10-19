@@ -18,7 +18,7 @@ derna2:
   repo: git@github.com:elkebir-group/derna2.git
 
 # Single-λ correctness, runtime and memory (E1). The grid itself (arms, instances, ε,
-# limits) is drivers/benchmark/e1.config.json, the configuration the deposited run used.
+# limits) is drivers/e1/e1.config.json, the configuration the deposited run used.
 e1:
   pin: 17ee9d8b
   manifest: pins/e1.sha256
@@ -30,16 +30,17 @@ e1:
   driver_cpus: "0-26:2"
   rows: {work: 3465, time_cells: 3465}
 
-# Whole-front runtime (E2). Grid: drivers/benchmark/e2.config.json.
+# Whole-front runtime (E2). Grid: drivers/e2/e2.config.json, the configuration of the run on
+# the second host. Its derna2 commit is chosen at launch; until then the rows, and this pin,
+# read `pending`, and check_bins refuses the empty manifest.
 e2:
-  pin: acfaae60
+  pin: pending
   manifest: pins/e2.sha256
+  # Every binary of the grid, derna2's and the comparators', in one directory. Set in host.yaml.
   bin_dir: data/derived/bin/e2
-  # derna2's binaries come from bin_dir; the comparators are E1's freeze.
-  comparator_bin_dir: data/derived/bin/e1
-  # DERNA v1's energy parameter directory (data/InputFiles of its source tree).
-  derna1_params: data/derived/derna1/InputFiles
-  driver_cpus: "1-27:2"
+  # LinearDesign and LinearCDSfold run from their own source trees, which hold their tables.
+  lineardesign_dir: data/derived/comparators/LinearDesign
+  lcds_dir: data/derived/comparators/LinearCDSfold
 
 # Overview figure (GLPE_HUMAN with hbb UTRs).
 fig1:

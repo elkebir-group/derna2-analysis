@@ -5,7 +5,8 @@
 # e1:
 #   bin_dir: /scratch/<user>/paper-e1-bin
 # e2:
-#   bin_dir: /scratch/<user>/paper-e2-bin
-#   comparator_bin_dir: /scratch/<user>/paper-e1-bin
+#   bin_dir: /path/to/e2/bin
+#   lineardesign_dir: /path/to/derna2/docs/reference/_lineardesign
+#   lcds_dir: /path/to/LinearCDSfold
 # fig1:
 #   bin_dir: /scratch/<user>/fig1-glpe-hbb/bin

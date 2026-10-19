@@ -4,7 +4,9 @@
 
 Left: a cell's wall time (its whole λ sweep, or derna2's walk) against protein length.
 Right: Pareto points each cell recovered, against length. Cells that did not finish (no
-hull, timeout, out of memory) are in the table and left out of the plot.
+hull, timeout, out of memory, a walk the limit stopped with a partial front) are in the
+table and left out of the plot. An eight-core arm shares its single-core twin's colour and
+marker, drawn hollow and dashed.
 
 Only rows stamped with PIN are read: a sweep file accumulates across re-pins, and rows of two
 builds are not one experiment. The table holds one row per (protein, arm) cell.
@@ -25,6 +27,10 @@ ARMS = {
     "mrnafold-hull": ("mRNAfold", SLOTS[3], "D"),
     "derna1-hull": ("DERNA v1, hull λs", SLOTS[4], "v"),
     "derna1-own": ("DERNA v1, own sweep", SLOTS[7], "h"),
+}
+PARALLEL = {
+    "derna2-walk-par": ("derna2, whole front, 8 cores", "derna2-walk"),
+    "mrnafold-hull-par": ("mRNAfold, 8 cores", "mrnafold-hull"),
 }
 
 
@@ -50,6 +56,8 @@ def cell_table(rows):
                 "n_aa": c["n_aa"],
                 "arm": c["arm"],
                 "exit": c.get("exit"),
+                "partial": bool(c.get("partial")),
+                "ncores": c.get("ncores"),
                 "wall_s": c.get("wall_s"),
                 "maxrss_kb": c.get("maxrss_kb"),
                 "front_points": len(front),
@@ -67,19 +75,28 @@ def main():
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0), sharex=True)
-    for arm, (label, color, marker) in ARMS.items():
-        g = df[(df.arm == arm) & (df.exit == "ok")].sort_values("n_aa") if len(df) else df
+    series = [(arm, label, color, marker, False) for arm, (label, color, marker) in ARMS.items()]
+    series += [(arm, label, *ARMS[twin][1:], True) for arm, (label, twin) in PARALLEL.items()]
+    for arm, label, color, marker, parallel in series:
+        g = df[(df.arm == arm) & (df.exit == "ok") & ~df.partial] if len(df) else df
         if g.empty:
             continue
+        g = g.sort_values("n_aa")
+        style_kw = {"mfc": "white", "ls": "--"} if parallel else {}
         for ax, field in zip(axes, ["wall_s", "front_points"], strict=True):
-            ax.plot(g.n_aa, g[field], color=color, marker=marker, label=label)
+            ax.plot(g.n_aa, g[field], color=color, marker=marker, label=label, **style_kw)
     axes[0].set_ylabel("wall time per cell (s)")
     axes[0].set_yscale("log")
     axes[1].set_ylabel("Pareto points recovered")
     for ax in axes:
         ax.set_xscale("log")
         ax.set_xlabel("protein length (aa)")
-    axes[1].legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=7)
+    if axes[1].get_lines():
+        axes[1].legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=7)
+    else:
+        # A pin with no finished cell yet: say so rather than draw empty axes as a result.
+        for ax in axes:
+            ax.text(0.5, 0.5, "no finished cells", transform=ax.transAxes, ha="center")
     fig.suptitle(
         f"derna2 pin {pin}: {df.protein.nunique() if len(df) else 0} instances", fontsize=8
     )

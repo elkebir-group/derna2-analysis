@@ -31,3 +31,13 @@ def test_verify_refuses_a_missing_file(tmp_path):
     manifest = write_manifest(tmp_path, {"tool": b"build 1"})
     with pytest.raises(FileNotFoundError):
         verify(manifest, tmp_path / "bin")
+
+
+def test_verify_refuses_a_manifest_that_names_nothing(tmp_path):
+    # A freeze that has not happened yet must not stamp a directory as pinned.
+    (tmp_path / "bin").mkdir()
+    (tmp_path / "bin" / "tool").write_bytes(b"any build")
+    manifest = tmp_path / "pins.sha256"
+    manifest.write_text("# not frozen yet\n")
+    with pytest.raises(ValueError, match="names no files"):
+        verify(manifest, tmp_path / "bin")

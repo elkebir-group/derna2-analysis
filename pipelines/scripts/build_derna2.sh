@@ -30,11 +30,16 @@ cargo build --release --quiet --manifest-path "$crate/Cargo.toml" \
     --bin run_design_per_lambda --bin scope35_walk_front
 cargo build --release --quiet --manifest-path "$build/packages/rna-mfe/Cargo.toml" \
     --example mfe_fold
+# E2's DERNA v1 arms run the Rust port.
+cargo build --release --quiet --manifest-path "$build/packages/derna-codon-dp/Cargo.toml" \
+    --bin run_brd_per_lambda --bin run_glpe78
 
+bins=(run_design_per_lambda scope35_walk_front run_brd_per_lambda run_glpe78)
 mkdir -p "$out"
-cp "$CARGO_TARGET_DIR/release/run_design_per_lambda" "$out/"
-cp "$CARGO_TARGET_DIR/release/scope35_walk_front" "$out/"
+for b in "${bins[@]}"; do
+    cp "$CARGO_TARGET_DIR/release/$b" "$out/"
+done
 cp "$CARGO_TARGET_DIR/release/examples/mfe_fold" "$out/"
 git -C "$build" rev-parse HEAD > "$out/COMMIT"
-(cd "$out" && sha256sum run_design_per_lambda scope35_walk_front mfe_fold > SHA256SUMS)
+(cd "$out" && sha256sum "${bins[@]}" mfe_fold > SHA256SUMS)
 cat "$out/SHA256SUMS"

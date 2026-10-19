@@ -18,18 +18,44 @@ enumerates a front: a sweep is the only route they have.
 
 | arm | binary | λ it is given |
 |---|---|---|
-| `derna2-hull` | `scope35_walk_front` | its own chord sweep |
+| `derna2-hull` | `run_design_per_lambda` | derna2's hull λs |
 | `derna2-walk` | `scope35_walk_front` | its own chord sweep plus gap solves |
-| `derna1-own` | DERNA v1 `-s 3` | its own adaptive sweep |
-| `derna1-hull` | DERNA v1 `-s 2 -l λ` | derna2's hull λs |
+| `derna2-walk-par` | `scope35_walk_front --threads 8` | the same walk on 8 threads |
+| `derna1-own` | `run_glpe78` | its own adaptive sweep |
+| `derna1-hull` | `run_brd_per_lambda` | derna2's hull λs |
 | `lineardesign-hull` | LinearDesign | derna2's hull λs, mapped |
 | `lcds-exact-hull` | LinearCDSfold `-m exact` | derna2's hull λs, mapped |
 | `mrnafold-hull` | mRNAfold | derna2's hull λs, mapped |
+| `mrnafold-hull-par` | mRNAfold, TBB build, `parallel true`, 8 cores | derna2's hull λs, mapped |
+
+**The v1 arms run the Rust port** (`derna-codon-dp`), not the C++ binary: the
+port is in the repository, builds from the same pin as every other derna2
+binary, and streams each λ as it finishes, which the C++ binary's buffered CSV
+cannot. Its λ is derna2's own weight — it scores `λ·E_dcal − (1 − λ)·round(100
+·Σ ln w)` — so `derna1-hull` takes the hull λs unmapped, and `verify` checks
+that. Its own search applies v1's thresholds on that scale and so places more
+λs than the C++ binary would (62 against 21 at n = 32); the arm reports the
+port's search as it is, and is named for it in the results.
 
 DERNA v1 appears twice on purpose. `derna1-own` is the only arm that both
 chooses its own λs and reports a front, so it is the honest sweep baseline;
 `derna1-hull` isolates the cost of the folds from the cost of the λ search by
 giving v1 the same λ list every other comparator gets.
+
+The two `-par` arms are the only parallel ones: derna2's walk and mRNAfold
+are the two methods that use more than one core on one instance, so each is
+run both on one core, against every other single-core arm, and on eight, as
+it would be used. Every walk arm runs in the `hull` pass (`walk_arms`); the
+first is the reference whose hull the replay arms read, and the others write
+beside it under their own names and are timed only.
+
+The multi-core arms run in a phase of their own (`--phase par`), after the
+single-core grid (`--phase single`), so an eight-core cell holds every timing
+core and never shares the socket. The order is `hull --phase single`,
+`sweep --phase single`, `hull --phase par`, `sweep --phase par`. A reference
+walk the limit stops leaves its streamed vertices, and with
+`replay_partial_hull` the replay arms take their lambdas from them; their rows
+are then a measurement at an incomplete hull, which the hull file records.
 
 `derna2-walk` is the one arm whose unit of work is not a λ: it enumerates the
 whole front in a single invocation, hull vertices and the off-hull points
@@ -361,6 +387,21 @@ Done:
   One lever is still outside the pin: the hull-walk anchor schedule
   (`ad963f76`, unmerged). It only makes the walk cheaper, so the arm remains an
   upper bound by that one lever.
+
+  **A second host re-pins on xg after #423 (the `derna` CLI) and #421 (idle
+  workers lent to gap folds by default)**, plus the walk's `--stream` and a
+  `derna front` that seeds its sweep from the pass grid and cuts its probes.
+  #423 renames `derna-beam` to `derna-lib` (build lines become
+  `cargo build --release -p derna-lib --bin …`). `derna front` runs the walk
+  as `scope35_walk_front --pass-grid auto --seed-sweep --cut-probes`; without
+  the last two the same front took 3.3× and 5.3× the wall at n = 200 and 250
+  on 8 threads. The walk's levers now come from the config (`walk_flags`), so
+  the arm states which walk it times; the example names the shipped one. `--stream` writes each hull
+  vertex and each solved gap as the walk finds it, so a walk the limit stops
+  records its partial front (`partial: true` rows) and its vertices in
+  `<label>.vertices.partial.json`; replay arms take lambdas from that file only
+  under `replay_partial_hull`. `mfe_fold` and the DERNA v1 port changed only in
+  comments between the two pins, so re-scored values and v1 cells carry over.
 
   **Every row records the build that produced it** — the pin from the config
   and the first 12 hex of each derna2 binary's hash from disk, so a config
