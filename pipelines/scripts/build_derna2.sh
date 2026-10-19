@@ -19,9 +19,14 @@ fi
 git -C "$build" fetch --quiet origin
 git -C "$build" checkout --quiet --detach "$pin"
 
+# The algorithm crate is packages/derna-beam up to derna2's 27ffb226 and packages/derna-lib
+# from it on; build whichever the pinned commit has.
+crate=$build/packages/derna-lib
+[ -d "$crate" ] || crate=$build/packages/derna-beam
+
 export CARGO_TARGET_DIR=$build/target
 export PATH=$HOME/.cargo/bin:$PATH
-cargo build --release --quiet --manifest-path "$build/packages/derna-beam/Cargo.toml" \
+cargo build --release --quiet --manifest-path "$crate/Cargo.toml" \
     --bin run_design_per_lambda --bin scope35_walk_front
 cargo build --release --quiet --manifest-path "$build/packages/rna-mfe/Cargo.toml" \
     --example mfe_fold
