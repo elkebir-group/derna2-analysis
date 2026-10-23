@@ -1,0 +1,22 @@
+# The corpus is a copy out of the gitignored _cpp mirror, reproducible with
+# `just sync-cpp` plus the <= 500 aa filter — third-party data, not ours to vendor.
+corpus/
+# Full front records: every design's sequence, per protein. The tables derived
+# from them (lattice.jsonl, binding.jsonl, f0/summary.csv) are what results
+# reports read, and those are tracked.
+f0/*.jsonl
+f0/*.log
+*.run.log
+*.err
+binding.jsonl
+
+# Coordination and run logs: operational provenance, rewritten constantly. What
+# matters from them is written up in prose (DISTURBED.md, the plan).
+*.log
+*.out
+
+# The 501-700 aa band: a second corpus out of the same mirror, same filter at a
+# different cut, and its full front records.
+corpus-l/
+f0-l/*.jsonl
+f0-l/*.log

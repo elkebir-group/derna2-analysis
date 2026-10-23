@@ -1,0 +1,1 @@
+PROVENANCE: hbb5/hbb3 from experiments/scope-19-utr-support/m5/; alb5 from experiments/lazy-kbest-probe/scope32-cells/P0DTC2-n250-alb.utr5

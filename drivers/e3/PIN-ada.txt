@@ -1,0 +1,70 @@
+E3 binaries on ada.cs.illinois.edu — recorded 2026-10-20
+
+Two binaries, two commits. Conflating them invalidates the grid, so each was
+built in its own worktree with its own CARGO_TARGET_DIR and the digests checked
+to differ.
+
+derna_60ddd0f9  Phase B's pin — every cell in all three bands, every resume and
+                every re-run. commit 60ddd0f9 ("Merge pull request #431 from
+                elkebir-group/scope/38-motif-pin"), the xg tip of 2026-10-20.
+                sha256 cb6ba36a810f6622ae40a8b6d19134bd4c1cc20e87e157b2cc755671ee6402b2
+                built here: cargo 1.95.0, --release -j 4,
+                target /scratch/xinyugu4/paper-e3/build/target-60ddd0f9
+
+derna_8603d37d  the screen's binary, rebuilt because e2/bin/derna did not arrive
+                with the host move. commit 8603d37d.
+                sha256 10748488b0aa28e4d6ef16cef825e818eba844096f92775385003bc2eb35abdf
+                target /scratch/xinyugu4/paper-e3/build/target-8603d37d
+
+The two digests differ, so no shared target directory skipped a rebuild.
+
+This rebuild does NOT reproduce tamazirt's recorded screen digest
+5acdae91672d7099864359d8484a8b8858111bfe50940740c9661c18b5a1ebb5, and is not
+expected to: a different host and toolchain, and that PIN record describes its
+tree as "xg 6e66bb32 + streaming + cai-scale" rather than as this commit alone.
+Where tamazirt's e2/bin/derna is copied across with its SHA256SUMS, the copy is
+authoritative for anything compared against the screen's own output, and this
+rebuild is the fallback whose provenance is the commit rather than the digest.
+
+derna_26e74dbf  the candidate pin: xg tip after PR #437 (probe ceiling, memory-
+                budgeted motif walk, box pass at weight 1 before its bracket).
+                commit 26e74dbf. Built on socket 1, cargo 1.95.0, --release -j 4,
+                target /scratch/xinyugu4/paper-e3/build/target-26e74dbf
+                sha256 recorded in SHA256SUMS beside this file.
+                Candidate, not the pin: whether it replaces 60ddd0f9 is decided
+                on the calibration ladder's A/B, which also checks that the two
+                builds agree on the emitted front rather than assuming they do.
+
+derna_549074e9  Phase B's pin from 2026-10-21 02:5x, replacing d1575370. commit
+                549074e9 ("Merge pull request #442 from elkebir-group/scope/38-
+                fold-threads"), the xg tip of 2026-10-21 01:03.
+                sha256 5a58f000bd5664cc4b03d01a7d7ef092e56388cad50adffdb8ec92456673565c
+                built here: cargo 1.95.0, --release -j 4 on cores 1,3,5,7,
+                worktree /scratch/xinyugu4/paper-e3/build/wt-549074e9,
+                target /scratch/xinyugu4/paper-e3/build/target-549074e9
+
+                Why it replaces d1575370: four PRs merged into xg in the three
+                and a half hours after that pin was chosen, two of them default-on
+                perf changes to the motif walk (#438 compose row merge, #439
+                adapted end). The pin was re-checked rather than assumed, per the
+                rule now in AGENTS.md.
+
+                The A/B, on P54852 at 163 aa, --deterministic, one thread, both
+                builds, three arms. Compared on the emitted front as well as the
+                wall, because a perf change that moves results is a different
+                experiment and a wall-only check cannot tell them apart:
+
+                  arm        points     gaps    designs    order    wall
+                  F0 free    486=486    45=45   identical  same     0.999x
+                  F1 set I   479=479    44=44   identical  same     0.927x
+                  F4 all     507=507    49=49   identical  same     0.953x
+
+                F0's 486 matches the recorded free-front baseline, so the 61
+                baselines stand under this build and no price spans two builds.
+                The speedup appears only on the motif walk and not on the free
+                walk, which is the expected signature for changes scoped to
+                motif_front.rs. F4 was included because #439 narrows the adapted
+                end to the most adapted codons, and a constraint that restricts
+                what a position may spell is the standing hazard for a closed
+                form that assumed the unrestricted best; the deepest nest is
+                where that would show.

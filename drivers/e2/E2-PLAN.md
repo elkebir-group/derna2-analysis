@@ -21,12 +21,23 @@ enumerates a front: a sweep is the only route they have.
 | `derna2-hull` | `run_design_per_lambda` | derna2's hull λs |
 | `derna2-walk` | `scope35_walk_front` | its own chord sweep plus gap solves |
 | `derna2-walk-par` | `scope35_walk_front --threads 8` | the same walk on 8 threads |
-| `derna1-own` | `run_glpe78` | its own adaptive sweep |
-| `derna1-hull` | `run_brd_per_lambda` | derna2's hull λs |
+| `derna1-own` | `run_glpe78 --cai-scale 100` | its own adaptive sweep |
+| `derna1-hull` | `run_brd_per_lambda` | derna2's hull λs — **held back**, see below |
 | `lineardesign-hull` | LinearDesign | derna2's hull λs, mapped |
 | `lcds-exact-hull` | LinearCDSfold `-m exact` | derna2's hull λs, mapped |
 | `mrnafold-hull` | mRNAfold | derna2's hull λs, mapped |
 | `mrnafold-hull-par` | mRNAfold, TBB build, `parallel true`, 8 cores | derna2's hull λs, mapped |
+
+**`derna1-own` sweeps the weights DERNA C++ sweeps.** The port quantizes CAI as
+`round(100·log CAI)` where C++ uses raw `log CAI`, and `lambda_sweep_2`'s
+thresholds are widths **in λ**, so reading C++'s 0.0025/0.00075 on the port's λ
+subdivides where C++ had already stopped: 62 weights against 21 at 32 residues.
+`--cai-scale 100` converts a bracket to C++'s λ before measuring its width and
+before bisecting, and converts the midpoint back to solve. At 32 residues that
+restores C++'s 21 weights, and the points it returns are a strict subset of the
+denser sweep's — two fewer, both of them points C++'s own spacing does not reach
+either. Without it the arm measured a search no released tool performs, and the
+inflation ran in derna2's favour.
 
 **The v1 arms run the Rust port** (`derna-codon-dp`), not the C++ binary: the
 port is in the repository, builds from the same pin as every other derna2
@@ -37,7 +48,20 @@ that. Its own search applies v1's thresholds on that scale and so places more
 λs than the C++ binary would (62 against 21 at n = 32); the arm reports the
 port's search as it is, and is named for it in the results.
 
-DERNA v1 appears twice on purpose. `derna1-own` is the only arm that both
+**`derna1-hull` is configured but not run with the others** (`enabled: false`).
+It is the most expensive arm of the grid — 442 of 1,234 projected cell-hours,
+20 of its 77 cells reaching the limit — and it is the one arm whose *cost* the
+rest of the grid already determines. v1's per-λ wall does not depend on which λ
+it is given: measured spreads of 1.04×, 1.07× and 1.02× over the λs of one cell
+at 64, 102 and 161 residues, and at 64 residues the two v1 arms agree on the
+figure itself, 10.49 s against 10.50 s per λ. Its hull-λ cost is therefore
+`derna1-own`'s per-λ cost times the hull's vertex count. What the arm would add
+beyond that is **recovery** — whether v1 at a given λ lands on the vertex derna2
+finds — which `verify` establishes at 32 and 102 residues, and which the arm
+could not establish at the lengths where it is capped anyway. It runs if the
+grid finishes with time to spare, as a measured check on a derived number.
+
+DERNA v1 otherwise appears twice on purpose. `derna1-own` is the only arm that both
 chooses its own λs and reports a front, so it is the honest sweep baseline;
 `derna1-hull` isolates the cost of the folds from the cost of the λ search by
 giving v1 the same λ list every other comparator gets.

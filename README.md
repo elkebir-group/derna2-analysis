@@ -126,12 +126,15 @@ What the whole Pareto front costs each method. derna2 enumerates it (`derna2-wal
 method sweeps its scalarization weight at derna2's hull λs (one per hull vertex plus the
 corners), and DERNA v1, through its Rust port, also by its own adaptive sweep. derna2's walk
 and mRNAfold run once on one core, against every other single-core arm, and once on eight
-(`-par`). Instances: the 55 UniProt proteins, 17 P0DTC2 prefix rungs (32–1,273 aa) and five
-Cas orthologs (PRT-03 to PRT-07, 1,000–1,629 aa). Limits: 12 h and 52 GB per cell; a walk the
-limit stops keeps its partial front, and the replay arms then run at its partial hull. Design:
-`drivers/e2/E2-PLAN.md`. The grid runs on a second host, re-pinned on derna2 after the `derna`
-CLI merge; **the pin is `pending` until launch** and the binaries are not frozen yet, so
-`check_bins` refuses `pins/e2.sha256` and the run targets stop there.
+(`-par`). Instances: the 55 UniProt proteins up to 500 aa, twelve native proteins of
+511–962 aa (`inputs/e2-natives/`), P0DTC2 whole (1,273 aa) and five Cas orthologs (PRT-03 to
+PRT-07, 1,000–1,629 aa). Limits: 2 h per cell below 1,000 aa (soft for the walk, which runs on
+to 12 h), 6 h above (12 h for `derna2-hull` and the walk); a cell is admitted only while its
+estimated peak memory fits the host's budget. A walk the limit stops keeps its partial front,
+and the replay arms then run at its partial hull. Design: `drivers/e2/E2-PLAN.md`. The grid
+runs on a second host; **the pin is `pending`** and the binaries are not frozen yet (the walk
+and the replay arms currently run different derna2 builds), so `check_bins` refuses
+`pins/e2.sha256` and the run targets stop there.
 
 | Rule | Output | Content |
 |---|---|---|
@@ -149,9 +152,12 @@ What excluding motifs costs: the exact Pareto front over every design, then over
 that avoid each of four cumulative motif sets (`inputs/motifs/`: manufacturing sites,
 processing signals, repeats, internal initiation), five nested fronts per instance, no UTRs.
 No other tool can express the constraint, so there are no comparator arms. Design and
-pre-registered rules: `drivers/e3/E3-PLAN.md`. **The grid has not run**: the nested fronts need
-`derna front --motif`, built on derna2's `scope/38-motif-front` and not yet in a pinned build.
-What has run, and is here:
+pre-registered rules: `drivers/e3/E3-PLAN.md`. The grid runs `derna front --motif` at derna2
+`06605630` (`drivers/e3/E3-PIN.md`), in 4 h rounds that stop at a gap boundary and resume.
+Pass 1 (six short-band proteins × F1–F4) is closed with two complete fronts and 22 anytime ones
+(`drivers/e3/E3-GRID-PASS1.md`); pass 2 and the middle band's selection are pending, and the
+long band was chosen from the lattice census (`drivers/e3/calib/`). Its fronts are not here yet.
+What is here as tables:
 
 - **the forced-motif census**: no entry of the four sets is forced by any peptide, so every
   set is satisfiable on every protein; the rejected thresholds `GGGG` and `CCNCCN` are forced
@@ -166,16 +172,18 @@ What has run, and is here:
 | `e3_probe_table` | `e3/probe.tsv`, `e3/probe_fit.txt` | one row per rung: exit, wall, peak RSS, vertices, probes, folds per probe and the cost of one fold (all probes, the λ = 10⁻⁴ probe, the ordinary ones); the peak-RSS fit and the wall's consecutive-rung exponents |
 | `e3_tables` | | the two above |
 
-### E4: UTR-aware design (planned)
+### E4: UTR-aware design (running)
 
 Four fronts per protein and UTR pair, all re-scored on the whole molecule by one folder: the
 CDS designed alone with the UTRs pasted on afterwards, the UTRs inside the DP with CDS–UTR pairs
 forbidden (`--forbid 5-cds,cds-3`; 5′–3′ pairs allowed), mRNAfold with the UTRs in its energy
-model, and the structurally optimal front. Instances: the five Cas orthologs at native length
-and six therapeutic natives (188–239 aa), each with five UTR pairs used in practice. Design:
-`drivers/e4/E4-PLAN.md`; its three gates (two-class exactness, mRNAfold with UTRs, the
-three-class control) passed on 2026-10-19. **Nothing else has run**, and E4 has no driver, pin or
-UTR sequence file yet, so it has no rule.
+model, and the structurally optimal front. Instances: the short band's proteins
+(`inputs/e4/`, with their source checksums), each with up to five UTR pairs used in practice
+(`inputs/utrs/utrs.fasta` and its provenance); the middle and long bands wait on E3's
+selections. The stop codon is a recorded dimension of every cell. Design:
+`drivers/e4/E4-PLAN.md`; driver `drivers/e4/drive_e4.py`. The grid runs on derna2 builds that
+follow `xg` arm by arm, so E4 has no single pin, and its results stay on the host until it
+does; it has no rule here.
 
 ### E5: one design, start to finish (planned)
 
@@ -225,12 +233,12 @@ arguments.
 - **E2's freeze.** When the second host chooses its commit, set `e2.pin`, fill
   `pins/e2.sha256` with every binary in `e2.bin_dir` (derna2's and the comparators') and add
   `pins/e2-PROVENANCE.md`. Rows of the first host's pilot (`acfaae60`) are not part of the grid.
-- **E3's grid** waits on `derna front --motif` with `--stream`, `--max-secs` and
-  `--max-rss-gb` in a pinned build. The probe's binary (`motif_hull` at `5d12df5f`) is not
-  frozen here, so the probe is a record, not a run target. The union rows of the forced-motif
-  census came from code the plan does not include, and are not checked.
-- **E4 and E5** need their drivers, a pin, the UTR pairs' sequence file with its provenance,
-  and the six therapeutic natives' sequences, none of which exists yet; E5 also pins MASS.
+- **E3's grid** has no rule: its binary (`06605630`) is not frozen here and its fronts are not
+  deposited. The probe's binary (`motif_hull` at `5d12df5f`) is not frozen either, so the probe
+  is a record, not a run target. The union rows of the forced-motif census came from code the
+  plan does not include, and are not checked.
+- **E4** has a driver, inputs and UTRs here but no pin or rule; **E5** needs its driver and a
+  pin, and also pins MASS.
 - **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold) are described in
   `pins/e1-PROVENANCE.md`, not automated.
 - **A rebuild of derna2 at a pin has not been compared** with the frozen binaries

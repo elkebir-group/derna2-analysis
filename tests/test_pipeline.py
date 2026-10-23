@@ -71,7 +71,7 @@ def test_the_readme_lists_targets():
     assert len(readme_targets()) >= 10
 
 
-@pytest.mark.parametrize("name", ["e1", "e2"])
+@pytest.mark.parametrize("name", ["e1", "e2", "e4"])
 def test_driver_configs_render_without_host_paths(tmp_path, name):
     template = ROOT / "drivers" / name / f"{name}.config.json"
     out = tmp_path / "config.json"
@@ -97,8 +97,16 @@ def test_driver_configs_render_without_host_paths(tmp_path, name):
     if name == "e1":
         assert "b{w}" in text or "{w}" in text
     # The pin is a commit, not a path, and reaches the rows as written.
-    if name == "e2":
+    if name in ("e2", "e4"):
         assert json.loads(text)["derna2_pin"] == "0123abcd"
+
+
+@pytest.mark.parametrize("name", ["e1", "e2", "e4"])
+def test_every_input_a_driver_config_names_is_in_the_repo(name):
+    template = (ROOT / "drivers" / name / f"{name}.config.json").read_text()
+    named = set(re.findall(r'"\{inputs\}/([^"]+)"', template))
+    assert named
+    assert sorted(p for p in named if not (ROOT / "inputs" / p).exists()) == []
 
 
 def test_render_refuses_a_missing_value(tmp_path):

@@ -269,6 +269,7 @@ class Rescorer:
     def __init__(self, cfg):
         self.fold = cfg["bins"]["mfe_fold"]
         self.cores = cfg.get("rescore_cores")
+        self.workers = cfg.get("rescore_workers", 1)
         rows = read_codon_table(cfg["tables"]["canonical"])
         self.aa = {codon: aa for aa, codon, _ in rows}
         self.w = codon_weights(rows)
@@ -282,6 +283,16 @@ class Rescorer:
         mfe = int(r.stdout.split("\t")[1]) / 100.0 if "\t" in r.stdout else None
         return dict(translates=translated == prot, cai_rescored=math.exp(sum(logs) / len(logs)) if logs else None,
                     mfe_rescored=mfe)
+
+    def many(self, seqs, prot):
+        """The scores of `seqs`, in order, folded `workers` at a time.
+
+        A walk's front is thousands of designs and each fold is one process,
+        so folding them one after another costs more than the walk itself.
+        Yields as each result is ready in order, so a caller that writes per
+        item keeps every score already computed."""
+        with ThreadPoolExecutor(max_workers=self.workers) as ex:
+            yield from ex.map(lambda s: self(s, prot), seqs)
 
 
 # ---- host occupancy ----------------------------------------------------------------
