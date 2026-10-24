@@ -52,13 +52,19 @@ data/results/
 │   ├── e3-probe/            # hull probe round 1: per rung the walk's rows, its measurement
 │   │                        # record and summary.csv; forced.jsonl, the forced-motif census
 │   └── e3-probe2/           # round 2: the n = 200 load control, n = 150, 250 and 300
-└── fig1/
-    ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
-    ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
-    ├── cd_symmetric_guarded_front.scored.jsonl  # exact guarded front
-    ├── d_so_front.jsonl                         # exact structurally optimal front
-    ├── so_windows/          # the window walks that found it, by round
-    └── top_exhaustive/      # the stretch above the most adapted seed, by enumeration
+├── fig1/
+│   ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
+│   ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
+│   ├── cd_symmetric_guarded_front.scored.jsonl  # exact guarded front
+│   ├── d_so_front.jsonl                         # exact structurally optimal front
+│   ├── so_windows/          # the window walks that found it, by round
+│   └── top_exhaustive/      # the stretch above the most adapted seed, by enumeration
+└── fig1_fronts/
+    ├── <arm>/               # unguarded, symmetric, no_clamp, unpaired: report.json, the front
+    │                        # and its hull vertices re-scored; front3.jsonl and its designs
+    ├── mrnafold/compare.jsonl  # mRNAfold at each hull vertex's weight
+    ├── plot/                # plot_data.json and fronts.png
+    └── raw/                 # every run output untrimmed, and the binaries' commit and SHA-256
 ```
 
 Nothing under `data/` is committed.
@@ -210,6 +216,22 @@ MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
 | `fig1_check_front` | `runs/fig1/{arm}/check.txt` | that front against the deposited one, energy at every log-CAI level |
 | `fig1_runs` | | both fronts, re-walked and checked |
 
+### Figure 1's three fronts
+
+The same instance with three fronts drawn together: the exact plain front (114 points, 23 hull
+vertices); the exact front under each of three CDS–UTR constraints (`5-cds,cds-3`: 117 points,
+none structurally optimal; `5-cds,5-3`: 119 points, 42 structurally optimal; `5-5,5-cds,5-3`:
+119 points, none, since the hbb 5′ UTR pairs with itself); and, per constrained hull vertex,
+the first structurally optimal design a lazy k-best walk finds (21 of 22 vertices under
+`5-cds,cds-3`, 22 of 22 under `5-cds,5-3`). mRNAfold is run at each vertex's weight. The deposit
+is derna2's `experiment/glpe-hbb-fronts-data` at `f67a04a6` (merged as derna2 PR #398), built
+from `1b3739b`; `drivers/fig1-fronts/README.md` describes the runs. The scripts there carry the
+paths of the host they ran on and are not pipeline steps.
+
+| Rule | Output | Content |
+|---|---|---|
+| `fig1_fronts_tables` | `fig1_fronts/tables.md` | per front: points, hull vertices, structurally optimal points and wall; per front-3 walk: λ, the vertex's energy, rank found, the design's energy and the walk's cost; mRNAfold against each vertex |
+
 ## Tests
 
 ```bash
@@ -229,6 +251,9 @@ arguments.
   (free and guarded folds of each design) and the window rounds were produced by the scripts in
   `drivers/fig1/`, which carry absolute paths to a derna2 checkout. The pipeline checks their
   output (`fig1_so_front`) but does not rerun them.
+- **Figure 1's three fronts** have no run target and no frozen binaries here. Their raw outputs
+  record the paths of the derna2 worktree they ran in, so the deposit should be scrubbed of them
+  before it is published.
 - **E2 is in progress.** Its deposit has no checksum manifest until the grid finishes.
 - **E2's freeze.** When the second host chooses its commit, set `e2.pin`, fill
   `pins/e2.sha256` with every binary in `e2.bin_dir` (derna2's and the comparators') and add

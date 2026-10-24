@@ -15,6 +15,7 @@ experiment ran.
 | `e4/` | `experiments/paper-benchmark/` on `chore/paper-e4-plan` at `1dc30fdb` | `drive_e4.py` (plan, run, score and summarize), `measure.py`, `E4-PLAN.md`; its proteins are under `inputs/e4/` (with the source's `PIN` and `SHA256SUMS`) and its UTR pairs under `inputs/utrs/` |
 | `e5/` | `experiments/paper-benchmark/` on `chore/paper-e5-plan` at `10dda4c2` | `E5-PLAN.md` only: E5 has no driver yet |
 | `fig1/` | `experiments/fig1-glpe-hbb/` on `experiment/fig1-glpe-hbb` at `0d56c280` | the scripts behind the overview figure, and `FIG1.md` (that directory's README) |
+| `fig1-fronts/` | `experiments/glpe-hbb-fronts/` on `experiment/glpe-hbb-fronts-data` at `f67a04a6` | the scripts behind Figure 1's three fronts (`run_fronts.sh`, `run_front3.sh`, `run_mrnafold.py`, the checks, `make_tables.py`, `build_plot.py`), and that directory's README |
 
 `e1/e1.config.json` is the configuration the deposited E1 timing run used
 (`data/results/e1/config.json`), with its host paths turned into `{bin}`, `{inputs}` and
@@ -44,3 +45,7 @@ The `fig1/` scripts are kept as the record of what was run, not as pipeline step
 from the derna2 copies in one respect: the working directory they ran in, which those copies
 spell as an absolute path, is read here from `FIG1_WORK` (default `work`). They still carry
 absolute paths to a derna2 checkout.
+
+The `fig1-fronts/` README differs from its source in one sentence: its link to a hosted copy
+of the interactive plot names the deposit's own copy (`results/raw/plot/glpe-hbb-fronts.html`)
+instead. `make_tables.py` is the one script the pipeline runs (`fig1_fronts_tables`).

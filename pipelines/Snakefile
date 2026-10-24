@@ -49,6 +49,7 @@ include: "rules/e1.smk"
 include: "rules/e2.smk"
 include: "rules/e3.smk"
 include: "rules/fig1.smk"
+include: "rules/fig1_fronts.smk"
 
 
 rule all:
@@ -57,3 +58,4 @@ rule all:
         rules.e2_figures.input,
         rules.e3_tables.input,
         rules.fig1_figures.input,
+        rules.fig1_fronts_tables.output,
