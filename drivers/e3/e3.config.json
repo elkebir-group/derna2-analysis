@@ -1,0 +1,261 @@
+{
+ "out_dir": "{out}",
+ "derna2_pin": "{pin}",
+ "bins": {
+  "derna": "{bin}/derna",
+  "census": "{bin}/scope37_census",
+  "mfe_fold": "{bin}/mfe_fold",
+  "mrnafold": "{bin}/mrnafold_fold_codon_graph"
+ },
+ "tables": {
+  "canonical": "{inputs}/codon_usage_human.csv"
+ },
+ "utrs_fasta": "{inputs}/utrs/utrs.fasta",
+ "forbid": "5-cds,cds-3",
+ "stop": "UAA",
+ "epsilon": 1.1920928955078125e-07,
+ "budget_s": 43200,
+ "walk_budget_s": 43200,
+ "emit_s": 3600,
+ "mrnafold_budget_s": 43200,
+ "a3_max_lambdas": 24,
+ "mem_cap_gb": 48,
+ "threads": 1,
+ "cores": "0-15",
+ "score_cores": "16-27",
+ "score_threads": 8,
+ "instances": [
+  {
+   "id": "P54852",
+   "fasta": "{inputs}/e3/P54852.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P01563",
+   "fasta": "{inputs}/e3/P01563.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb",
+    "hba",
+    "bnt",
+    "mrna1273",
+    "curevac"
+   ]
+  },
+  {
+   "id": "P01588",
+   "fasta": "{inputs}/e3/P01588.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb",
+    "hba",
+    "bnt",
+    "mrna1273",
+    "curevac"
+   ]
+  },
+  {
+   "id": "P09919",
+   "fasta": "{inputs}/e3/P09919.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb",
+    "hba",
+    "bnt",
+    "mrna1273",
+    "curevac"
+   ]
+  },
+  {
+   "id": "Q9HAE3",
+   "fasta": "{inputs}/e3/Q9HAE3.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P01241",
+   "fasta": "{inputs}/e3/P01241.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb",
+    "hba",
+    "bnt",
+    "mrna1273",
+    "curevac"
+   ]
+  },
+  {
+   "id": "RBD",
+   "fasta": "{inputs}/e3/RBD.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb",
+    "hba",
+    "bnt",
+    "mrna1273",
+    "curevac"
+   ]
+  },
+  {
+   "id": "P98173",
+   "fasta": "{inputs}/e3/P98173.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "eGFP",
+   "fasta": "{inputs}/e3/eGFP.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb",
+    "hba",
+    "bnt",
+    "mrna1273",
+    "curevac"
+   ]
+  },
+  {
+   "id": "P26436",
+   "fasta": "{inputs}/e3/P26436.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P30281",
+   "fasta": "{inputs}/e3/P30281.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q9HC38",
+   "fasta": "{inputs}/e3/Q9HC38.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q6PF06",
+   "fasta": "{inputs}/e3/Q6PF06.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P78382",
+   "fasta": "{inputs}/e3/P78382.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P47211",
+   "fasta": "{inputs}/e3/P47211.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q8TDG2",
+   "fasta": "{inputs}/e3/Q8TDG2.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P01860",
+   "fasta": "{inputs}/e3/P01860.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q92734",
+   "fasta": "{inputs}/e3/Q92734.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "P15086",
+   "fasta": "{inputs}/e3/P15086.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q9NWZ3",
+   "fasta": "{inputs}/e3/Q9NWZ3.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q6B0B8",
+   "fasta": "{inputs}/e3/Q6B0B8.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  },
+  {
+   "id": "Q9UBM8",
+   "fasta": "{inputs}/e3/Q9UBM8.fasta",
+   "band": "short",
+   "pairs": [
+    "hbb"
+   ]
+  }
+ ],
+ "pairs": [
+  {
+   "key": "hbb",
+   "utr5": "hbb_5p",
+   "utr3": "hbb_3p"
+  },
+  {
+   "key": "hba",
+   "utr5": "hba_5p",
+   "utr3": "hba_3p"
+  },
+  {
+   "key": "bnt",
+   "utr5": "bnt_5p",
+   "utr3": "bnt_3p"
+  },
+  {
+   "key": "mrna1273",
+   "utr5": "mrna1273_5p",
+   "utr3": "mrna1273_3p"
+  },
+  {
+   "key": "curevac",
+   "utr5": "curevac_5p",
+   "utr3": "curevac_3p"
+  }
+ ],
+ "bands_pending": {
+  "mid": "E2's 500-1000 band, selected once its 501-700 binding screen reports",
+  "long": "E2's >=1000 band, selected once its long-band lattice census runs"
+ },
+ "length_grid_pair": "hbb"
+}

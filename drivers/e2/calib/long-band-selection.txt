@@ -1,0 +1,23 @@
+census: 19 instance(s), 1006-2828 aa
+excluded as not a protein: ReverseCovid
+deepest nest admitted, by criterion:
+  every entry of the nest      F4:13 F3:3 F1:1 F0:1
+  at least one entry per set   F4:15 F3:3
+
+qualifiers for the full nest: 15, wanted 10
+
+=== the long band, 10 instance(s) ===
+instance        aa  selected as
+PRT-05        1082  Cas ortholog
+PRT-06        1368  Cas ortholog
+Q8IZA0        1049  stratum 1006-1144 aa
+P54098        1239  stratum 1145-1302 aa
+Q96HA7        1378  stratum 1303-1481 aa
+Q5VYS8        1495  stratum 1482-1686 aa
+P51805        1871  stratum 1687-1919 aa
+Q9NR99        2828  stratum 2486-2828 aa
+Q5TZJ5        1347  stratum 1920-2184 aa, empty, nearest taken
+P0DTC2        1273  stratum 2185-2485 aa, empty, nearest taken
+
+length span: 1049-2828 aa (2.70x)
+cells: 10 x 4 = 40

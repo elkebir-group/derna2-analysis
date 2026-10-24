@@ -1,0 +1,212 @@
+<title>GLPE + hbb Fronts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab-notebook figure page; summary line, two panels side by side (stacked on phones), legend, then tables. */
+:root {
+  --bg: #fbfbf9; --panel: #ffffff; --fg: #17181a; --fg2: #4f5156; --muted: #8a8c90;
+  --grid: #e7e7e3; --rule: #d8d8d3;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --ink: #17181a;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161716; --panel: #1d1e1d; --fg: #f2f2ee; --fg2: #c3c2b7; --muted: #8f8e86;
+  --grid: #2c2d2b; --rule: #393a37; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --ink: #f2f2ee;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #161716; --panel: #1d1e1d; --fg: #f2f2ee; --fg2: #c3c2b7; --muted: #8f8e86;
+  --grid: #2c2d2b; --rule: #393a37; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --ink: #f2f2ee;
+  color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; display: grid; gap: 20px; }
+h1 { font-size: 1.35rem; font-weight: 600; margin: 0; text-wrap: balance; }
+.sub { color: var(--fg2); margin: 4px 0 0; max-width: 72ch; line-height: 1.5; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 24px; font-family: var(--mono); font-size: 12.5px; color: var(--fg2); font-variant-numeric: tabular-nums; }
+.stats b { color: var(--fg); font-weight: 500; }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 16px; }
+figure { margin: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; min-width: 0; }
+figcaption { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+svg { width: 100%; height: auto; display: block; overflow: visible; }
+svg text { fill: var(--fg2); font-family: var(--mono); font-size: 10.5px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--fg2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 14px; height: 14px; }
+#tip { position: fixed; pointer-events: none; background: var(--panel); color: var(--fg); border: 1px solid var(--rule);
+  border-radius: 4px; padding: 8px 10px; font-family: var(--mono); font-size: 11.5px; line-height: 1.5;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.12); max-width: 320px; font-variant-numeric: tabular-nums; z-index: 5; }
+details { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; }
+summary { cursor: pointer; font-weight: 500; font-size: 13px; }
+summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+.tbl { overflow-x: auto; margin-top: 10px; }
+table { border-collapse: collapse; font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 3px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--fg2); font-weight: 500; }
+td:first-child, th:first-child { text-align: left; }
+.note { color: var(--fg2); font-size: 12.5px; line-height: 1.55; max-width: 90ch; margin: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>GLPE_HUMAN (78 aa) with hbb UTRs: three fronts and mRNAfold</h1>
+    <p class="sub">416 nt: 50 nt 5′ UTR, 234 nt CDS, 132 nt 3′ UTR. Each design is drawn at the energy its method optimized: free MFE for front 1, the arm's guarded energy for fronts 2 and 3 and for mRNAfold's guarded arms. Hover a mark for its free MFE and whether it is structurally optimal (free MFE = guarded energy).</p>
+  </header>
+  <div class="stats" id="stats"></div>
+  <div class="legend" id="legend"></div>
+  <div class="panels">
+    <figure><figcaption>Symmetric guard: 5′↔CDS and CDS↔3′ forbidden</figcaption><svg id="p-sym"></svg></figure>
+    <figure><figcaption>5′ guards: no_clamp (◆, △) and 5′ unpaired (■, ▽)</figcaption><svg id="p-five"></svg></figure>
+  </div>
+  <p class="note" id="note"></p>
+  <details><summary>Front 3: one walk per guarded hull vertex</summary><div class="tbl" id="t3"></div></details>
+  <details><summary>mRNAfold at the symmetric hull weights</summary><div class="tbl" id="tm"></div></details>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+const DATA = /*DATA*/null;
+const NS = "http://www.w3.org/2000/svg";
+const W = 620, H = 440, M = { l: 56, r: 14, t: 10, b: 40 };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const f2 = x => (x == null ? "–" : (+x).toFixed(2));
+const f3 = x => (x == null ? "–" : (+x).toFixed(3));
+const soText = s => (s == null ? "" : s ? "yes" : "no");
+
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function ticks(lo, hi, n) {
+  const step0 = (hi - lo) / n, mag = 10 ** Math.floor(Math.log10(step0));
+  const step = [1, 2, 5, 10].map(m => m * mag).find(s => s >= step0);
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+// Marker shapes, centred at (x, y), size r.
+function shape(g, kind, x, y, r, color, hollow) {
+  const fill = hollow ? "none" : color, stroke = color;
+  const common = { fill, stroke, "stroke-width": hollow ? 1.4 : 1 };
+  if (kind === "circle") return el("circle", { cx: x, cy: y, r, ...common }, g);
+  if (kind === "square") return el("rect", { x: x - r, y: y - r, width: 2 * r, height: 2 * r, ...common }, g);
+  if (kind === "diamond") return el("path", { d: `M${x},${y - r * 1.3}L${x + r * 1.1},${y}L${x},${y + r * 1.3}L${x - r * 1.1},${y}Z`, ...common }, g);
+  if (kind === "up") return el("path", { d: `M${x},${y - r * 1.3}L${x + r * 1.2},${y + r}L${x - r * 1.2},${y + r}Z`, ...common }, g);
+  if (kind === "down") return el("path", { d: `M${x},${y + r * 1.3}L${x + r * 1.2},${y - r}L${x - r * 1.2},${y - r}Z`, ...common }, g);
+  if (kind === "plus") return el("path", { d: `M${x - r},${y}H${x + r}M${x},${y - r}V${y + r}`, fill: "none", stroke, "stroke-width": 1.6 }, g);
+  if (kind === "cross") return el("path", { d: `M${x - r},${y - r}L${x + r},${y + r}M${x - r},${y + r}L${x + r},${y - r}`, fill: "none", stroke, "stroke-width": 1.6 }, g);
+}
+
+const tip = document.getElementById("tip");
+function hover(node, html) {
+  node.style.cursor = "default";
+  node.addEventListener("pointerenter", () => { tip.innerHTML = html; tip.hidden = false; });
+  node.addEventListener("pointermove", e => {
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.min(e.clientX + 14, innerWidth - w - 8) + "px";
+    tip.style.top = Math.min(e.clientY + 14, innerHeight - h - 8) + "px";
+  });
+  node.addEventListener("pointerleave", () => { tip.hidden = true; });
+}
+
+const MF_SHAPE = { plain: "plus", guard: "cross", unpaired5: "square", unpaired_both: "circle" };
+const MF_PANEL = { plain: ["sym", "five"], guard: ["sym"], unpaired5: ["five"], unpaired_both: ["five"] };
+const F2_SHAPE = { symmetric: "diamond", no_clamp: "diamond", unpaired: "square" };
+const F3_SHAPE = { symmetric: "up", no_clamp: "up", unpaired: "down" };
+
+function layers(panel) {
+  const arms = panel === "sym" ? ["symmetric"] : ["no_clamp", "unpaired"];
+  const L = [];
+  for (const p of DATA.front1) L.push({ kind: "circle", color: "--s1", hollow: !p.hull, r: 3.2, ...p,
+    tip: `<b>front 1, unguarded</b> ${p.hull ? "(hull)" : "(off-hull)"}<br>free MFE ${f2(p.E)} kcal/mol<br>log-CAI ${f3(p.L)} · CAI ${f3(p.cai)}` });
+  for (const a of arms) for (const p of DATA.front2[a]) L.push({ kind: F2_SHAPE[a], color: "--s2", hollow: !p.hull, r: 3.2, ...p,
+    tip: `<b>front 2, ${a}</b> ${p.hull ? "(hull)" : "(off-hull)"}<br>guarded E ${f2(p.E)} · free F ${f2(p.free)}<br>structurally optimal: ${soText(p.so)}<br>log-CAI ${f3(p.L)} · CAI ${f3(p.cai)}` });
+  for (const a of arms) for (const r of DATA.front3[a]) L.push({ kind: F3_SHAPE[a], color: "--s3", hollow: !r.finished, r: 5, link: [r.vL, r.vE], ...r,
+    tip: r.finished
+      ? `<b>front 3, ${a}</b>, vertex ${r.vertex}<br>λ ${r.lambda.toPrecision(4)} · rank ${r.rank} · walk ${f2(r.walk_s)} s<br>guarded E ${f2(r.E)} = free F ${f2(r.free)}<br>log-CAI ${f3(r.L)}`
+      : `<b>front 3, ${a}</b>, vertex ${r.vertex}: <b>unfinished</b><br>λ ${r.lambda.toPrecision(4)} · ${r.rank} designs walked · ${f2(r.walk_s)} s<br>drawn at the vertex` });
+  for (const r of DATA.mrnafold) if (MF_PANEL[r.arm].includes(panel)) L.push({ kind: MF_SHAPE[r.arm], color: "--ink", hollow: true, r: 4.2, ...r,
+    tip: `<b>mRNAfold ${r.arm}</b>, vertex ${r.vertex}<br>λ ${r.lambda.toPrecision(4)} · E ${f2(r.E)} · free F ${f2(r.free)}<br>log-CAI ${f3(r.L)} · matches ours: ${r.matches_ours ? "yes" : "no (Δobj " + f3(r.d_obj) + ")"}<br>SO symmetric: ${soText(r.so_symmetric)} · SO 5′ unpaired: ${soText(r.so_unpaired)}` });
+  return L;
+}
+
+function draw(id, panel, xs, ys) {
+  const svg = document.getElementById(id);
+  svg.replaceChildren();
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const x = v => M.l + (v - xs[0]) / (xs[1] - xs[0]) * (W - M.l - M.r);
+  const y = v => M.t + (ys[1] - v) / (ys[1] - ys[0]) * (H - M.t - M.b);
+  const g = el("g", {}, svg);
+  for (const t of ticks(xs[0], xs[1], 6)) {
+    el("line", { x1: x(t), x2: x(t), y1: M.t, y2: H - M.b, stroke: css("--grid") }, g);
+    el("text", { x: x(t), y: H - M.b + 14, "text-anchor": "middle" }, g).textContent = t;
+  }
+  for (const t of ticks(ys[0], ys[1], 6)) {
+    el("line", { x1: M.l, x2: W - M.r, y1: y(t), y2: y(t), stroke: css("--grid") }, g);
+    el("text", { x: M.l - 6, y: y(t) + 3.5, "text-anchor": "end" }, g).textContent = t;
+  }
+  el("text", { x: (M.l + W - M.r) / 2, y: H - 6, "text-anchor": "middle" }, g).textContent = "accumulated log-CAI  Σ ln w";
+  const yl = el("text", { x: 12, y: (M.t + H - M.b) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(M.t + H - M.b) / 2})` }, g);
+  yl.textContent = "energy (kcal/mol)";
+  const L = layers(panel);
+  for (const p of L) if (p.link) el("line", { x1: x(p.link[0]), y1: y(p.link[1]), x2: x(p.L), y2: y(p.E), stroke: css("--s3"), "stroke-width": 1, opacity: 0.8 }, g);
+  for (const p of L) {
+    const node = shape(g, p.kind, x(p.L), y(p.E), p.r, css(p.color), p.hollow);
+    const hit = el("circle", { cx: x(p.L), cy: y(p.E), r: 7, fill: "transparent" }, g);
+    hover(hit, p.tip);
+  }
+}
+
+function legend() {
+  const items = [
+    ["circle", "--s1", false, "front 1 unguarded, hull"], ["circle", "--s1", true, "front 1 off-hull"],
+    ["diamond", "--s2", false, "front 2 hull (◆ symmetric / no_clamp)"], ["square", "--s2", false, "front 2 5′ unpaired"],
+    ["diamond", "--s2", true, "front 2 off-hull"],
+    ["up", "--s3", false, "front 3 found (△ symmetric / no_clamp)"], ["down", "--s3", true, "front 3 5′ unpaired / unfinished (hollow)"],
+    ["plus", "--ink", true, "mRNAfold plain"], ["cross", "--ink", true, "mRNAfold guard emulation"],
+    ["square", "--ink", true, "mRNAfold 5′ unpaired"], ["circle", "--ink", true, "mRNAfold both UTRs unpaired"],
+  ];
+  const box = document.getElementById("legend");
+  box.replaceChildren();
+  for (const [k, c, h, label] of items) {
+    const s = document.createElement("span");
+    const svg = el("svg", { viewBox: "0 0 14 14" });
+    shape(svg, k, 7, 7, 4, css(c), h);
+    s.append(svg, label);
+    box.append(s);
+  }
+}
+
+function tables() {
+  const rows3 = [];
+  for (const a of ["symmetric", "no_clamp", "unpaired"]) for (const r of DATA.front3[a])
+    rows3.push(`<tr><td>${a}</td><td>${r.vertex}</td><td>${r.lambda.toPrecision(4)}</td><td>${f2(r.vE)}</td><td>${f3(r.vL)}</td><td>${r.finished ? "found" : "unfinished"}</td><td>${r.rank}</td><td>${f2(r.walk_s)}</td><td>${r.finished ? f2(r.E) : "–"}</td><td>${r.finished ? f3(r.L) : "–"}</td></tr>`);
+  document.getElementById("t3").innerHTML = `<table><tr><th>arm</th><th>vertex</th><th>λ</th><th>vertex E</th><th>vertex log-CAI</th><th>walk</th><th>rank</th><th>walk s</th><th>E = F</th><th>log-CAI</th></tr>${rows3.join("") || "<tr><td colspan=10>no walks yet</td></tr>"}</table>`;
+  const rowsM = DATA.mrnafold.map(r => `<tr><td>${r.arm}</td><td>${r.vertex}</td><td>${r.lambda.toPrecision(4)}</td><td>${f2(r.E)}</td><td>${f2(r.free)}</td><td>${f3(r.L)}</td><td>${r.matches_ours ? "yes" : "no"}</td><td>${f3(r.d_obj)}</td><td>${soText(r.so_symmetric)}</td><td>${soText(r.so_unpaired)}</td></tr>`);
+  document.getElementById("tm").innerHTML = `<table><tr><th>arm</th><th>vertex</th><th>λ</th><th>E</th><th>free F</th><th>log-CAI</th><th>= ours</th><th>Δobj</th><th>SO sym</th><th>SO 5′ unp.</th></tr>${rowsM.join("")}</table>`;
+}
+
+function stats() {
+  const n = a => a.length, h = a => a.filter(p => p.hull).length;
+  const f3done = a => DATA.front3[a].filter(r => r.finished).length + "/" + DATA.front3[a].length;
+  const s = [
+    `front 1: <b>${n(DATA.front1)}</b> points, <b>${h(DATA.front1)}</b> hull`,
+    ...["symmetric", "no_clamp", "unpaired"].map(a => `front 2 ${a}: <b>${n(DATA.front2[a])}</b> / <b>${h(DATA.front2[a])}</b> hull · front 3 <b>${f3done(a)}</b>`),
+  ];
+  document.getElementById("stats").innerHTML = s.map(x => `<span>${x}</span>`).join("");
+  document.getElementById("note").textContent = DATA.note || "";
+}
+
+function render() {
+  const all = [...DATA.front1, ...Object.values(DATA.front2).flat(), ...Object.values(DATA.front3).flat(), ...DATA.mrnafold];
+  const xs = [Math.min(...all.map(p => p.L)) - 0.6, 0.6];
+  const ys = [Math.min(...all.map(p => p.E)) - 2, Math.max(...all.map(p => p.E)) + 2];
+  draw("p-sym", "sym", xs, ys);
+  draw("p-five", "five", xs, ys);
+  legend(); tables(); stats();
+}
+render();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
