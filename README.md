@@ -255,8 +255,10 @@ arguments.
   `derna` and drop `pins/fig1.sha256`.
 - **Figure 1's binaries have no recorded commit.** `pins/fig1.sha256` pins the binaries
   themselves, so the figure is reproducible from the freeze, but they cannot be rebuilt from
-  source until the commit is identified. Their window reports carry a `binary_fnv64` that can
-  confirm a candidate.
+  source until the commit is identified. The test is mechanical: the window reports stamp
+  `binary_fnv64` = `1ff256ead61c92ba`, which is `provenance.fnv1a64` of the pinned
+  `scope37_window` and of no other pinned binary, so a candidate commit is confirmed by
+  building it and hashing. See `pins/fig1-PROVENANCE.md`.
 - **Figure 1 panel b's scoring and the window search are not pipeline rules.** The scored files
   (free and guarded folds of each design) and the window rounds were produced by the scripts in
   `drivers/fig1/`, which carry absolute paths to a derna2 checkout. The pipeline checks their
@@ -277,7 +279,9 @@ arguments.
   substitutions miss; `--apply` rewrites the files in place. **Rewriting the deposit
   invalidates its manifest**, so the manifest has to be regenerated afterwards and the
   substitutions recorded beside it. Whether to rewrite the deposit or to scrub only a
-  published copy is open.
+  published copy is open — but all 191 files are byte-identical to derna2 `f67a04a6`
+  (checked file by file; `pins/fig1_fronts-PROVENANCE.md`), so a rewrite loses nothing
+  that cannot be recovered from the commit.
 - **E2 is in progress.** Its deposit has no checksum manifest until the grid finishes.
 - **E2's freeze.** When the second host chooses its commit, set `e2.pin`, fill
   `pins/e2.sha256` with every binary in `e2.bin_dir` (derna2's and the comparators') and add

@@ -12,6 +12,20 @@ def sha256(path, chunk=1 << 20):
     return h.hexdigest()
 
 
+def fnv1a64(path, chunk=1 << 20):
+    """FNV-1a over the whole file, which is the `binary_fnv64` a run stamps on its rows.
+
+    The stamp names the binary that wrote a row, so rows can be tied to a pinned file even
+    where the source commit was never recorded.
+    """
+    h = 0xCBF29CE484222325
+    with open(path, "rb") as f:
+        while block := f.read(chunk):
+            for byte in block:
+                h = ((h ^ byte) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return f"{h:016x}"
+
+
 def read_manifest(path):
     """`sha256sum` format: '<hex>  <relative path>' per line."""
     entries = []
