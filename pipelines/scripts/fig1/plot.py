@@ -13,12 +13,21 @@ import sys
 from pathlib import Path
 
 from derna2_analysis.figures import INK_2, SLOTS, save, style
+from derna2_analysis.fronts import hull_vertices
 from derna2_analysis.io import read_jsonl
 
 
 def xy(rows, field):
     rows = sorted(rows, key=lambda r: r["cai_log"])
     return [r["cai_log"] for r in rows], [r[field] for r in rows]
+
+
+def hull_xy(rows, field):
+    """Hull membership computed from the points rather than read from a row's flag. A
+    stored flag is what the search that wrote it accepted at its own tolerance, so a point
+    lying within the energy field's resolution of the chord can be flagged either way;
+    what the panel claims is a property of the front, which is computable here."""
+    return tuple(zip(*sorted(hull_vertices([(r["cai_log"], r[field]) for r in rows])), strict=True))
 
 
 def main():
@@ -36,7 +45,7 @@ def main():
 
     x, y = xy(a, "mfe_kcal_mol")
     pa.plot(x, y, color=SLOTS[0], marker="o", markersize=2, linewidth=1, label="Pareto front")
-    hx, hy = xy([r for r in a if r.get("hull_vertex")], "mfe_kcal_mol")
+    hx, hy = hull_xy(a, "mfe_kcal_mol")
     pa.plot(
         hx,
         hy,
