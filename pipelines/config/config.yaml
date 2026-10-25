@@ -64,6 +64,9 @@ fig1:
   bin_dir: data/derived/bin/fig1
   n_aa: 78
   # arm -> extra flags of scope35_walk_front
+  # the restriction site whose two strands are the overview figure's forbidden motifs (from
+  # inputs/motifs/set1-manufacturing.txt)
+  overview_motif: SapI
   fronts:
     cdsonly: ""
     symmetric: "--utr5 {utr5} --utr3 {utr3} --region 5-cds,cds-3"

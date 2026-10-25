@@ -212,6 +212,8 @@ MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
 | `fig1_so_front` | `fig1/so_front.jsonl` | the structurally optimal front reassembled from its window reports; fails unless the windows settle the whole log-CAI range and the front equals the deposited one |
 | `fig1_plot` | `figures/fig1_glpe_hbb.pdf` | panels a–d |
 | `fig1_figures` | | the two above |
+| `fig1_overview_designs` | `fig1/overview_designs.json` | the overview figure's three designs at CAI ≈ 0.886, the modular one refolded with the pinned `fold_seq`; fails unless the refold matches the deposited energy with no CDS–UTR pair and no modular design contains the forbidden SapI site |
+| `fig1_overview` | `figures/fig1_overview.pdf` | the paper's overview figure; needs a LaTeX install (Times) for its text |
 | `fig1_front` | `runs/fig1/{arm}/front.jsonl` | the CDS-only (`cdsonly`) or symmetric-guarded (`symmetric`) front, re-walked |
 | `fig1_check_front` | `runs/fig1/{arm}/check.txt` | that front against the deposited one, energy at every log-CAI level |
 | `fig1_runs` | | both fronts, re-walked and checked |
@@ -243,6 +245,14 @@ arguments.
 
 ## Open items
 
+- **TODO: run only clean `derna` executables.** The pipeline should call only the `derna` CLI,
+  built from the integration branch `xg` at a recorded commit, never an experiment binary.
+  Figure 1 does not yet: its fronts come from `scope35_walk_front` and `scope37_window`, its
+  scoring from `fold_seq` and `guard_fold`, and the overview figure refolds its modular design
+  with `fold_seq` because the window walks record no structures. For each of these, either
+  `derna` already does the job (then switch the rule to it) or the CLI lacks it, which is a CLI
+  gap to fix in derna2, not a reason to keep the custom binary. Then rerun Figure 1 with
+  `derna` and drop `pins/fig1.sha256`.
 - **Figure 1's binaries have no recorded commit.** `pins/fig1.sha256` pins the binaries
   themselves, so the figure is reproducible from the freeze, but they cannot be rebuilt from
   source until the commit is identified. Their window reports carry a `binary_fnv64` that can

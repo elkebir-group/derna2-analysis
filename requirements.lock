@@ -67,5 +67,6 @@ typing-inspection==0.4.4
 typing_extensions==4.16.0
 tzdata==2026.5
 urllib3==2.8.0
+ViennaRNA==2.7.2
 wrapt==2.5.1
 yte==1.9.4

@@ -48,6 +48,43 @@ rule fig1_so_front:
         "{PY} {SCRIPTS}/fig1/so_front.py {params.windows} {input.front} {output}"
 
 
+# The paper's overview figure: the modular front against UTR masking and concatenation, and
+# the structures of three designs. Its designs need the pinned fold_seq (the modular front's
+# window walks report energies only), so it is not part of fig1_figures or `all`.
+rule fig1_overview_designs:
+    input:
+        ok=source_ok("fig1"),
+        bins=STAMPS / "bins_fig1.ok",
+        motifs=INPUTS / "motifs" / "set1-manufacturing.txt",
+    output:
+        DERIVED / "fig1" / "overview_designs.json",
+    params:
+        results=source("fig1"),
+        motif=FIG1["overview_motif"],
+        fold=lambda w: Path(FIG1["bin_dir"]) / "fold_seq",
+        work=DERIVED / "fig1" / "overview_fold",
+    shell:
+        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {input.motifs} {params.motif} "
+        "{params.fold} {params.work} {output}"
+
+
+rule fig1_overview:
+    input:
+        ok=source_ok("fig1"),
+        designs=DERIVED / "fig1" / "overview_designs.json",
+        fasta=GLPE / "GLPE_HUMAN_78.fasta",
+        utr5=GLPE / "hbb5.txt",
+        utr3=GLPE / "hbb3.txt",
+    output:
+        FIGURES / "fig1_overview.pdf",
+        FIGURES / "fig1_overview.png",
+    params:
+        results=source("fig1"),
+    shell:
+        "{PY} {SCRIPTS}/fig1/overview.py {params.results} {input.designs} {input.fasta} "
+        "{input.utr5} {input.utr3} {output[0]}"
+
+
 # ---- runs -----------------------------------------------------------------------------
 
 def fig1_flags(w):
