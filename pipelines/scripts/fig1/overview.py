@@ -179,13 +179,13 @@ def plot_others(a, fronts, ms):
     # not modular: mRNAfold's designs and the hull vertices of the concatenation front, the only
     # designs a weighted sum returns, as circles at the MFE of the refolded mRNA. Most of them
     # are the same design, so the concatenation circles are drawn larger, behind.
-    # in the background: the designs of the two fronts that no weight reaches, as faint dots
+    # in the background: the designs of the two fronts that no weight reaches, as open circles
     mf_seqs = {r["sequence"] for r in fronts.mf}
     hull_b = [r for r in fronts.b if not fronts.on_b(r)]
     hull_cd = [r for r in fronts.cd if r["sequence"] not in mf_seqs]
     for rows, col in ((hull_b, GREEN), (hull_cd, ORANGE)):
         a.plot([cai(r) for r in rows], [r["free_mfe_kcal_mol"] for r in rows], "o",
-               ms=0.9 * ms, mec="none", mfc=col, alpha=0.3, zorder=1)
+               ms=0.9 * ms, mec=col, mfc="none", mew=0.5, alpha=0.6, zorder=1)
     for rows, on, col, size, z in ((fronts.b, fronts.on_b, GREEN, 1.7 * ms, 2.5),
                                    (fronts.mf, fronts.on_mf, ORANGE, ms, 2.6)):
         sel = [r for r in by_cai(rows) if on(r)]
@@ -251,7 +251,7 @@ def add_legend(ax):
     def shape(m, filled):
         return Line2D([], [], marker=m, mec="k", mfc="k" if filled else "white", **style)
 
-    faint = Line2D([], [], marker="o", ls="", ms=2.2, mec="none", mfc="k", alpha=0.3)
+    faint = Line2D([], [], marker="o", ls="", ms=2.4, mec="k", mfc="none", mew=0.5)
     derna2 = (method(PURPLE, "s"),
               Line2D([], [], marker="s", mec=PURPLE, mfc="white", **style))
     handles = [derna2, method(ORANGE, "o"), method(GREEN, "o"),
