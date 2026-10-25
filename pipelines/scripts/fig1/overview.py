@@ -1,4 +1,4 @@
-"""The overview figure: GLPE_HUMAN (78 aa) with the hbb UTRs.
+"""The overview figure: GLPE_HUMAN (78 aa) with the hbb UTRs and one restriction site forbidden.
 
     python overview.py RESULTS_DIR MRNAFOLD_JSONL DESIGNS_JSON FASTA UTR5_TXT UTR3_TXT OUT_PDF
 
@@ -9,7 +9,7 @@
     of (b)-(d) and one on the hull edge of the modular front with the most designs above it.
     Color: method; shape: modular (square) or not (circle); fill: on the convex hull of the
     modular front or above it.
-(b)-(d) the structures of the three designs of overview_designs.py.
+(b)-(d) the structures of the three designs of overview_designs.py; (c) zooms on the motif.
 Text is set by LaTeX in Times at the sizes of the paper's Fig. 2 (7 pt, small labels 6.3 pt), at
 the paper's text width (6.5 in). Structure layouts come from ViennaRNA (NAView).
 """
@@ -32,7 +32,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 L5, LC = 50, 234   # hbb 5' UTR and the CDS of GLPE_HUMAN (78 aa)
-COL = {"u5": "#3b7dd8", "cds": "#2e9e5b", "u3": "#9a9a9a", "x": "#d62728"}
+COL = {"u5": "#3b7dd8", "cds": "#2e9e5b", "u3": "#9a9a9a", "x": "#d62728", "m": "#c51b8a"}
 TEAL, ORANGE, PURPLE = "#1b9e9e", "#e8772e", "#6a4bc4"
 FS, FSS = 7, 6.3
 PREAMBLE = (r"\usepackage[T1]{fontenc}\usepackage{times}\usepackage{textcomp}"
@@ -221,9 +221,9 @@ def zoom_inset(ax, fronts, bounds, x0, x1, y0, y1, corners, rad=0.2):
 
 def mark_designs(ins, designs):
     # the designs of (b)-(d), circled and labeled in the zoom
-    marks = (("d1", "free_mfe_kcal_mol", r"$\mathbf{v}''$", (14, 6)),
-             ("d2", "free_mfe_kcal_mol", r"$\mathbf{v}'$", (-14, 7)),
-             ("d3", "mfe_kcal_mol", r"$\mathbf{v}$", (14, -7)))
+    marks = (("d1", "free_mfe_kcal_mol", r"$\mathbf{v}''$", (0, 15)),
+             ("d2", "free_mfe_kcal_mol", r"$\mathbf{v}'$", (0, -14)),
+             ("d3", "mfe_kcal_mol", r"$\mathbf{v}$", (16, -9)))
     for key, field, label, at in marks:
         d = designs[key]
         ins.plot(cai(d), d[field], "o", ms=6.0, mfc="none", mec="k", mew=0.7, zorder=5)
@@ -262,7 +262,7 @@ def panel_a(fig, cell, fronts, designs):
     xs = [cai(designs[k]) for k in ("d1", "d2", "d3")]
     ys = [designs[k]["free_mfe_kcal_mol"] for k in ("d1", "d2", "d3")]
     ins = zoom_inset(ax, fronts, [0.03, 0.56, 0.42, 0.42], min(xs) - 0.004, max(xs) + 0.004,
-                     min(ys) - 3.0, max(ys) + 3.0, [((0, 1), (1, 1)), ((0, 0), (1, 0))])
+                     min(ys) - 3.0, max(ys) + 3.0, [((0, 1), (0, 0)), ((1, 1), (1, 0))])
     # the second zoom: the hull edge of the modular front with the most designs above it
     pts = sorted((r["cai_log"], r["mfe_kcal_mol"]) for r in fronts.so)
     lo, hi = max(pairwise(fronts.hull), key=lambda e: gap(e, pts))
@@ -307,8 +307,8 @@ def layout(s, aspect, room=0.0, vroom=0.0, align=None):
     return rotate(best)
 
 
-def draw_structure(fig, ax, s, room=0.0, vroom=0.0, align=None):
-    # backbone, bases colored by region, base pairs; CDS-UTR pairs in red
+def draw_structure(fig, ax, s, motif=(), room=0.0, vroom=0.0, align=None):
+    # backbone, bases colored by region, base pairs; CDS-UTR pairs in red, motif bases on top
     fig.canvas.draw()
     bb = ax.get_position()
     xs, ys = layout(s, bb.width * fig.get_figwidth() / (bb.height * fig.get_figheight()),
@@ -319,6 +319,9 @@ def draw_structure(fig, ax, s, room=0.0, vroom=0.0, align=None):
     ax.scatter(xs, ys, s=[3.0 if i in red else 1.3 for i in range(len(s))],
                c=[COL["x"] if i in red else COL[region(i)] for i in range(len(s))],
                linewidths=0, zorder=2)
+    if motif:
+        ax.scatter([xs[i] for i in motif], [ys[i] for i in motif], s=6, c=COL["m"],
+                   linewidths=0, zorder=4)
     for i, j in pairs(s):
         x = i in red
         ax.plot([xs[i], xs[j]], [ys[i], ys[j]], color=COL["x"] if x else "#cfcfcf",
@@ -333,6 +336,48 @@ def draw_structure(fig, ax, s, room=0.0, vroom=0.0, align=None):
     return xs, ys
 
 
+def motif_sites(seq, motif):
+    # the positions of the motif and of its reverse complement in the CDS
+    rc = motif[::-1].translate(str.maketrans("ACGU", "UGCA"))
+    m0 = L5 + seq[L5:L5 + LC].index(motif)
+    m1 = L5 + seq[L5:L5 + LC].index(rc)
+    return m0, rc, set(range(m0, m0 + len(motif))) | set(range(m1, m1 + len(rc)))
+
+
+def motif_zoom(ax, d, xs, ys, mot):
+    # the letters around the motif bases and their partners, in an inset above the structure
+    s, seq = d["free_structure"], d["sequence"]
+    show = set(mot)
+    show |= {j for i, j in pairs(s) if i in show} | {i for i, j in pairs(s) if j in show}
+    sx, sy = [xs[i] for i in show], [ys[i] for i in show]
+    rx, ry = 0.5 * (max(sx) - min(sx)) + 9, 0.5 * (max(sy) - min(sy)) + 9
+    cx, cy = (max(sx) + min(sx)) / 2, (max(sy) + min(sy)) / 2
+    zi = ax.inset_axes([0.0, 0.69, 1.0, 0.31])
+    near = [i for i in range(len(xs)) if abs(xs[i] - cx) < rx and abs(ys[i] - cy) < ry]
+    for k in range(len(xs) - 1):
+        if k in near or k + 1 in near:
+            zi.plot(xs[k:k + 2], ys[k:k + 2], color="#d9d9d9", lw=0.4, zorder=1)
+    for i, j in pairs(s):
+        if i in near and j in near:
+            zi.plot([xs[i], xs[j]], [ys[i], ys[j]], color="#b0b0b0", lw=0.4, zorder=4)
+    for i in near:
+        c = COL["m"] if i in mot else COL[region(i)]
+        letter = r"\textbf{" + seq[i] + "}" if i in mot else seq[i]
+        zi.text(xs[i], ys[i], letter, ha="center", va="center", fontsize=6.0, color=c,
+                zorder=5, bbox={"boxstyle": "circle,pad=0.02", "fc": "white", "ec": "none"})
+    zi.set_xlim(cx - rx, cx + rx)
+    zi.set_ylim(cy - ry, cy + ry)
+    zi.set_aspect("equal", adjustable="box")
+    zi.set_anchor("N")
+    zi.set_xticks([])
+    zi.set_yticks([])
+    for sp in zi.spines.values():
+        sp.set_linewidth(0.4)
+        sp.set_color(COL["m"])
+    zoom_box(ax, zi, cx - rx, cx + rx, cy - ry, cy + ry, COL["m"],
+             [((0, 1), (0, 0)), ((1, 1), (1, 0))])
+
+
 def structure_panels(fig, ax, cell, designs, key_height, key_last):
     # right side: the key's last row sits on the bottom of (a), the structures fill the rest
     fig.canvas.draw()
@@ -343,8 +388,14 @@ def structure_panels(fig, ax, cell, designs, key_height, key_last):
                           bottom=kb, height_ratios=[0.80 - kb - key_height, key_height],
                           wspace=0.02, hspace=0.0)
     axs = [fig.add_subplot(gr[0, k]) for k in range(3)]
-    for a, k in zip(axs, ("d1", "d2", "d3"), strict=True):
-        draw_structure(fig, a, designs[k]["free_structure"])
+    d2 = designs["d2"]
+    draw_structure(fig, axs[0], designs["d1"]["free_structure"])
+    m0, _, mot = motif_sites(d2["sequence"], designs["motif"])
+    xs, ys = draw_structure(fig, axs[1], d2["free_structure"], mot, vroom=0.45,
+                            align=(m0, m0 + len(designs["motif"]) - 1))
+    axs[1].set_anchor("C")
+    motif_zoom(axs[1], d2, xs, ys, mot)
+    draw_structure(fig, axs[2], designs["d3"]["free_structure"])
     return gr, axs
 
 
@@ -359,7 +410,8 @@ def add_titles(fig, ax, cell, gr, axs, designs):
         (axs[0], r"\textbf{(b)} $(\mathbf{v}'',P'')$" + "\n" + stats(d1) + "\n"
          + f"{cds_utr_pairs(d1['free_structure'])} CDS--UTR pairs"),
         (axs[1], r"\textbf{(c)} $(\mathbf{v}',P')$" + "\n" + stats(d2) + "\n"
-         + f"{cds_utr_pairs(d2['free_structure'])} CDS--UTR pairs"),
+         + f"{cds_utr_pairs(d2['free_structure'])} CDS--UTR pairs, "
+         + designs["motif_name"] + " site"),
         (axs[2], r"\textbf{(d)} $(\mathbf{v},P)$" + "\n" + stats(d3) + "\n"
          + "no CDS--UTR pairs"),
     ]
@@ -376,7 +428,7 @@ def add_titles(fig, ax, cell, gr, axs, designs):
         fig.text(x, 0.975, t, ha="left", va="top", fontsize=FS)
 
 
-def add_key(fig, cell, w, u5, u3):
+def add_key(fig, cell, w, u5, u3, motif, rc, motif_name):
     lax = fig.add_subplot(cell)
     lax.axis("off")
     lax.set_xlim(0, 1)
@@ -384,7 +436,10 @@ def add_key(fig, cell, w, u5, u3):
     rows = ((COL["u5"], r"5$'$ UTR $\mathbf{u}_5$", [tt(u5) + r" (50 nt)"]),
             (COL["cds"], r"protein $\mathbf{w}$", [tt(w[:39]), tt(w[39:]) + r" (78 aa)"]),
             (COL["u3"], r"3$'$ UTR $\mathbf{u}_3$",
-             [tt(u3[:22] + r"\ldots{}" + u3[-22:]) + r" (132 nt)"]))
+             [tt(u3[:22] + r"\ldots{}" + u3[-22:]) + r" (132 nt)"]),
+            (COL["m"], r"motifs $\mathcal{M}$",
+             [", ".join(tt(m) for m in dict.fromkeys((motif, rc)))
+              + r" (forbidden, " + motif_name + ")"]))
     y, dy = 0.92, 0.165
     for c, name, seqs in rows:
         lax.plot([0.0, 0.035], [y, y], color=c, lw=2, solid_capstyle="butt")
@@ -408,9 +463,10 @@ def main():
                           bottom=0.14, wspace=0.05)
     ax = panel_a(fig, gs[0], fronts, designs)
     # the key's height (figure fraction) and its last row (key coordinates)
-    gr, axs = structure_panels(fig, ax, gs[1], designs, key_height=0.30, key_last=0.26)
+    gr, axs = structure_panels(fig, ax, gs[1], designs, key_height=0.30, key_last=0.095)
     add_titles(fig, ax, gs[0], gr, axs, designs)
-    add_key(fig, gr[1, :], w, u5, u3)
+    _, rc, _ = motif_sites(designs["d2"]["sequence"], designs["motif"])
+    add_key(fig, gr[1, :], w, u5, u3, designs["motif"], rc, designs["motif_name"])
     fig.savefig(out)
     fig.savefig(out.rsplit(".", 1)[0] + ".png", dpi=300)
 

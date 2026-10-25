@@ -61,11 +61,13 @@ rule fig1_overview_designs:
     params:
         results=source("fig1"),
         mrnafold=source("fig1_fronts") / "mrnafold" / "compare.jsonl",
+        motif=FIG1["overview_motif"]["name"],
+        site=FIG1["overview_motif"]["site"],
         fold=lambda w: Path(FIG1["bin_dir"]) / "fold_seq",
         work=DERIVED / "fig1" / "overview_fold",
     shell:
-        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {params.mrnafold} {params.fold} "
-        "{params.work} {output}"
+        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {params.mrnafold} {params.motif} "
+        "{params.site} {params.fold} {params.work} {output}"
 
 
 rule fig1_overview:
