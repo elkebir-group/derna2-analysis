@@ -160,14 +160,15 @@ def set_style():
     })
 
 
-def zoom_box(parent, child, x0, x1, y0, y1, color, corners):
-    # the zoomed region on the parent and two lines to the matching corners of the inset
+def zoom_box(parent, child, x0, x1, y0, y1, color, corners, rad=0.2):
+    # the zoomed region on the parent and two dashed curves to the matching corners of the inset
     parent.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fill=False, ec=color, lw=0.5,
                                zorder=6))
     for (px, py), (cx, cy) in corners:
         parent.add_artist(ConnectionPatch(xyA=((x0, x1)[px], (y0, y1)[py]),
                                           coordsA=parent.transData, xyB=(cx, cy),
                                           coordsB=child.transAxes, color=color, lw=0.5,
+                                          ls=(0, (3, 2)), connectionstyle=f"arc3,rad={rad}",
                                           zorder=6))
 
 
@@ -205,7 +206,7 @@ def plot_fronts(a, fronts, ms_others, ms_modular):
     a.plot(hx, hy, "--", color="k", lw=0.45, zorder=2.8)
 
 
-def zoom_inset(ax, fronts, bounds, x0, x1, y0, y1, corners):
+def zoom_inset(ax, fronts, bounds, x0, x1, y0, y1, corners, rad=0.2):
     ins = ax.inset_axes(bounds)
     plot_fronts(ins, fronts, 2.6, 2.6)
     ins.set_xlim(x0, x1)
@@ -214,7 +215,7 @@ def zoom_inset(ax, fronts, bounds, x0, x1, y0, y1, corners):
     ins.set_yticks([])
     for sp in ins.spines.values():
         sp.set_linewidth(0.4)
-    zoom_box(ax, ins, x0, x1, y0, y1, "k", corners)
+    zoom_box(ax, ins, x0, x1, y0, y1, "k", corners, rad)
     return ins
 
 
@@ -267,7 +268,7 @@ def panel_a(fig, cell, fronts, designs):
     lo, hi = max(pairwise(fronts.hull), key=lambda e: gap(e, pts))
     zoom_inset(ax, fronts, [0.62, 0.03, 0.37, 0.26],
                math.exp(lo[0] / 78) - 0.0015, math.exp(hi[0] / 78) + 0.0015,
-               lo[1] - 1.0, hi[1] + 1.0, [((0, 0), (0, 1)), ((1, 0), (1, 1))])
+               lo[1] - 1.0, hi[1] + 1.0, [((0, 0), (0, 1)), ((1, 0), (1, 1))], rad=-0.2)
     mark_designs(ins, designs)
     ax.set_xticks([0.85, 0.9, 0.95, 1.0])
     ax.set_xticklabels(["$0.85$", "$0.9$", "$0.95$", "$1$"])
