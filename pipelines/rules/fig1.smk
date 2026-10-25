@@ -54,21 +54,24 @@ rule fig1_so_front:
 rule fig1_overview_designs:
     input:
         ok=source_ok("fig1"),
+        ok_fronts=source_ok("fig1_fronts"),
         bins=STAMPS / "bins_fig1.ok",
     output:
         DERIVED / "fig1" / "overview_designs.json",
     params:
         results=source("fig1"),
+        mrnafold=source("fig1_fronts") / "mrnafold" / "compare.jsonl",
         fold=lambda w: Path(FIG1["bin_dir"]) / "fold_seq",
         work=DERIVED / "fig1" / "overview_fold",
     shell:
-        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {params.fold} {params.work} "
-        "{output}"
+        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {params.mrnafold} {params.fold} "
+        "{params.work} {output}"
 
 
 rule fig1_overview:
     input:
         ok=source_ok("fig1"),
+        ok_fronts=source_ok("fig1_fronts"),
         designs=DERIVED / "fig1" / "overview_designs.json",
         fasta=GLPE / "GLPE_HUMAN_78.fasta",
         utr5=GLPE / "hbb5.txt",
@@ -78,8 +81,10 @@ rule fig1_overview:
         FIGURES / "fig1_overview.png",
     params:
         results=source("fig1"),
+        mrnafold=source("fig1_fronts") / "mrnafold" / "compare.jsonl",
     shell:
-        "{PY} {SCRIPTS}/fig1/overview.py {params.results} {input.designs} {input.fasta} "
+        "{PY} {SCRIPTS}/fig1/overview.py {params.results} {params.mrnafold} {input.designs} "
+        "{input.fasta} "
         "{input.utr5} {input.utr3} {output[0]}"
 
 

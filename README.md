@@ -212,7 +212,7 @@ MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
 | `fig1_so_front` | `fig1/so_front.jsonl` | the structurally optimal front reassembled from its window reports; fails unless the windows settle the whole log-CAI range and the front equals the deposited one |
 | `fig1_plot` | `figures/fig1_glpe_hbb.pdf` | panels a–d |
 | `fig1_figures` | | the two above |
-| `fig1_overview_designs` | `fig1/overview_designs.json` | the overview figure's three designs at CAI ≈ 0.987: hull vertices of the UTR-masking and concatenation fronts (what a weighted sum returns) and the nearest modular design, refolded with the pinned `fold_seq`; fails unless the refold matches the deposited energy with no CDS–UTR pair |
+| `fig1_overview_designs` | `fig1/overview_designs.json` | the overview figure's three designs at CAI ≈ 0.987: mRNAfold's design (CDS–UTR pairs discouraged, from the `fig1_fronts` deposit), a hull vertex of the concatenation front (what a weighted sum returns) and the nearest modular design, refolded with the pinned `fold_seq`; fails unless the refold matches the deposited energy with no CDS–UTR pair |
 | `fig1_overview` | `figures/fig1_overview.pdf` | the paper's overview figure; needs a LaTeX install (Times) for its text |
 | `fig1_front` | `runs/fig1/{arm}/front.jsonl` | the CDS-only (`cdsonly`) or symmetric-guarded (`symmetric`) front, re-walked |
 | `fig1_check_front` | `runs/fig1/{arm}/check.txt` | that front against the deposited one, energy at every log-CAI level |

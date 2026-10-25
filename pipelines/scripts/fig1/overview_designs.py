@@ -1,18 +1,20 @@
 """The three designs drawn in the overview figure, with their structures.
 
-    python overview_designs.py RESULTS_DIR FOLD_SEQ WORK_DIR OUT_JSON
+    python overview_designs.py RESULTS_DIR MRNAFOLD_JSONL FOLD_SEQ WORK_DIR OUT_JSON
 
-A weighted sum returns only hull vertices, so the two other methods are represented by the
-hull vertices of their fronts: UTR masking (a proxy for mRNAfold) and concatenation (the
-front without UTRs, a proxy for LinearDesign, LinearCDSfold and DERNA). The designs:
-  d2  the UTR-masking hull vertex with the CAI closest to CAI_TARGET;
+A weighted sum returns only hull vertices. The figure compares DERNA2 with mRNAfold's designs
+(CDS-UTR pairs discouraged, one per hull weight of the UTR-masking front) and with the hull
+vertices of the concatenation front (the front without UTRs, a proxy for LinearDesign,
+LinearCDSfold and DERNA). The designs:
+  d2  mRNAfold's design with the CAI closest to CAI_TARGET;
   d1  the concatenation hull vertex closest in CAI to d2 with another CDS;
   d3  the modular design closest in CAI to d2.
-d1 and d2 keep the free structures of the deposit. The modular front was found by window
-walks that report energies only, so d3 is refolded here with the pinned fold_seq.
+d1 keeps the free structure of the deposit, and d2 the free structure of the UTR-masking design
+with the same sequence. The modular front was found by window walks that report energies only,
+so d3 is refolded here with the pinned fold_seq.
 
-Fails unless d3 refolds to its deposited energy with no CDS-UTR base pair and d1 and d2 are
-not modular.
+Fails unless d2 is also a UTR-masking design with the same free MFE, d3 refolds to its
+deposited energy with no CDS-UTR base pair, and d1 and d2 are not modular.
 """
 
 import json
@@ -42,27 +44,21 @@ def cds_utr_pairs(structure):
     return n
 
 
-def lower_hull(pts):
-    h = []
-    for q in sorted(pts):
-        while len(h) >= 2 and ((h[-1][0] - h[-2][0]) * (q[1] - h[-2][1])
-                               - (h[-1][1] - h[-2][1]) * (q[0] - h[-2][0])) <= 0:
-            h.pop()
-        h.append(q)
-    return set(h)
-
-
 def main():
-    results, fold_seq, work, out = sys.argv[1:]
+    results, mrnafold, fold_seq, work, out = sys.argv[1:]
     res = Path(results)
     b = read_jsonl(res / "b_cdsonly_with_utrs.scored.jsonl")
     cd = read_jsonl(res / "cd_symmetric_guarded_front.scored.jsonl")
     so = read_jsonl(res / "d_so_front.jsonl")
     hull_b = {r["sequence"] for r in read_jsonl(res / "a_cdsonly_front.jsonl")
               if r.get("hull_vertex")}
-    hull_cd = lower_hull([(r["cai_log"], r["mfe_kcal_mol"]) for r in cd])
-    masking = [r for r in cd if (r["cai_log"], r["mfe_kcal_mol"]) in hull_cd]
-    d2 = min(masking, key=lambda r: abs(cai(r) - CAI_TARGET))
+    mf = [dict(r, cai_log=r["theirs_cai_log"]) for r in read_jsonl(mrnafold)
+          if r["arm"] == "guard"]
+    d2 = min(mf, key=lambda r: abs(cai(r) - CAI_TARGET))
+    twin = [r for r in cd if r["sequence"] == d2["sequence"]]
+    if not twin or twin[0]["free_mfe_kcal_mol"] != d2["free_mfe_kcal_mol"]:
+        sys.exit("mRNAfold's design is not a UTR-masking design with the same free MFE")
+    d2 = dict(d2, free_structure=twin[0]["free_structure"])
     concatenation = [r for r in b
                      if r["cds_sequence"] in hull_b and r["sequence"] != d2["sequence"]]
     d1 = min(concatenation, key=lambda r: abs(cai(r) - cai(d2)))

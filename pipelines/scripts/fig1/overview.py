@@ -1,9 +1,10 @@
 """The overview figure: GLPE_HUMAN (78 aa) with the hbb UTRs.
 
-    python overview.py RESULTS_DIR DESIGNS_JSON FASTA UTR5_TXT UTR3_TXT OUT_PDF
+    python overview.py RESULTS_DIR MRNAFOLD_JSONL DESIGNS_JSON FASTA UTR5_TXT UTR3_TXT OUT_PDF
 
-(a) the modular front (DERNA2) against the hull vertices of the UTR-masking and concatenation
-    fronts, the designs a weighted sum can return (proxies for mRNAfold and for LinearDesign,
+(a) the modular front (DERNA2) against mRNAfold's designs with CDS-UTR pairs discouraged (one per
+    hull weight of the UTR-masking front, from the fig1_fronts deposit) and the hull vertices of
+    the concatenation front, the designs a weighted sum can return (a proxy for LinearDesign,
     LinearCDSfold and DERNA), each at the MFE of the refolded mRNA; a zoom on the three designs
     of (b)-(d) and one on the hull edge of the modular front with the most designs above it.
     Color: method; shape: modular (square) or not (circle); fill: on the convex hull of the
@@ -43,17 +44,16 @@ class Fronts:
     """The three fronts of (a) and which of their designs lie on their methods' hulls."""
 
     b: list            # concatenation designs, refolded with the UTRs
-    cd: list           # UTR-masking designs
+    mf: list           # mRNAfold's designs, CDS-UTR pairs discouraged
     so: list           # the modular front
     hull: list         # convex hull of the modular front in (log CAI, MFE)
     on_hull_b: set     # CDS sequences on the hull of the front without UTRs
-    on_hull_cd: set    # (log CAI, masked energy) on the hull of the masking front
 
     def on_b(self, r):
         return r["cds_sequence"] in self.on_hull_b
 
-    def on_cd(self, r):
-        return (r["cai_log"], r["mfe_kcal_mol"]) in self.on_hull_cd
+    def on_mf(self, r):
+        return True
 
 
 def cai(r):
@@ -120,19 +120,23 @@ def gap(edge, pts):
     return max(heights or [0])
 
 
-def load_fronts(results):
+def load_mrnafold(path):
+    # the guarded arm, with its CAI under our codon weights
+    return [dict(r, cai_log=r["theirs_cai_log"]) for r in read_jsonl(path) if r["arm"] == "guard"]
+
+
+def load_fronts(results, mrnafold):
     res = Path(results)
     b = read_jsonl(res / "b_cdsonly_with_utrs.scored.jsonl")
-    cd = read_jsonl(res / "cd_symmetric_guarded_front.scored.jsonl")
+    mf = load_mrnafold(mrnafold)
     so = read_jsonl(res / "d_so_front.jsonl")
-    assert not any(r["symmetric_so"] for r in b + cd)   # every gray and orange point is non-modular
+    assert not any(r["symmetric_so"] for r in b + mf)   # no teal or orange point is modular
     on_hull_b = {r["sequence"] for r in read_jsonl(res / "a_cdsonly_front.jsonl")
                  if r.get("hull_vertex")}
     return Fronts(
-        b=b, cd=cd, so=so,
+        b=b, mf=mf, so=so,
         hull=lower_hull([(r["cai_log"], r["mfe_kcal_mol"]) for r in so]),
         on_hull_b=on_hull_b,
-        on_hull_cd=set(lower_hull([(r["cai_log"], r["mfe_kcal_mol"]) for r in cd])),
     )
 
 
@@ -168,11 +172,11 @@ def zoom_box(parent, child, x0, x1, y0, y1, color, corners):
 
 
 def plot_others(a, fronts, ms):
-    # not modular: the hull vertices of the two other fronts, the only designs a weighted sum
-    # returns, as circles at the MFE of the refolded mRNA. Most hull vertices of the two fronts
+    # not modular: mRNAfold's designs and the hull vertices of the concatenation front, the only
+    # designs a weighted sum returns, as circles at the MFE of the refolded mRNA. Most of them
     # are the same design, so the concatenation circles are drawn larger, behind.
     for rows, on, col, size, z in ((fronts.b, fronts.on_b, TEAL, 1.7 * ms, 2.5),
-                                   (fronts.cd, fronts.on_cd, ORANGE, ms, 2.6)):
+                                   (fronts.mf, fronts.on_mf, ORANGE, ms, 2.6)):
         sel = [r for r in by_cai(rows) if on(r)]
         a.plot([cai(r) for r in sel], [r["free_mfe_kcal_mol"] for r in sel], "o", ms=size,
                mec=col, mfc=col, mew=0.5, zorder=z)
@@ -239,7 +243,7 @@ def add_legend(ax):
 
     handles = [method(PURPLE), method(ORANGE), method(TEAL),
                shape("s", True), shape("s", False), shape("o", True)]
-    labels = ["DERNA2", "UTR masking", "concatenation", "modular, on hull",
+    labels = ["DERNA2", "mRNAfold", "concatenation", "modular, on hull",
               "modular, above hull", "not modular, on hull"]
     pos = ax.get_position()
     ax.set_position([pos.x0, pos.y0, pos.width, pos.height - 0.06])
@@ -392,8 +396,8 @@ def add_key(fig, cell, w, u5, u3):
 
 
 def main():
-    results, designs_json, fasta, utr5, utr3, out = sys.argv[1:7]
-    fronts = load_fronts(results)
+    results, mrnafold, designs_json, fasta, utr5, utr3, out = sys.argv[1:8]
+    fronts = load_fronts(results, mrnafold)
     with open(designs_json) as f:
         designs = json.load(f)
     w, u5, u3 = load_inputs(fasta, utr5, utr3, designs)
