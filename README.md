@@ -262,8 +262,22 @@ arguments.
   `drivers/fig1/`, which carry absolute paths to a derna2 checkout. The pipeline checks their
   output (`fig1_so_front`) but does not rerun them.
 - **Figure 1's three fronts** have no run target and no frozen binaries here. Their raw outputs
-  record the paths of the derna2 worktree they ran in, so the deposit should be scrubbed of them
-  before it is published.
+  record the host paths of the checkout, the cargo target directory and the run directory they
+  ran in — 97 files, every one of them named by `pins/results-fig1_fronts.sha256` and so every
+  one published. Three substitutions cover all of them:
+
+  ```sh
+  .venv/bin/python pipelines/scripts/scrub_host_paths.py /scratch/xinyugu4/fig1-fronts-deposit \
+      '/home/xinyugu4/derna2/.claude/worktrees/snug-cooking-turtle/=derna2/' \
+      '/scratch/xinyugu4/derna2-target-glpe-hbb/=target/' \
+      '/scratch/xinyugu4/glpe-hbb-fronts/=run/'
+  ```
+
+  The script reports what it would rewrite and exits non-zero on any host path the
+  substitutions miss; `--apply` rewrites the files in place. **Rewriting the deposit
+  invalidates its manifest**, so the manifest has to be regenerated afterwards and the
+  substitutions recorded beside it. Whether to rewrite the deposit or to scrub only a
+  published copy is open.
 - **E2 is in progress.** Its deposit has no checksum manifest until the grid finishes.
 - **E2's freeze.** When the second host chooses its commit, set `e2.pin`, fill
   `pins/e2.sha256` with every binary in `e2.bin_dir` (derna2's and the comparators') and add
