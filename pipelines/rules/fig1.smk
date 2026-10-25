@@ -55,17 +55,15 @@ rule fig1_overview_designs:
     input:
         ok=source_ok("fig1"),
         bins=STAMPS / "bins_fig1.ok",
-        motifs=INPUTS / "motifs" / "set1-manufacturing.txt",
     output:
         DERIVED / "fig1" / "overview_designs.json",
     params:
         results=source("fig1"),
-        motif=FIG1["overview_motif"],
         fold=lambda w: Path(FIG1["bin_dir"]) / "fold_seq",
         work=DERIVED / "fig1" / "overview_fold",
     shell:
-        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {input.motifs} {params.motif} "
-        "{params.fold} {params.work} {output}"
+        "{PY} {SCRIPTS}/fig1/overview_designs.py {params.results} {params.fold} {params.work} "
+        "{output}"
 
 
 rule fig1_overview:
