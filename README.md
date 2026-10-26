@@ -51,7 +51,10 @@ data/results/
 ├── e3/                      # in progress: no checksum manifest yet
 │   ├── e3-probe/            # hull probe round 1: per rung the walk's rows, its measurement
 │   │                        # record and summary.csv; forced.jsonl, the forced-motif census
-│   └── e3-probe2/           # round 2: the n = 200 load control, n = 150, 250 and 300
+│   ├── e3-probe2/           # round 2: the n = 200 load control, n = 150, 250 and 300
+│   ├── grid/, mid/, long/   # the short, middle and long bands: summary.csv and each cell's
+│   │                        # front by round (`<protein>_<nest>*.jsonl`)
+│   └── screen/              # binding.jsonl, the binding screen; f0/, unconstrained fronts
 ├── fig1/
 │   ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
 │   ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
@@ -145,7 +148,8 @@ and the replay arms currently run different derna2 builds), so `check_bins` refu
 | Rule | Output | Content |
 |---|---|---|
 | `e2_plot_fronts` | `figures/e2_fronts.pdf`, `e2/cells.tsv` | wall time and Pareto points recovered per cell against length, eight-core arms hollow and dashed; rows of the configured pin only |
-| `e2_figures` | | the figure above |
+| `e2_fig2_data` | `e2/fig2.json` | Figure 2's data: per arm, wall, peak RSS, designs and seconds per design on the cells every arm completed, with completions, timeouts and the longest protein finished; per walk front, the share of its points no weight reaches, from hull vertices computed on the points, and the fronts whose stored `vertices` disagrees; rows of the configured pin only |
+| `e2_figures` | | the two above |
 | `e2_config` | `runs/e2/config.json` | `drivers/e2/e2.config.json` with this host's paths and the pin |
 | `e2_verify` | `runs/e2/verify.done` | each comparator's λ map against derna2 at interior λs |
 | `e2_grid` | `runs/e2/grid.done` | `run_e2_grid.sh`: refuses to start while a timing core or its hyperthread sibling is busy, then the four passes in order (single-core walk, single-core replays, eight-core walk, eight-core replays) into `runs/e2/sweep.jsonl`; resumable |
@@ -162,8 +166,9 @@ pre-registered rules: `drivers/e3/E3-PLAN.md`. The grid runs `derna front --moti
 `06605630` (`drivers/e3/E3-PIN.md`), in 4 h rounds that stop at a gap boundary and resume.
 Pass 1 (six short-band proteins × F1–F4) is closed with two complete fronts and 22 anytime ones
 (`drivers/e3/E3-GRID-PASS1.md`); pass 2 and the middle band's selection are pending, and the
-long band was chosen from the lattice census (`drivers/e3/calib/`). Its fronts are not here yet.
-What is here as tables:
+long band was chosen from the lattice census (`drivers/e3/calib/`). The three bands' fronts
+are read in place, while they run, by Figure 3's rules (`grid/`, `mid/`, `long/` and `screen/`
+under `data/results/e3/`, no checksum manifest yet). What is here as tables:
 
 - **the forced-motif census**: no entry of the four sets is forced by any peptide, so every
   set is satisfiable on every protein; the rejected thresholds `GGGG` and `CCNCCN` are forced
@@ -177,6 +182,11 @@ What is here as tables:
 | `e3_forced_motifs` | `e3/forced_motifs.jsonl` | the census recomputed from the motif sets and the codon table, and checked entry by entry against the recorded one |
 | `e3_probe_table` | `e3/probe.tsv`, `e3/probe_fit.txt` | one row per rung: exit, wall, peak RSS, vertices, probes, folds per probe and the cost of one fold (all probes, the λ = 10⁻⁴ probe, the ordinary ones); the peak-RSS fit and the wall's consecutive-rung exponents |
 | `e3_tables` | | the two above |
+| `e3_fig3_cells` | `e3/fig3_cells.json` | every cell of the three bands' summaries (`grid/`, `mid/`, `long/`): state, wall, peak RSS, points, hull, completeness; rows split by an unquoted core mask are rejoined, and a stopped cell keeps its wall and RSS |
+| `e3_fig3_panels` | `e3/fig3_panels.json` | coverage per protein and nest; peak RSS fitted per build where a build spans enough length (the pooled fit mixes builds sitting in different bands); points found relative to F1 |
+| `e3_fig3_planned` | `e3/fig3_planned.json` | per short-band cell: ΔMFE at matched CAI against the protein's unconstrained front, whether its sets bind (removed from the price if not, kept in the cost), and wall against that front |
+| `e3_fig3_strip` | `e3/fig3_strip.json` | per blacklist entry, proteins admitting it against proteins whose front spells it; one instance's nested fronts with computed hull vertices and the price of each step; every cell's coverage against the retirement gate |
+| `e3_figures` | | Figure 3's data, the three above |
 
 ### E4: UTR-aware design (running)
 

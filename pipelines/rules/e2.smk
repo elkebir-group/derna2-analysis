@@ -9,6 +9,7 @@ E2_DRIVE = DRIVERS / "e2" / "drive_e2.py"
 rule e2_figures:
     input:
         FIGURES / "e2_fronts.pdf",
+        DERIVED / "e2" / "fig2.json",
 
 
 rule e2_runs:
@@ -33,6 +34,20 @@ rule e2_plot_fronts:
         pin=E2["pin"],
     shell:
         "{PY} {SCRIPTS}/e2/plot_fronts.py {input.sweep} {params.pin} {output.pdf} {output.cells}"
+
+
+# Figure 2's data: per arm on the cells every arm completed, the cost quartiles; per front,
+# the share of its points no weight reaches, from hull vertices computed on the points.
+rule e2_fig2_data:
+    input:
+        sweep=source("e2") / "sweep.jsonl",
+        ok=lambda w: [] if config["figures_from"] == "deposit" else E2_RUNS / "summary.txt",
+    output:
+        DERIVED / "e2" / "fig2.json",
+    params:
+        pin=E2["pin"],
+    shell:
+        "{PY} {SCRIPTS}/e2/fig2_data.py {input.sweep} {params.pin} {output}"
 
 
 # ---- runs -----------------------------------------------------------------------------

@@ -6,10 +6,20 @@ E3 = config["e3"]
 E3_DRIVERS = DRIVERS / "e3"
 
 
+E3_BANDS = ["grid", "mid", "long"]
+
+
 rule e3_tables:
     input:
         DERIVED / "e3" / "forced_motifs.jsonl",
         DERIVED / "e3" / "probe.tsv",
+
+
+rule e3_figures:
+    input:
+        DERIVED / "e3" / "fig3_panels.json",
+        DERIVED / "e3" / "fig3_planned.json",
+        DERIVED / "e3" / "fig3_strip.json",
 
 
 # Which motif entries the codon table forces, on which peptides: recomputed by the vendored
@@ -41,3 +51,56 @@ rule e3_probe_table:
         dirs=[source("e3") / d for d in E3["probe_dirs"]],
     shell:
         "{PY} {SCRIPTS}/e3/probe_table.py {output.tsv} {output.fit} {params.dirs}"
+
+
+# ---- Figure 3 ---------------------------------------------------------------------------
+
+# Every cell of the three bands (`grid` is the short band), from their summaries, with the
+# rows the driver wrote with an unquoted core mask rejoined.
+rule e3_fig3_cells:
+    input:
+        [source("e3") / b / "summary.csv" for b in E3_BANDS],
+    output:
+        DERIVED / "e3" / "fig3_cells.json",
+    params:
+        root=source("e3"),
+    shell:
+        "{PY} {SCRIPTS}/e3/fig3_cells.py {params.root} {output}"
+
+
+# Coverage per protein and nest, peak RSS fitted per build, points found relative to F1.
+rule e3_fig3_panels:
+    input:
+        DERIVED / "e3" / "fig3_cells.json",
+    output:
+        DERIVED / "e3" / "fig3_panels.json",
+    shell:
+        "{PY} {SCRIPTS}/e3/fig3_panels.py {input} {output}"
+
+
+# Per short-band cell: ΔMFE at matched CAI against the protein's unconstrained front,
+# whether its sets bind, and its cost against that front.
+rule e3_fig3_planned:
+    input:
+        source("e3") / "screen" / "binding.jsonl",
+        source("e3") / "grid" / "summary.csv",
+    output:
+        DERIVED / "e3" / "fig3_planned.json",
+    params:
+        root=source("e3"),
+    shell:
+        "{PY} {SCRIPTS}/e3/fig3_planned.py {params.root} {output}"
+
+
+# The constraint strip: per blacklist entry, proteins admitting it against proteins whose
+# front spells it; one instance's nested fronts and their prices; every cell's coverage.
+rule e3_fig3_strip:
+    input:
+        [source("e3") / "screen" / "binding.jsonl"]
+        + [source("e3") / b / "summary.csv" for b in E3_BANDS],
+    output:
+        DERIVED / "e3" / "fig3_strip.json",
+    params:
+        root=source("e3"),
+    shell:
+        "{PY} {SCRIPTS}/e3/fig3_strip.py {params.root} {output}"

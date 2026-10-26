@@ -57,5 +57,6 @@ rule all:
         rules.e1_figures.input,
         rules.e2_figures.input,
         rules.e3_tables.input,
+        rules.e3_figures.input,
         rules.fig1_figures.input,
         rules.fig1_fronts_tables.output,
