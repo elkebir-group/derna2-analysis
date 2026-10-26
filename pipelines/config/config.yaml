@@ -64,6 +64,9 @@ fig1:
   bin_dir: data/derived/bin/fig1
   n_aa: 78
   # arm -> extra flags of scope35_walk_front
+  # the overview figure's forbidden motif: a restriction site that one of mRNAfold's designs
+  # contains and no modular design does, so the deposited modular front is also motif-free
+  overview_motif: {name: XhoI, site: CTCGAG}
   fronts:
     cdsonly: ""
     symmetric: "--utr5 {utr5} --utr3 {utr3} --region 5-cds,cds-3"
