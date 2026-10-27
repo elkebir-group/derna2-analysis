@@ -20,7 +20,10 @@ measured with it and how.
 ## Install
 
 Python 3.11–3.13. On a host whose glibc is older than 2.28 (CentOS 7), the numpy cap in
-`pyproject.toml` keeps pip on wheels it can install.
+`pyproject.toml` keeps pip on wheels it can install. ViennaRNA has no wheel for such a host and
+its source build fails there; the overview figures, the only targets that import it, then need a
+Python whose ViennaRNA 2.7.2 bindings come from elsewhere (e.g. conda's `viennarna`), with the
+rest of `requirements.lock` installed beside it.
 
 ```bash
 python3 -m venv .venv
@@ -62,6 +65,10 @@ data/results/
 │   ├── d_so_front.jsonl                         # exact structurally optimal front
 │   ├── so_windows/          # the window walks that found it, by round
 │   └── top_exhaustive/      # the stretch above the most adapted seed, by enumeration
+├── fig1_hba/                # not deposited yet: the overview figure for the hba UTR pair
+│   ├── run3-hba/            # the GLPE arms' results for that pair (a0 CDS-only front and its
+│   │                        # refolds, a2 masking front, a3 mRNAfold)
+│   └── xhoi/so.jsonl        # the structurally optimal front with XhoI forbidden
 └── fig1_fronts/
     ├── <arm>/               # unguarded, symmetric, no_clamp, unpaired: report.json, the front
     │                        # and its hull vertices re-scored; front3.jsonl and its designs
@@ -227,6 +234,10 @@ MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
 | `fig1_front` | `runs/fig1/{arm}/front.jsonl` | the CDS-only (`cdsonly`) or symmetric-guarded (`symmetric`) front, re-walked |
 | `fig1_check_front` | `runs/fig1/{arm}/check.txt` | that front against the deposited one, energy at every log-CAI level |
 | `fig1_runs` | | both fronts, re-walked and checked |
+| `fig1_overview2_prep_hbb` | `fig1/overview2_hbb/` | the revised overview's inputs for the hbb pair from the fig1 and fig1_fronts deposits, hull vertices computed, and its three designs picked as `fig1_overview_designs` does; the structurally optimal design refolded with the pinned `fold_seq` and checked against its recorded energy, no CDS–UTR pair and no XhoI site |
+| `fig1_overview2_prep_hba` | `fig1/overview2_hba/` | the same for the hba pair, from `fig1_hba/` |
+| `fig1_overview2_plot` | `figures/fig1_overview2_{pair}.pdf` | the revised overview figure: (a) the problem, with the AlphaFold model of the protein (`inputs/structures/`); (b) the fronts with a 2×2 table as their legend; (c)–(e) the three designs' RNApuzzler structures; layout settings fixed per pair in `config.yaml` (`fig1.overview2`) |
+| `fig1_overview2` | | the revised overview figure for both pairs; needs ViennaRNA and a LaTeX install (Times) |
 
 ### Figure 1's three fronts
 

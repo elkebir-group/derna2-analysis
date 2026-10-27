@@ -131,3 +131,76 @@ rule fig1_check_front:
         FIG1_RUNS / "{arm}" / "check.txt",
     shell:
         "{PY} {SCRIPTS}/fig1/check_front.py {input.run} {input.deposited} {output}"
+
+
+# ---- the revised overview figure -------------------------------------------------------------
+
+# (a) the problem as input -> method -> output, (b) the fronts with a table as their legend,
+# (c)-(e) the three designs' structures, for one UTR pair. The prep step writes the pair's
+# fronts and designs in one layout and picks the designs; it refolds the structurally optimal
+# design with the pinned fold_seq, so like fig1_overview it is not part of `all`.
+OV2 = FIG1["overview2"]
+
+
+def ov2_layout(pair):
+    return shlex.quote(json.dumps(OV2[pair]["layout"]))
+
+
+rule fig1_overview2:
+    input:
+        FIGURES / "fig1_overview2_hbb.pdf",
+        FIGURES / "fig1_overview2_hba.pdf",
+
+
+rule fig1_overview2_prep_hbb:
+    input:
+        ok=source_ok("fig1"),
+        ok_fronts=source_ok("fig1_fronts"),
+        bins=STAMPS / "bins_fig1.ok",
+        utr5=GLPE / "hbb5.txt",
+        utr3=GLPE / "hbb3.txt",
+    output:
+        DERIVED / "fig1" / "overview2_hbb" / "overview_designs.json",
+    params:
+        results=source("fig1"),
+        mrnafold=source("fig1_fronts") / "mrnafold" / "compare.jsonl",
+        fold=lambda w: Path(FIG1["bin_dir"]) / "fold_seq",
+        layout=ov2_layout("hbb"),
+        out=DERIVED / "fig1" / "overview2_hbb",
+    shell:
+        "{PY} {SCRIPTS}/fig1/overview2_prep_hbb.py {params.results} {params.mrnafold} "
+        "{input.utr5} {input.utr3} {params.fold} {params.layout} {params.out}"
+
+
+rule fig1_overview2_prep_hba:
+    input:
+        so=OV2["hba"]["so"],
+        bins=STAMPS / "bins_fig1.ok",
+    output:
+        DERIVED / "fig1" / "overview2_hba" / "overview_designs.json",
+    params:
+        arms=OV2["hba"]["arms"],
+        fold=lambda w: Path(FIG1["bin_dir"]) / "fold_seq",
+        layout=ov2_layout("hba"),
+        out=DERIVED / "fig1" / "overview2_hba",
+    shell:
+        "{PY} {SCRIPTS}/fig1/overview2_prep_arms.py {params.arms} {input.so} {params.fold} "
+        "{params.layout} {params.out}"
+
+
+rule fig1_overview2_plot:
+    input:
+        designs=DERIVED / "fig1" / "overview2_{pair}" / "overview_designs.json",
+        fasta=GLPE / "GLPE_HUMAN_78.fasta",
+        structure=OV2["structure"],
+    output:
+        FIGURES / "fig1_overview2_{pair}.pdf",
+        FIGURES / "fig1_overview2_{pair}.png",
+    wildcard_constraints:
+        pair="hbb|hba",
+    params:
+        data=lambda w: DERIVED / "fig1" / f"overview2_{w.pair}",
+    shell:
+        "{PY} {SCRIPTS}/fig1/overview2.py {params.data} {params.data}/mrnafold.jsonl "
+        "{input.designs} {input.fasta} {params.data}/u5.txt {params.data}/u3.txt "
+        "{input.structure} {output[0]}"

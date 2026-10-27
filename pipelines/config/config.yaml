@@ -67,6 +67,30 @@ fig1:
   # the overview figure's forbidden motif: a restriction site that one of mRNAfold's designs
   # contains and no modular design does, so the deposited modular front is also motif-free
   overview_motif: {name: XhoI, site: CTCGAG}
+  # The revised overview figure (overview2.py), one per UTR pair. `layout` goes into the design
+  # file: the title's name for the UTR pair, and any placement fixed for that pair instead of
+  # chosen from the data (y-range of (b), zoom positions, label offsets, the (c) layout's top band).
+  overview2:
+    structure: inputs/structures/AF-P15421-F1-model_v6.pdb
+    hbb:
+      layout:
+        utr_label: 'the human $\beta$-globin (HBB) UTRs'
+        vroom_c: 0.55
+        spot_c: [0.0, 0.69, 1.0, 0.31]
+        margin_c: 16
+        inset2_pad: 0.005
+        label_at: {d2: [-4, -3, right, top]}
+    # hba reads the GLPE arms' results for that pair and the structurally optimal front with
+    # XhoI forbidden, neither deposited yet. The front below is settled to CAI 0.969 only; the
+    # final figure takes the complete run.
+    hba:
+      arms: data/results/fig1_hba/run3-hba
+      so: data/results/fig1_hba/xhoi/so.jsonl
+      layout:
+        utr_label: 'the human $\alpha$-globin (HBA1) UTRs'
+        ylim: [-194, -118]
+        spot_c: [0.24, 0.66, 0.76, 0.34]
+        spot_d: [0.0, 0.0, 0.36, 0.24]
   fronts:
     cdsonly: ""
     symmetric: "--utr5 {utr5} --utr3 {utr3} --region 5-cds,cds-3"

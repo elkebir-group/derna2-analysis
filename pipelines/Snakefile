@@ -6,6 +6,8 @@
 #   run targets     regenerate the results from pinned binaries. Opt-in: they take hours
 #                   to days, and the timed passes need a reserved socket.
 
+import json
+import shlex
 import sys
 from pathlib import Path
 
