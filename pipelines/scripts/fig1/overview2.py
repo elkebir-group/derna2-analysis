@@ -288,12 +288,13 @@ def schematic(fig, w, u5, u3, motifs, pdb, mode="ochre"):
 
 
 # the properties of (b)'s fronts, in the order the caption introduces them, and which front has
-# each one; a row's markers are the ones it is plotted with
+# each one; a row shows its plot marker in the fills listed (filled, then open), the marker
+# legend under the table saying what the fills mean
 PROPERTIES = ("UTRs", "motifs", "complete", "modular")
 FRONTS = (
-    ("DERNA2", PURPLE, "s", (True, True, True, True)),
-    ("mRNAfold", ORANGE, "o", (True, False, False, False)),
-    ("LinearDesign, LinearCDSfold, DERNA", GREEN, "o", (False, False, False, False)),
+    ("DERNA2", PURPLE, "s", (True, False), (True, True, True, True)),
+    ("mRNAfold", ORANGE, "o", (True,), (True, False, False, False)),
+    ("LinearDesign, LinearCDSfold, DERNA", GREEN, "o", (True,), (False, False, False, False)),
 )
 CHECK, CROSS = r"\ding{51}", r"\ding{55}"
 MARKER_GAP = 4.5  # pt between the centres of two markers set in a line of text
@@ -326,7 +327,7 @@ def text_marker(ax, x, y, m, color, filled):
 
 def table_legend(fig, left, right, bottom, top):
     # one row per front, one column per property. The first column names the front and shows
-    # its filled and open plot markers in its plot color; the marks are black. A closed grid in
+    # its plot markers in its plot color; the marks are black. A closed grid in
     # light grey, so it frames the legend without outweighing the plot.
     ax = fig.add_axes([left, bottom, right - left, top - bottom])
     ax.set_xlim(0, 1)
@@ -336,8 +337,10 @@ def table_legend(fig, left, right, bottom, top):
     pad = 0.06 * inch
     gap = MARKER_GAP / 72 * inch
     # the name column fits the longest name with its markers
-    c1 = 2 * pad + max(width_in(fig, name + " (", FSS) for name, *_ in FRONTS) * inch
-    c1 += 2 * gap + width_in(fig, ")", FSS) * inch
+    c1 = 2 * pad + width_in(fig, ")", FSS) * inch
+    c1 += max(
+        width_in(fig, name + " (", FSS) * inch + len(fills) * gap for name, _, _, fills, _ in FRONTS
+    )
     # each property column as wide as its header, the room left over shared evenly
     heads = [width_in(fig, prop, FSS) * inch for prop in PROPERTIES]
     spare = (1 - c1 - sum(heads)) / len(heads)
@@ -357,12 +360,12 @@ def table_legend(fig, left, right, bottom, top):
     centre = [(a + b) / 2 for a, b in pairwise(cols)]
     for x, prop in zip(centre, PROPERTIES, strict=True):
         ax.text(x, mid[0], prop, ha="center", va="center", fontsize=FSS)
-    for y, (name, color, m, has) in zip(mid[1:], FRONTS, strict=True):
+    for y, (name, color, m, fills, has) in zip(mid[1:], FRONTS, strict=True):
         x = pad + width_in(fig, name + " (", FSS) * inch
         ax.text(pad, y, name + " (", va="center", fontsize=FSS)
-        text_marker(ax, x + gap / 2, y, m, color, True)
-        text_marker(ax, x + 3 * gap / 2, y, m, color, False)
-        ax.text(x + 2 * gap, y, ")", va="center", fontsize=FSS)
+        for k, filled in enumerate(fills):
+            text_marker(ax, x + (k + 0.5) * gap, y, m, color, filled)
+        ax.text(x + len(fills) * gap, y, ")", va="center", fontsize=FSS)
         for xc, yes in zip(centre, has, strict=True):
             ax.text(xc, y, CHECK if yes else CROSS, ha="center", va="center", fontsize=FSS)
     return ax
