@@ -31,7 +31,7 @@ GREEN, ORANGE, PURPLE = "#2e9e5b", "#e8772e", "#6a4bc4"
 FS, FSS = 7, 6.3
 PREAMBLE = (
     r"\usepackage[T1]{fontenc}\usepackage{times}\usepackage{textcomp}"
-    r"\usepackage{amsmath}"
+    r"\usepackage{amsmath}\usepackage{pifont}"
 )
 
 

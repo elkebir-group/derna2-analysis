@@ -13,6 +13,7 @@ import importlib.util
 import json
 import math
 import sys
+from itertools import pairwise
 from pathlib import Path
 
 import numpy as np
@@ -208,12 +209,12 @@ def schematic(fig, w, u5, u3, motifs, pdb, mode="ochre"):
     fig.text(0.5675, ya + 0.02, r"\textbf{DERNA2}", ha="center", va="bottom", fontsize=FSS)
     fig.text(
         0.5675,
-        yc + 0.015,
-        "Pareto front of\nmodular designs",
+        yc + 0.018,
+        "Pareto front of\nmodular designs\n" r"without motifs in $\mathcal{M}$",
         ha="center",
         va="center",
         fontsize=FSS,
-        linespacing=1.0,
+        linespacing=1.15,
     )
     # the output: one mRNA as three boxes, with what it may not contain drawn on it
     x0, yb, h = 0.63, ya - 0.022, 0.044
@@ -271,11 +272,12 @@ def schematic(fig, w, u5, u3, motifs, pdb, mode="ochre"):
         )
     )
     forbid(fig, mx + 0.015, yb + h / 2, "white")
+    # centred under the molecule, clear of the method's caption
     fig.text(
-        0.63,
+        (edges[0][0] + edges[-1][1]) / 2,
         yc,
-        r"\textbf{modular:} no motif of $\mathcal{M}$ in $\mathbf{v}$,"
-        r" no CDS--UTR base pair",
+        r"\textbf{modular:} no CDS--UTR base pair",
+        ha="center",
         va="center",
         fontsize=FSS,
         linespacing=1.1,
@@ -285,55 +287,118 @@ def schematic(fig, w, u5, u3, motifs, pdb, mode="ochre"):
 # ---- (b): the fronts, and the table that is their legend --------------------------------
 
 
-def mark(c, m, filled=True):
-    return Line2D([], [], marker=m, ls="", ms=3.0, mew=0.5, mec=c, mfc=c if filled else "white")
+# the properties of (b)'s fronts, in the order the caption introduces them, and which front has
+# each one; a row's markers are the ones it is plotted with
+PROPERTIES = ("UTRs", "motifs", "complete", "modular")
+FRONTS = (
+    ("DERNA2", PURPLE, "s", (True, True, True, True)),
+    ("mRNAfold", ORANGE, "o", (True, False, False, False)),
+    ("LinearDesign, LinearCDSfold, DERNA", GREEN, "o", (False, False, False, False)),
+)
+CHECK, CROSS = r"\ding{51}", r"\ding{55}"
+MARKER_GAP = 4.5  # pt between the centres of two markers set in a line of text
+
+
+def width_in(fig, text, fontsize):
+    # the rendered width of a text, in inches
+    t = fig.text(0, 0, text, fontsize=fontsize)
+    w = t.get_window_extent(renderer=fig.canvas.get_renderer()).width / fig.dpi
+    t.remove()
+    return w
+
+
+def text_marker(ax, x, y, m, color, filled):
+    # one plot marker set in a line of text; x and y in axes fractions
+    ax.add_line(
+        Line2D(
+            [x],
+            [y],
+            marker=m,
+            ls="",
+            ms=3.0,
+            mew=0.5,
+            mec=color,
+            mfc=color if filled else "white",
+            transform=ax.transAxes,
+        )
+    )
 
 
 def table_legend(fig, left, right, bottom, top):
-    # 2x2: rows modular / non-modular, columns complete / incomplete; each name with its marker.
-    # A closed grid in light grey, so it frames the legend without outweighing the plot.
+    # one row per front, one column per property. The first column names the front and shows
+    # its filled and open plot markers in its plot color; the marks are black. A closed grid in
+    # light grey, so it frames the legend without outweighing the plot.
     ax = fig.add_axes([left, bottom, right - left, top - bottom])
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
+    inch = 1 / ((right - left) * fig.get_size_inches()[0])  # axes fraction per inch
+    pad = 0.06 * inch
+    gap = MARKER_GAP / 72 * inch
+    # the name column fits the longest name with its markers
+    c1 = 2 * pad + max(width_in(fig, name + " (", FSS) for name, *_ in FRONTS) * inch
+    c1 += 2 * gap + width_in(fig, ")", FSS) * inch
+    # each property column as wide as its header, the room left over shared evenly
+    heads = [width_in(fig, prop, FSS) * inch for prop in PROPERTIES]
+    spare = (1 - c1 - sum(heads)) / len(heads)
+    cols = [c1]
+    for wd in heads:
+        cols.append(cols[-1] + wd + spare)
+    rows = len(FRONTS) + 1
+    edges = [1 - k / rows for k in range(rows + 1)]  # header first
     grid = "#9a9a9a"
-    c1, c2 = 0.19, 0.405  # column edges: row label | complete | incomplete
-    h1, h2 = 2 / 3, 1 / 3  # row edges: header | modular | non-modular
-    ax.add_patch(Rectangle((c1, h1), 1 - c1, 1 - h1, fc="#efefef", ec="none"))
+    ax.add_patch(Rectangle((c1, edges[1]), 1 - c1, 1 - edges[1], fc="#efefef", ec="none"))
     ax.add_patch(Rectangle((0, 0), 1, 1, fill=False, ec=grid, lw=0.5))
-    for yy in (h1, h2):
+    for yy in edges[1:-1]:
         ax.plot([0, 1], [yy, yy], color=grid, lw=0.4)
-    for xx in (c1, c2):
+    for xx in cols[:-1]:
         ax.plot([xx, xx], [0, 1], color=grid, lw=0.4)
-    pad = 0.012
-    ax.text(pad, (1 + h1) / 2, r"\textbf{Pareto front}", va="center", fontsize=FSS)
-    ax.text(c1 + pad, (1 + h1) / 2, "complete", va="center", fontsize=FSS)
-    ax.text(c2 + pad, (1 + h1) / 2, "incomplete", va="center", fontsize=FSS)
-    ax.text(pad, (h1 + h2) / 2, "modular", va="center", fontsize=FSS)
-    ax.text(pad, h2 / 2, "non-modular", va="center", fontsize=FSS)
-
-    def entry(x, y, color, m, text):
-        # filled and open marker at fixed offsets, then the name at one left edge per column
-        for k, filled in enumerate((True, False)):
-            ax.add_line(
-                Line2D(
-                    [x + 0.02 + 0.03 * k],
-                    [y],
-                    marker=m,
-                    ls="",
-                    ms=3.0,
-                    mew=0.5,
-                    mec=color,
-                    mfc=color if filled else "white",
-                )
-            )
-        ax.text(x + 0.07, y, text, va="center", fontsize=FSS)
-
-    entry(c1, (h1 + h2) / 2, PURPLE, "s", "DERNA2")
-    entry(c2, (h1 + h2) / 2, ORANGE, "o", r"mRNAfold$^{*}$")
-    ax.text((c1 + c2) / 2, h2 / 2, "--", ha="center", va="center", fontsize=FSS, color="#888888")
-    entry(c2, h2 / 2, GREEN, "o", "LinearDesign, LinearCDSfold, DERNA")
+    mid = [(a + b) / 2 for a, b in pairwise(edges)]
+    centre = [(a + b) / 2 for a, b in pairwise(cols)]
+    for x, prop in zip(centre, PROPERTIES, strict=True):
+        ax.text(x, mid[0], prop, ha="center", va="center", fontsize=FSS)
+    for y, (name, color, m, has) in zip(mid[1:], FRONTS, strict=True):
+        x = pad + width_in(fig, name + " (", FSS) * inch
+        ax.text(pad, y, name + " (", va="center", fontsize=FSS)
+        text_marker(ax, x + gap / 2, y, m, color, True)
+        text_marker(ax, x + 3 * gap / 2, y, m, color, False)
+        ax.text(x + 2 * gap, y, ")", va="center", fontsize=FSS)
+        for xc, yes in zip(centre, has, strict=True):
+            ax.text(xc, y, CHECK if yes else CROSS, ha="center", va="center", fontsize=FSS)
     return ax
+
+
+def marker_legend(fig, left, right, y, fontsize):
+    # one row of black glyphs: shape is modularity (square modular, circle not), fill is the hull
+    # (filled on it, open off it); the entries spread evenly between left and right
+    items = [
+        ("s", True, "modular, on hull"),
+        ("s", False, "modular, off hull"),
+        ("o", True, "non-modular, on hull"),
+        ("o", False, "non-modular, off hull"),
+    ]
+    w, h = fig.get_size_inches()
+    lift = 0.3 / 72 / h  # a glyph sits on the text's optical centre, a little above its box's
+    sw = 1.6 * MARKER_GAP / 72 / w  # room for the glyph and the space after it, figure fraction
+    widths = [width_in(fig, lab, fontsize) / w for *_, lab in items]
+    spare = (right - left - sum(sw + wd for wd in widths)) / (len(items) - 1)
+    x = left
+    for (m, filled, lab), wd in zip(items, widths, strict=True):
+        fig.add_artist(
+            Line2D(
+                [x + 0.4 * sw],
+                [y + lift],
+                marker=m,
+                ls="",
+                ms=3.0,
+                mew=0.5,
+                mec="k",
+                mfc="k" if filled else "white",
+                transform=fig.transFigure,
+            )
+        )
+        fig.text(x + sw, y, lab, va="center", fontsize=fontsize)
+        x += sw + wd + spare
 
 
 def panel_b(fig, rect, fronts, designs):
@@ -365,7 +430,7 @@ def panel_b(fig, rect, fronts, designs):
         math.exp(hi[0] / 78) + designs.get("inset2_pad", 0.0025),
         lo[1] - 6.5,
         hi[1] + 3.0,
-        [((1, 0), (1, 1))],
+        [((0, 0), (0, 1)), ((1, 0), (1, 1))],
     )
     ov.mark_designs(ins, designs, designs.get("label_at", {}))
     ax.set_xticks([0.85, 0.9, 0.95, 1.0])
@@ -582,26 +647,19 @@ def main():
             transform=fig.transFigure,
         )
     )
-    # (b): table on top, plot below
-    table_legend(fig, 0.07, 0.49, TOP - 0.165, TOP - 0.035)
-    fig.text(
-        0.49,
-        TOP - 0.172,
-        r"filled: hull vertex; open: off the hull."
-        r" $^{*}$modularity not guaranteed.",
-        ha="right",
-        va="top",
-        fontsize=5.4,
-        color="#444444",
-    )
-    panel_b(fig, [0.07, 0.09, 0.413, TOP - 0.305], fronts, designs)
+    # (b): table and marker legend on top, the table's top level with the titles of (c)-(e) and
+    # clear of the panel letter on its left; plot below
+    table_legend(fig, 0.03, 0.49, TOP - 0.155, TOP - 0.005)
+    marker_legend(fig, 0.03, 0.49, TOP - 0.173, 5.8)
+    panel_b(fig, [0.07, 0.09, 0.413, TOP - 0.287], fronts, designs)
     # (c)-(e)
     left, right = 0.505, 0.975
     gr, _ = structures(fig, designs, left, right, 0.07, TOP - 0.115)
     xs_cde = [gr[0, k].get_position(fig).x0 for k in range(3)]
     titles(fig, designs, xs_cde, fronts)
     color_key(fig, left, right, 0.03)
-    fig.savefig(out)
+    # no creation date in the PDF, so a rebuild is byte for byte the same file
+    fig.savefig(out, metadata={"CreationDate": None})
     fig.savefig(out.rsplit(".", 1)[0] + ".png", dpi=300)
 
 

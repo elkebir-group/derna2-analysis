@@ -236,8 +236,8 @@ MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
 | `fig1_runs` | | both fronts, re-walked and checked |
 | `fig1_overview2_prep_hbb` | `fig1/overview2_hbb/` | the revised overview's inputs for the hbb pair from the fig1 and fig1_fronts deposits, hull vertices computed, and its three designs picked as `fig1_overview_designs` does; the structurally optimal design refolded with the pinned `fold_seq` and checked against its recorded energy, no CDS–UTR pair and no XhoI site |
 | `fig1_overview2_prep_hba` | `fig1/overview2_hba/` | the same for the hba pair, from `fig1_hba/` |
-| `fig1_overview2_plot` | `figures/fig1_overview2_{pair}.pdf` | the revised overview figure: (a) the problem, with the AlphaFold model of the protein (`inputs/structures/`); (b) the fronts with a 2×2 table as their legend; (c)–(e) the three designs' RNApuzzler structures; layout settings fixed per pair in `config.yaml` (`fig1.overview2`) |
-| `fig1_overview2` | | the revised overview figure for both pairs; needs ViennaRNA and a LaTeX install (Times) |
+| `fig1_overview2_plot` | `figures/fig1_overview2_{pair}.pdf` | the revised overview figure: (a) the problem, with the AlphaFold model of the protein (`inputs/structures/`); (b) the fronts with a table of what each front guarantees (UTRs, motifs, complete, modular) and a one-row marker legend (square modular, circle not; filled on the hull, open off it); (c)–(e) the three designs' RNApuzzler structures; layout settings fixed per pair in `config.yaml` (`fig1.overview2`) |
+| `fig1_overview2` | | the revised overview figure for both pairs; needs ViennaRNA and a LaTeX install with Times and the `pifont` ZapfDingbats font for the table's marks (on EL7, `texlive-times` and `texlive-zapfding`); the PDF carries no creation date, so a rebuild on the same TeX fonts is byte for byte the same |
 
 ### Figure 1's three fronts
 

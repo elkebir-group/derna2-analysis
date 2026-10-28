@@ -88,3 +88,26 @@ def test_a_zoom_goes_to_the_emptier_corner():
     left, right = [0.0, 0.6, 0.4, 0.4], [0.6, 0.6, 0.4, 0.4]
     assert ov2.emptiest(ax, xs, ys, [left, right]) == right
     plt.close(fig)
+
+
+def test_every_front_states_every_property():
+    ov2 = overview2()
+    assert ov2.PROPERTIES == ("UTRs", "motifs", "complete", "modular")
+    for _, _, _, has in ov2.FRONTS:
+        assert len(has) == len(ov2.PROPERTIES)
+    # only DERNA2's front is modular, and it is the only front drawn with squares
+    assert [m for *_, m, _ in ov2.FRONTS] == ["s", "o", "o"]
+    assert [has[-1] for *_, has in ov2.FRONTS] == [True, False, False]
+
+
+def test_the_marker_legend_has_one_glyph_per_shape_and_fill():
+    ov2 = overview2()
+    ov2.ov.set_style()
+    fig = plt.figure(figsize=(6.5, 2.95))
+    before = len(fig.artists)
+    ov2.marker_legend(fig, 0.03, 0.49, 0.5, 5.8)
+    glyphs = {(a.get_marker(), a.get_markerfacecolor()) for a in fig.artists[before:]}
+    assert len(fig.artists) - before == 4
+    assert {m for m, _ in glyphs} == {"s", "o"}
+    assert len(glyphs) == 4
+    plt.close(fig)
