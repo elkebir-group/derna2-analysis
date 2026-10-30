@@ -110,3 +110,88 @@ rule e2_summarize:
     shell:
         "{DRIVER_PY} {E2_DRIVE} summarize --config {input.config} --pin {params.pin} "
         "> {output} 2>&1"
+
+
+# ---- Figure 4 ----------------------------------------------------------------------------
+# Figure 4 reads its own frozen deposit, `results/e2_fig4`: a snapshot of the E2 sweep taken
+# before rows were added to it on 2026-10-30, and the walk's hull/ outputs it was drawn from
+# (pins/e2_fig4-PROVENANCE.md). Every table below is rebuilt from those files, and
+# e2_fig4_verify checks the tables and the figure against pins/e2_fig4.outputs.
+
+F4 = config["e2_fig4"]
+F4_DIR = DERIVED / "e2" / "fig4"
+
+
+rule e2_fig4_figures:
+    input:
+        FIGURES / "fig4_e2_overview.pdf",
+        STAMPS / "e2_fig4.verified",
+
+
+# One cell row per (arm, protein) of the pin: the best attempt, not the last line.
+rule e2_fig4_cells:
+    input:
+        sweep=RESULTS / "e2_fig4" / "sweep.jsonl",
+        ok=STAMPS / "results_e2_fig4.ok",
+    output:
+        F4_DIR / "cells.csv",
+    params:
+        pin=F4["pin"],
+    shell:
+        "{PY} {SCRIPTS}/e2/fig4_cells.py {input.sweep} {params.pin} {output}"
+
+
+# Each arm's exit and wall time, and the dichotomic hull search with and without pruning.
+rule e2_fig4_per_protein:
+    input:
+        sweep=RESULTS / "e2_fig4" / "sweep.jsonl",
+        ok=STAMPS / "results_e2_fig4.ok",
+    output:
+        F4_DIR / "per_protein.csv",
+    params:
+        hull=RESULTS / "e2_fig4" / "hull",
+    shell:
+        "{PY} {SCRIPTS}/e2/fig4_per_protein.py {input.sweep} {params.hull} {output}"
+
+
+# Every front and its sweep hull, and the steps between neighbouring designs of each.
+rule e2_fig4_steps:
+    input:
+        per=F4_DIR / "per_protein.csv",
+        ok=STAMPS / "results_e2_fig4.ok",
+    output:
+        F4_DIR / "steps.npz",
+    params:
+        hull=RESULTS / "e2_fig4" / "hull",
+    shell:
+        "{PY} {SCRIPTS}/e2/fig4_steps.py {params.hull} {input.per} {output}"
+
+
+# The figure. Fails, keeping the files, if any text covers another text, a mark or another
+# panel. `focus` picks panel (a)'s protein.
+rule e2_fig4:
+    input:
+        steps=F4_DIR / "steps.npz",
+        per=F4_DIR / "per_protein.csv",
+        cells=F4_DIR / "cells.csv",
+    output:
+        pdf=FIGURES / "fig4_e2_overview.pdf",
+        png=FIGURES / "fig4_e2_overview.png",
+    params:
+        focus=F4["focus"],
+    shell:
+        "{PY} {SCRIPTS}/e2/fig4_overview.py {input.steps} {input.per} {input.cells} "
+        "{output.pdf} {params.focus}"
+
+
+# The tables and the figure against the digests they were published with. The tables match
+# on any host with requirements.lock; the figure's bytes also need the TeX the manifest names.
+rule e2_fig4_verify:
+    input:
+        manifest=ROOT / "pins" / "e2_fig4.outputs",
+        built=[F4_DIR / "cells.csv", F4_DIR / "per_protein.csv", F4_DIR / "steps.npz",
+               FIGURES / "fig4_e2_overview.pdf", FIGURES / "fig4_e2_overview.png"],
+    output:
+        STAMPS / "e2_fig4.verified",
+    shell:
+        "{PY} {SCRIPTS}/check_manifest.py {input.manifest} {DERIVED} {output}"

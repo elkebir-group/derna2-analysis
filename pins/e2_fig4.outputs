@@ -1,0 +1,10 @@
+# What the e2_fig4 rules produce from the deposit pinned by results-e2_fig4.sha256, in
+# sha256sum format, paths relative to data/derived. e2_fig4_verify checks a build against it.
+# The three tables are plain data and match on any host with requirements.lock installed.
+# The figure's bytes also depend on the TeX installation that typesets its text (usetex):
+# these were made with pdfTeX 3.1415926-2.5-1.40.14 (TeX Live 2013) and its mathptmx.
+093ece6d902c9288087128a6c13d11716344529e8cef1adf637ad5ca6aac2977  e2/fig4/cells.csv
+1139df9c9e2f43b241d60e20139e324a1424cfb82c3598d7ef64e39298e79475  e2/fig4/per_protein.csv
+4f6e89c1089f62594efb235f3dd7c7e04e6b19019074db9cd60d8a9474df66c3  e2/fig4/steps.npz
+b2386acf0d2ffe3e8507addb12329b18303c18b5ddd345a5a65805ab9cfdc68c  figures/fig4_e2_overview.pdf
+8f5c865f80b2cc056c32152ffa8d999e53f641601ea0fe11dd34691c76882596  figures/fig4_e2_overview.png

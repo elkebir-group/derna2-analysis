@@ -51,6 +51,9 @@ data/results/
 │   ├── sweep.jsonl          # one row per λ, per front point and per cell, stamped with its pin
 │   └── hull/                # derna2's hull vertices and replay λs per instance (partial if the
 │                            # walk was stopped)
+├── e2_fig4/                 # Figure 4's frozen snapshot of e2 (pins/e2_fig4-PROVENANCE.md)
+│   ├── sweep.jsonl          # the sweep before the rows added on 2026-10-30: 256,214 rows
+│   └── hull/                # <P>.front.jsonl and <P>.walk.json for the 79 proteins
 ├── e3/                      # in progress: no checksum manifest yet
 │   ├── e3-probe/            # hull probe round 1: per rung the walk's rows, its measurement
 │   │                        # record and summary.csv; forced.jsonl, the forced-motif census
@@ -161,6 +164,23 @@ and the replay arms currently run different derna2 builds), so `check_bins` refu
 | `e2_verify` | `runs/e2/verify.done` | each comparator's λ map against derna2 at interior λs |
 | `e2_grid` | `runs/e2/grid.done` | `run_e2_grid.sh`: refuses to start while a timing core or its hyperthread sibling is busy, then the four passes in order (single-core walk, single-core replays, eight-core walk, eight-core replays) into `runs/e2/sweep.jsonl`; resumable |
 | `e2_summarize` | `runs/e2/summary.txt` | fronts, recovery against the reference, anytime curves, for the configured pin |
+
+#### The paper's Figure 4
+
+Drawn from its own frozen deposit, `data/results/e2_fig4`: a snapshot of the E2 sweep and the
+walk's `hull/` outputs, pinned by `pins/results-e2_fig4.sha256` and described in
+`pins/e2_fig4-PROVENANCE.md`. Every table is rebuilt from those files, and the tables and the
+figure are checked against the digests in `pins/e2_fig4.outputs`. The protein of panel (a) is
+`e2_fig4.focus` in `config.yaml` (P47211); any protein of the corpus can be drawn there.
+
+| Rule | Output | Content |
+|---|---|---|
+| `e2_fig4_cells` | `e2/fig4/cells.csv` | one cell row per (arm, protein) of the replay pin `8603d37d`: the delivered and then faster attempt |
+| `e2_fig4_per_protein` | `e2/fig4/per_protein.csv` | per protein, each arm's exit and wall time, and the dichotomic hull search with Carrillo-Lipman pruning (measured) and without (projected) |
+| `e2_fig4_steps` | `e2/fig4/steps.npz` | every front Pareto-filtered on raw (energy, log CAI), its sweep hull vertices, and the ΔMFE and ΔCAI between neighbouring designs of each |
+| `e2_fig4` | `figures/fig4_e2_overview.pdf` | the figure; fails if any text covers another text, a mark or another panel |
+| `e2_fig4_verify` | `stamps/e2_fig4.verified` | the three tables and the figure against `pins/e2_fig4.outputs` (the figure's bytes also need the TeX that file names) |
+| `e2_fig4_figures` | | the two above |
 | `e2_runs` | | the run chain above |
 
 ### E3: the price of motif-freedom

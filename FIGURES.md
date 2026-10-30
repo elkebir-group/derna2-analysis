@@ -89,6 +89,13 @@ Three things the panels must carry as text, because each changes what the number
 - `derna1-own` spends 1.71–2.33 λs per front point and still misses vertices (9 of 11
   at n = 32); that ratio is a small inset, not a fourth panel.
 
+**As drawn for the paper** (its Figure 4, rule `e2_fig4`): (a) one protein's front with a
+magnified hull step, the ΔMFE and ΔCAI between neighbouring designs of its hull and of its
+front, and each method's wall time on it; (b) the share of each front a weight reaches, by
+length group; (c) those steps pooled per length group; (d) wall time per run, with the runs
+each method did not complete; (e) Carrillo-Lipman pruning's speed-up of the dichotomic hull
+search, and that search's time over the whole front's. Source: `data/results/e2_fig4`.
+
 ## Figure 3 — E3, the price of motif-freedom
 
 | panel | content | source | state |

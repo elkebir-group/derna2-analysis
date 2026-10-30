@@ -42,6 +42,12 @@ e2:
   lineardesign_dir: data/derived/comparators/LinearDesign
   lcds_dir: data/derived/comparators/LinearCDSfold
 
+# Figure 4, drawn from E2's frozen snapshot (pins/e2_fig4-PROVENANCE.md): the replay pin its
+# run table reads, and the protein of panel (a).
+e2_fig4:
+  pin: 8603d37d
+  focus: P47211
+
 # The price of motif-freedom (E3). Design: drivers/e3/E3-PLAN.md. The nested fronts need
 # `derna front --motif`, not in a pinned build yet; what is here is the forced-motif census
 # and the hull probe, read from the results without a checksum manifest while it runs.
