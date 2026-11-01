@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "derna2-analysis"
+version = "0.1.0"
+description = "Analyses and figures of the derna2 paper"
+readme = "README.md"
+# snakemake 9 needs 3.11+. numpy is capped below 2.3: later wheels need glibc 2.28,
+# and the benchmark host has 2.17.
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "numpy>=1.26,<2.3",
+    "pandas>=2.0,<2.4",
+    "matplotlib>=3.8,<3.11",
+    # structure layouts (NAView) of the overview figure
+    "ViennaRNA>=2.6,<2.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff"]
+pipeline = ["snakemake>=9,<10"]
+
+[tool.setuptools]
+packages = ["derna2_analysis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# The drivers are vendored verbatim from the derna2 repository (drivers/README.md):
+# keeping them byte-identical to the commit that produced the deposited results
+# matters more than restyling them.
+extend-exclude = ["drivers"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["derna2_analysis"]
+
+[tool.ruff.lint.pep8-naming]
+# E for energy, as in the paper.
+extend-ignore-names = ["E"]
+
+[tool.ruff.lint.per-file-ignores]
+# The composite figure binds each panel's data tables to the name the cache file gives
+# them -- A, B, EX, WHY, XY -- inside the function that draws that panel, so one name means
+# one table whether it is read at module level or in a panel. Lowercasing them there would
+# make the same table two names.
+"pipelines/scripts/e2/fig_composite.py" = ["N806"]
