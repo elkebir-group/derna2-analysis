@@ -1,0 +1,27 @@
+# What the e2 composite-figure rules produce, in sha256sum format, paths relative to
+# data/derived. e2_fig_composite_verify checks a build against it.
+#
+# The three JSON caches are plain data and match on any host that has E2's deposit AND the
+# two trees panel (a) reads from outside it (config e2.e1_sweep, e2.e1_extra) -- depositing
+# those is what makes this manifest checkable elsewhere.
+#
+# Nothing here is a function of anything but those inputs, which is what lets the manifest
+# pass while the bands are still running: `composite-census.json` holds the fields that move
+# with the host rather than with the figure (the finished table's write time and checksum,
+# and which cells sit on disk unreported) and is deliberately absent from this file.
+#
+# The figure's bytes are matplotlib's, with the PDF's CreationDate and the PNG's Software
+# stamp suppressed, so they match on a host with the same matplotlib as requirements.lock.
+#
+# Cut 2026-11-02 against the finished set of that day: 85 proteins screened for panel
+# (a), 45 finished for panel (b), of which 27 are exact at every level and 24 have all
+# three sets binding. The 45 are the finished set less eGFP and RBD, the two sequences in
+# it that are not human proteins, excluded at every rung by `cellset` with the reason.
+# Panel (a)'s 85 is the screen's own population and is not a function of the grid, so it
+# does not move with that exclusion. The set moves as the grid closes cells, so a rebuild after an
+# arrival will differ here and the pin is re-cut with the population it describes.
+555a35e75bebba983f4d5168a7a411e50a2771c0c4859bd53812c89a0c8ff4ea  e2/composite/composite-data.json
+e0af9092f7be6cc3e141b8fb1aaff762dd810c6535af384cea6eb2f896635429  e2/composite/dcai-at-mfe.json
+03e0975191437c55b45ec88149fb63265cfd3f1c657386e7dbb5b7e18356537a  e2/composite/example-Q6PF06-c80-none.json
+6f137f4b8dbdfc917ba8d8ec30ae67188b9b0a4ae26a70afdad994fee8e0cc4d  figures/fig3_e2_composite.pdf
+6df4c399342c4e1006b356c2d293fb9c0e98a106852fa274aa10daf94f6f93e9  figures/fig3_e2_composite.png

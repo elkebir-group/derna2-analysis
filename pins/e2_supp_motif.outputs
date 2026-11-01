@@ -1,0 +1,42 @@
+# What the e2 motif-supplement rules produce, in sha256sum format, paths relative to
+# data/derived. e2_fig_supp_motif_verify checks a build against it.
+#
+# The three JSON caches are plain data and match on any host with E2's deposit: they read
+# the deposit, the motif set files and nothing else. Two things they deliberately do NOT
+# depend on, each of which moved a digest here while every number in the file stayed as it
+# was. The finished table is digested PARSED rather than as a file, over the rows these
+# steps read -- the complete and retired ones -- and by the round file's BASENAME: the
+# table carries an ISO timestamp in its header and regenerates hourly, an open cell's round
+# advances every round the grid runs, and the round file is spelled as an absolute path, so
+# a digest over any of the three could only ever fail. `admits.json` carries no digest of
+# the finished set at all, its population being the proteins with an unconstrained front.
+# Each cache names its members, because a count cannot report a one-in-one-out swap.
+#
+# The figure's bytes are matplotlib's, with the PDF's CreationDate and the PNG's Software
+# stamp suppressed and every jitter seeded per panel, so they match on a host with the same
+# matplotlib as requirements.lock. The layout is measured off the drawn figure, so the
+# script fixes figure.dpi and refuses a tight save box; both are part of the geometry and
+# not the host's to choose. Verified byte-identical over a cold rebuild.
+#
+# These digests are over the finished set of 2026-11-02: 45 proteins closed on F1-F3, and
+# 85 of the corpus for the per-motif counts, both named in the caches. The 85 is
+# inputs/e2/corpus.json, which the composite plate's data step derives for itself
+# from E1's sweep and asserts equal, so the two cannot drift; three of its members
+# have no unconstrained front in E2's own screen and are read from E1's auxiliary
+# tree, where the sequence the scan needs lives. The
+# 45 are the finished set less eGFP and RBD, the two sequences in it that are not human
+# proteins, which `cellset` excludes at every rung and names with the reason. The set moves
+# as the grid closes cells, so a rebuild after an arrival will differ here and the pin is
+# re-cut with the population it describes.
+#
+# One of the 45, Q96NI6, has an unconstrained front E2 imported from E1 rather than ran, so
+# it carries points and no timing. Its wall and memory ratios are formed against the E1 run
+# the front came from -- a different build on a loaded host -- which
+# inputs/e2/f0_timings_imported.json states, `cost.json` names under
+# `imported_unconstrained_timings`, and every row it affects carries as `f0_timing`.
+4e0f07c665084a86fd0cdeb0ff03932a5c989d33793bc84647a9bc2c3203cb1a  e2/supp/admits.json
+550539acd697c5db135d565c0ca28488b5113b9fc50876e7ce807f3c324a0934  e2/supp/presence.json
+2026979540e138893c0b8ad86973ca538cf3d209e4d99063dd110c86fc1dcb62  e2/supp/cost.json
+c52258654b0f62b254750face953dc5b0ae5cbcbef45d2abb930f458fb4b9a43  figures/fig_supp_motif.pdf
+ba74e84eaf28755dda3d6c6f8f918213ef51c47f7e780a1affaba09bd376ad01  figures/fig_supp_motif.png
+b58915418482000164e6c9dc0c56c769338aba9441b31f619435a6f48b6ac480  figures/tab_supp_motifs.tex
