@@ -1,0 +1,20 @@
+# What the e3 main-figure rule produces, in sha256sum format, paths relative to data/derived.
+# e3_fig_story_verify checks a build against it.
+#
+# The figure's bytes are matplotlib's through usetex (the PDF's CreationDate is suppressed), so
+# they match on a host with the same matplotlib, TeX and Times fonts as requirements.lock; it
+# is the only output pinned, because the figure computes its numbers from the deposit as it
+# draws. Those numbers, from the build this pin was cut on:
+#   non-modular share of the concatenation designs, per UTR pair (HBB, mRNA-1273, HBA, CureVac,
+#   BNT): 100.0, 95.2, 79.0, 73.5, 70.6 %
+#   modular designs, concatenation: 0, 136, 595, 750, 833; mRNAfold: 27, 388, 614, 779, 1057;
+#   DERNA2: 338, 7385, 13260, 16182, 23431
+#   instance P26436 on the BNT UTRs at CAI >= 0.90: concatenation (the hull vertex of least CDS-alone MFE) 70 codons from DERNA2's,
+#   MFE -589.1, 2 CDS-UTR pairs; mRNAfold 1 codon, -595.7, 3 pairs; DERNA2 -594.3, none.
+#
+# Cut 2026-11-04: 30 proteins of 163 to 787 residues on five UTR pairs, 150 cells. The 110
+# short-band hull refolds are the run the earlier pin was cut on, carried over unchanged; the 40
+# middle-band ones are new. Of the 110, 31 were independently recomputed with the same binary on
+# another host and agree on every design's mfe, gap and violations (3,183 points), differing only
+# in the header's wall_s and peak_rss_kb.
+41ff2d8e2df314ce4071feb3e48160e5f85017dfe61e0f0bab49d3d45a67d0f6  figures/fig_e3_story.pdf

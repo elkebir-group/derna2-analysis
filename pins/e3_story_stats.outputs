@@ -1,0 +1,13 @@
+# What the e3 story-statistics rule produces, in sha256sum format, paths relative to data/derived.
+# e3_story_stats_verify checks a build against it.
+#
+# The file is plain text: a function of the deposit (pinned by results-e3.sha256), E2's
+# unconstrained fronts the concatenation arm points at, and the refolds of `derna check` at the pin
+# (config e3.derna_pin). It holds every number the paper's UTRs subsection quotes: the share of
+# concatenation designs that are modular (84% are not), the proteins with a modular design per
+# method and UTR pair, the windows of DERNA2's search by state, and the instance of the main figure
+# (P26436 on the BNT UTRs at CAI >= 0.9), including the window that contains the cutoff and the
+# comparison over every instance with a modular DERNA2 design there.
+#
+# Cut 2026-11-04: 30 proteins of 163 to 787 residues on five UTR pairs, 150 cells.
+b7c895c57cacdcd1b8f90a5624fbd15109145510e9b360b7eb0182cc753c7bb7  e3/story_stats.txt

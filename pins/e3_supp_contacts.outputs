@@ -1,0 +1,11 @@
+# What the e3 supplement-figure rules produce, in sha256sum format, paths relative to
+# data/derived. e3_supp_contacts_verify checks a build against it.
+#
+# The histograms are plain data: a function of the deposit (pinned by results-e3.sha256), E2's
+# unconstrained fronts the concatenation arm points at, and the refolds of the hull vertices
+# by `derna check` at the pin (config e3.derna_pin). The figure's bytes are matplotlib's
+# through usetex and are not pinned.
+#
+# Cut 2026-11-04: 11831 non-modular concatenation designs over 150 cells (HBB 2829, mRNA-1273
+# 2693, HBA 2234, CureVac 2079, BNT 1996).
+c221adb3c998b312bbf076d790130eefc1b98b792e9b0bc7e7785d20277afb4e  e3/supp_contacts.json
