@@ -1,0 +1,8 @@
+# What the proteins-table rule produces, in sha256sum format, paths relative to data/derived.
+# supp_proteins_verify checks a build against it.
+#
+# The table is plain text: a function of inputs/e2/corpus.json, E2's per-protein AUC table
+# (data/derived/e2/composite/auc01_fin.json), inputs/e3/cells.txt and the protein FASTA files
+# under inputs/. Cut 2026-11-04: 85 proteins of 78 to 1,629 residues, 45 at every motif level,
+# 30 in the UTR experiment.
+de01c394f67cddc6ad6cce545d0c9c3c2e905ab2f2b952f8bbcdd969b21bf389  figures/tab_supp_proteins.tex
