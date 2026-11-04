@@ -1,0 +1,83 @@
+# The derna2 paper pipeline. Run it through pipelines/run.sh; README.md lists the targets.
+#
+# Two kinds of target:
+#   figure targets  read deposited results (or this checkout's own runs, `figures_from`)
+#                   and need no binaries. `all` is these.
+#   run targets     regenerate the results from pinned binaries. Opt-in: they take hours
+#                   to days, and the timed passes need a reserved socket.
+
+import json
+import shlex
+import sys
+from pathlib import Path
+
+configfile: "pipelines/config/config.yaml"
+
+ROOT = Path(workflow.basedir).parent
+# Data paths stay relative to the repository root (the working directory), so a target given
+# on the command line as data/derived/... matches the rule that makes it.
+workdir: ROOT
+INPUTS = Path(config["inputs_root"])
+RESULTS = Path(config["results_root"])
+DERIVED = Path(config["derived_root"])
+RUNS = DERIVED / "runs"
+FIGURES = DERIVED / "figures"
+STAMPS = DERIVED / "stamps"
+DRIVERS = ROOT / "drivers"
+SCRIPTS = ROOT / "pipelines" / "scripts"
+# Library scripts run in this environment; the vendored drivers are standard-library only.
+PY = sys.executable
+DRIVER_PY = config["driver_python"]
+# The rules that import ViennaRNA, which is not installable on every host this runs on.
+RNA_PY = config.get("rna_python") or PY
+
+
+def derna2_bin(name):
+    """One of the two derna2 binaries: a directory given in host.yaml, or this
+    checkout's own build at `derna2.pin`."""
+    given = config["derna2"]["bin_dir"]
+    if given:
+        return Path(given) / name
+    return DERIVED / "bin" / f"derna2-{config['derna2']['pin']}" / name
+
+
+DERNA = derna2_bin("derna")
+MFE_FOLD = derna2_bin("mfe_fold")
+
+
+def source(exp):
+    """Where an experiment's figures read their results from."""
+    if config["figures_from"] == "deposit":
+        return RESULTS / exp
+    if config["figures_from"] == "runs":
+        return RUNS / exp
+    raise ValueError(f"figures_from: {config['figures_from']!r}, want deposit or runs")
+
+
+def source_ok(exp):
+    """The stamp a figure waits on: the deposit's checksums, or the run's own summary."""
+    if config["figures_from"] == "deposit":
+        return STAMPS / f"results_{exp}.ok"
+    return RUNS / exp / "summary.txt"
+
+
+include: "rules/common.smk"
+include: "rules/e1.smk"
+include: "rules/e1_memory.smk"
+include: "rules/e2.smk"
+include: "rules/e3.smk"
+include: "rules/fig1.smk"
+include: "rules/fig1_fronts.smk"
+include: "rules/proteins.smk"
+
+
+rule all:
+    input:
+        rules.e1_figures.input,
+        rules.e1_fig4_figures.input,
+        rules.e1_memory_figures.input,
+        rules.e2_tables.input,
+        rules.e2_figures.input,
+        rules.fig1_figures.input,
+        rules.fig1_fronts_tables.output,
+        rules.supp_proteins.output,

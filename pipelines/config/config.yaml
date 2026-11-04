@@ -1,0 +1,137 @@
+# Configuration of the derna2 paper pipeline. Paths are relative to the repository root.
+# Host-specific values (where the frozen binaries and the deposit live, which cores are
+# reserved) go in pipelines/config/host.yaml, which run.sh loads after this file; see
+# host.example.yaml.
+
+inputs_root: inputs
+# Deposited results: what the figure targets read. Link or unpack the deposit here.
+results_root: data/results
+# Everything the pipeline writes: run outputs, tables, figures.
+derived_root: data/derived
+# Figures read the deposit (`deposit`) or this checkout's own runs (`runs`).
+figures_from: deposit
+
+# The drivers under drivers/ are standard-library Python, run outside the venv's packages.
+driver_python: python3
+# The two rules that fold a sequence (fig1_overview, e2_composite_example) import ViennaRNA.
+# Null runs them in the environment snakemake itself runs in. On a host where ViennaRNA has
+# no installable wheel (CentOS 7 and older glibc), name a Python whose ViennaRNA 2.7.2
+# bindings come from elsewhere here, with the rest of requirements.lock installed beside it.
+rna_python: null
+
+# The method itself. The pipeline's run targets build these two binaries at `pin` and run
+# them: `derna`, the command every design and every front comes from, and `mfe_fold`, the
+# free fold of one given sequence. Point `bin_dir` at a directory holding both to skip the
+# build (host.yaml).
+derna2:
+  repo: https://github.com/elkebir-group/derna2.git
+  pin: main
+  bin_dir: null
+
+# Whole-front runtime (E1). Grid: drivers/e1/e1.config.json, the configuration of the run on
+# the second host. `pin` stamps every row with the derna2 commit that produced it; the rows
+# of the deposit carry the commit its own run was made at.
+e1:
+  pin: pending
+  # The comparators, which are frozen once and never rebuilt, in one directory. derna2's own
+  # two binaries come from `derna2` above. Set `bin_dir` in host.yaml.
+  bin_dir: data/derived/bin/e1
+  # LinearDesign and LinearCDSfold run from their own source trees, which hold their tables.
+  lineardesign_dir: data/derived/comparators/LinearDesign
+  lcds_dir: data/derived/comparators/LinearCDSfold
+
+# Figure 4, drawn from E1's frozen snapshot (pins/e1_fig4-PROVENANCE.md): the replay pin its
+# run table reads, and the protein of panel (a).
+e1_fig4:
+  pin: 8603d37d
+  focus: P47211
+
+# The price of motif-freedom (E2). Design: drivers/e2/E2-PLAN.md. The nested fronts need
+# `derna front --motif`, not in a pinned build yet; what is here is the forced-motif census
+# and the hull probe, read from the results without a checksum manifest while it runs.
+e2:
+  pin: null
+  # Cumulative order F1..F4, files under inputs/motifs/.
+  motif_sets: [set1-manufacturing, set2-processing, set3-repeats, set4-initiation]
+  probe_dirs: [e3-probe, e3-probe2]
+  # The grid ran on two hosts. Its early rounds did not record which, so a round is
+  # attributed by a home directory only one of them wrote; `second_marker` is that path.
+  hosts:
+    first: ada
+    second: tamazirt
+    second_marker: /home/melkebir
+  # The composite figure's example: protein, CAI floor, and which design (`none` = the
+  # rung optima themselves). Panels (c)-(g) are this instance.
+  example: {cell: Q6PF06, floor: 0.80, alt: none}
+  # The plate's size in inches and panel (b)'s population. The layout is solved in inches
+  # at this size, so neither is a rendering convenience: `finished` is every protein closed
+  # on all four rungs, exact or bounded; `certified` keeps only the exact ones.
+  figure: {width_in: 7.3, height_in: 3.0, subset: finished}
+  # The motif supplement plate: nine panels in two rows at the text width.
+  supp_figure: {width_in: 6.5, height_in: 3.0}
+  # Panel (a)'s two inputs from outside E2's deposit: E1's sweep, which names the proteins
+  # the screen is scored over, and the auxiliary tree of E1 instances screened for this
+  # figure. Set in host.yaml until both are deposited.
+  e1_sweep: null
+  e1_extra: null
+
+# E3 (UTR-aware design, four fronts per instance) and E5 (the combined ladder and its MASS
+# summary) are plans: drivers/e3/E3-PLAN.md, drivers/e5/E5-PLAN.md. Neither has a driver,
+# a pin or a result yet, so neither has a rule.
+
+# Overview figure (GLPE_HUMAN with hbb UTRs).
+fig1:
+  # `pins/fig1.sha256` identifies four binaries by their bytes: they predate the command line
+  # and their source commit was never recorded, so nothing here checks or rebuilds them, and
+  # what reruns runs `derna`. See README "Open items".
+  # the overview figure's forbidden motif: a restriction site that one of mRNAfold's designs
+  # contains and no modular design does, so the deposited modular front is also motif-free
+  overview_motif: {name: XhoI, site: CTCGAG}
+  # The revised overview figure (overview2.py), one per UTR pair. `layout` goes into the design
+  # file: the title's name for the UTR pair, and any placement fixed for that pair instead of
+  # chosen from the data (y-range of (b), zoom positions, label offsets, the (c) layout's top band).
+  overview2:
+    structure: inputs/structures/AF-P15421-F1-model_v6.pdb
+    hbb:
+      layout:
+        utr_label: 'the human $\beta$-globin (HBB) UTRs'
+        vroom_c: 0.55
+        spot_c: [0.0, 0.69, 1.0, 0.31]
+        margin_c: 16
+        inset2_pad: 0.005
+        label_at: {d2: [-4, -3, right, top]}
+    # hba reads the GLPE arms' results for that pair and the structurally optimal front with
+    # XhoI forbidden, neither deposited yet. The front below is settled to CAI 0.969 only; the
+    # final figure takes the complete run.
+    hba:
+      arms: data/results/fig1_hba/run3-hba
+      so: data/results/fig1_hba/xhoi/so.jsonl
+      layout:
+        utr_label: 'the human $\alpha$-globin (HBA1) UTRs'
+        ylim: [-194, -118]
+        spot_c: [0.24, 0.66, 0.76, 0.34]
+        spot_d: [0.0, 0.0, 0.36, 0.24]
+  # arm -> extra flags of `derna front`. The deposited fronts have no stop codon.
+  fronts:
+    cdsonly: "--stop none"
+    symmetric: "--utr5 {utr5} --utr3 {utr3} --forbid 5-cds,cds-3 --stop none"
+
+# E3: what a UTR-aware practice delivers, per practical UTR pair. The deposit is the figure
+# bundle's paper-e4/ (results_root/e3, against pins/results-e3.sha256). The refolds of
+# concatenation's hull vertices come from `derna check`, the binary `derna2` above builds.
+e3:
+  # The commit the deposited refolds were made at, which the rows carry.
+  derna_pin: db5982d8
+  # The deposited rows carry a `source` path from the host that ran them: the concatenation
+  # arm points at E2's unconstrained fronts, and the middle band at files of this deposit.
+  # Each recorded prefix is rewritten to where that tree is on this host. They are
+  # configuration rather than literals in the readers because they name one past run's
+  # filesystem, and a second run on another host records its own.
+  recorded_prefixes:
+    e2_fronts: /scratch/xinyugu4/paper-e3
+    deposit: /scratch/xinyugu4/paper-e4
+  # The instance of the main figure's (d) and (e): a protein on a UTR pair, and the CAI floor at
+  # which each method's best design is drawn.
+  story:
+    cell: P26436__bnt
+    cai_floor: 0.90
