@@ -1,0 +1,38 @@
+Companion panel, copied from chore/paper-e3-plan at ea37117a384479859bb6f273708d9a6ef5107e2b
+Source: experiments/paper-benchmark/screen/natives/ (see PROVENANCE-e2-screen.md)
+Copied because E2 commits to that branch while E3 runs; an id must mean one protein.
+
+2867ed2f3a1472a43726f5ad3667ee0327ec5a6f  P01588.fasta (git blob at source commit)
+99a96afd0345f76c15a196ef02278153de63e2f1  P09919.fasta (git blob at source commit)
+a373041e3a52a45b93f6c6104ec0c9bbca272dd3  P01241.fasta (git blob at source commit)
+2b15ac4b203c090b51e3d32bf36a2c6d988b59cb  P01563.fasta (git blob at source commit)
+32eae86bbb532b8395e80f2271f21af06841f294  eGFP.fasta (git blob at source commit)
+5677da699986bbc5b9b1c8d7ab9af59ae8ac273d  RBD.fasta (git blob at source commit)
+
+Mirror proteins (E2 short band), copied 2026-10-20 from the derna C++ mirror
+Source repo: https://github.com/elkebir-group/derna at adecda8277add8c0b75512434bd729f30b8fd7d6
+Path in repo: data/uniprotSeq/<accession>.fasta
+Copied because that mirror is gitignored and re-cloned per host, so on another host it
+need not be this revision.
+
+The sha256 below are of the file contents, and each names the copy under inputs/e3/ — all
+sixteen verify against it. They were recorded with the directory the run read them from, on
+the host that ran it; the directory is dropped because the checksum is the attestation and
+the path was only where that host kept the file.
+
+39413b091a2df43fc59859749bde4793031fd81231c1c3e540e1f9a63c61a7a5  P54852.fasta
+780561b765ae9391978983cf49303384b9de1a51c21c2181d8b893f9f4356d2d  Q9HAE3.fasta
+eeb959bd7947335096de16cfdcdad09146acf6e545336597c582e36f23d8ae81  P98173.fasta
+bf9d720fc2e7fb61d5c5b6c9a2ba90930ef99a0a3831518ee9012a049f5ce322  P26436.fasta
+d0912c9e351007e0d7f6c4552ffa7825586ce83ba7330b01360a89bf90bf7481  P30281.fasta
+905ee4eb3671ce76cf9d47468dd1766a3f19cf0bd72a31eb13a76f11c900cc34  Q9HC38.fasta
+9f48ea69530c8988bfdf0a3008fadfddb5c1f03e691ec484e281e7ee89688d94  Q6PF06.fasta
+b37867089624e5c2244d3183ed9fba6308303bd863348b9e97c44adb1e1d6d3c  P78382.fasta
+2b8915891739068cad01b1f7e41e2436f7938fc1b7137f59949faa4d66468d69  P47211.fasta
+df1deb34df1bf04a7375c02f329ad33667788855fc3877eafaa6d6ef9b3c26f3  Q8TDG2.fasta
+99f96d49c948c6312c6c01be4019f0be16c9901199029c1c4db57b6da746ee8d  P01860.fasta
+685e1e256d7a17f94c2022d40f678dd6cca9d426cb02edbe75bca7074d7d7ec4  Q92734.fasta
+c10cc5248ff92d7600380bc3967a27e88547c06965424b7dbac3285d12899cc9  P15086.fasta
+f3600c2fc18975e783b542dbe4681f1534d4dce378f66918a41cc7e0df98c304  Q9NWZ3.fasta
+a26ec06de85a58ffa252f3385c840eeead8be9e274fe95dab413502fa299a407  Q6B0B8.fasta
+7fa8906d772991a4903850ac58fd74e84ae4560ec7b47640c312dda319a0af8b  Q9UBM8.fasta

@@ -1,0 +1,14 @@
+# E2 set II — transcription / processing. Signals a transcribed construct
+# should not carry internally. T is read as U.
+
+# Cryptic polyadenylation signals: premature 3' end formation.
+AATAAA
+ATTAAA
+
+# 5' splice donor consensus, the invariant GT plus its flanking preference.
+GGTRAGT
+
+# The 3' acceptor is deliberately absent: its polypyrimidine tract is a
+# composition rule over a window, not a fixed k-mer, so stating it as one
+# would either forbid nothing or forbid everything. See the plan's
+# limitation section.

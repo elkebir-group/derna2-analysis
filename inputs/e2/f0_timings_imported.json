@@ -1,0 +1,21 @@
+{
+ "_comment": "Wall and peak RSS for an unconstrained front that E2's own screen did not time, taken from the E1 run the front itself was imported from. screen/f0-five holds five fronts converted from E1 (see each file's `converted_from`), and the conversion kept the points and dropped the timing, so a cost ratio against them has no denominator. Only cells whose front is such an import belong here; an E2 run that simply was not timed does not, because nothing says the two measure the same thing.",
+ "_caveat": "These are NOT measured under the conditions the other denominators were. E1 ran a different build on a different host, and the row records that host under load. A ratio formed against one of these prices the constraint together with whatever differs between the two builds and the two machines. Every step that uses one marks the row, and the figure's provenance names the cell.",
+ "Q96NI6": {
+  "wall_s": 4512.920264482498,
+  "peak_rss_kb": 7250888,
+  "front_points": 4906,
+  "source": {
+   "run": "E1 sweep, arm derna2-walk, kind cell",
+   "file": "the E1 sweep named by e2.e1_sweep (pin 8603d37d)",
+   "exit": "ok",
+   "ncores": 1,
+   "pin": "8603d37d",
+   "sha_derna": "2bd748d578ce",
+   "load_at_run": 10.04931640625,
+   "concurrency": 8,
+   "walk_flags": ["--pass-grid", "auto", "--seed-sweep", "--cut-probes", "--lend-idle"]
+  },
+  "matches_imported_front": "the converted front in screen/f0-five/Q96NI6.jsonl carries 4906 points, which is this run's front_points"
+ }
+}
