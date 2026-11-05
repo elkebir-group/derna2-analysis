@@ -43,7 +43,7 @@ import matplotlib.ticker  # noqa: E402
 import numpy as np  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from e4common import refold_points, relocate, take_refold  # noqa: E402
+from e3common import refold_points, relocate, take_refold  # noqa: E402
 
 PAIRS = ["hbb", "mrna1273", "hba", "curevac", "bnt"]
 PAIR_HUES = dict(zip(PAIRS, ["#8f5f00", "#9f9f00", "#008d51", "#00c2ac", "#008ec8"]))

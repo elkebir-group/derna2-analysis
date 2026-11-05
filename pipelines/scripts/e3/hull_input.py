@@ -11,7 +11,7 @@ bound on the constrained optimum, so the check computes that optimum and writes 
 import json
 import sys
 
-from e4common import PAIRS, a0_path, header, rd, relocate
+from e3common import PAIRS, a0_path, header, rd, relocate
 
 
 def main():

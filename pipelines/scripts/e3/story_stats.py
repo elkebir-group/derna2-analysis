@@ -18,7 +18,7 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fig_story as F  # noqa: E402
-from e4common import a0_path, rd, relocate  # noqa: E402
+from e3common import a0_path, rd, relocate  # noqa: E402
 
 
 def pct(a, b):
