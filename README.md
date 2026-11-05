@@ -443,11 +443,28 @@ Each of these can be closed, and says what closes it.
   191 files are byte-identical to derna2 `f67a04a6` (checked file by file;
   `pins/fig1_fronts-PROVENANCE.md`), so a rewrite loses nothing that cannot be recovered from
   the commit.
-- **Figure 3's inputs are not all deposited.** `e2_fig_composite` reproduces the published
-  figure byte for byte on this host, and `pins/e2_composite.outputs` is checkable here, but two
-  of its inputs sit outside E2's deposit (`e2.e1_sweep`, `e2.e1_extra`) and the short2 and mid
-  bands' fronts are read at absolute host paths, which the cache's provenance records as such.
-  Depositing all three is what makes the manifest checkable elsewhere.
+- **E2 has no deposit.** `e2_fig_composite` and `e2_fig_supp_motif` reproduce their published
+  figures byte for byte, and `pins/e2_composite.outputs` and `pins/e2_supp_motif.outputs` are
+  checkable — but only here, because what `results_root/e2` names is not a cut deposit. It is
+  a directory of links into the run tree that produced the results, which also holds that
+  run's scripts, logs and working copies, carries the paths of the two hosts it ran on, and
+  is three orders of magnitude larger than what the figures read. There is accordingly no
+  `pins/results-e2.sha256`, and nothing stops a figure here being drawn from a tree that has
+  moved underneath it.
+
+  Cutting it is the same job the E3 bundle was cut by: run the figure rules with the file
+  opens recorded, keep the files they touched, write the manifest from those, and rebuild to
+  check the figures still match their pins. `pipelines/scripts/package_deposit.py` then packs
+  exactly the manifest's files, which is what leaves the logs and host paths behind.
+- **Two of Figure 3's inputs come from outside any deposit**, `e2.e1_sweep` and `e2.e1_extra`,
+  and are set in `host.yaml`. The sweep is E1's own result, read for one thing: the set of
+  proteins the screen is scored over, which `composite_data.py` then asserts equal to the
+  committed `inputs/e2/corpus.json`. That assertion is why the sweep cannot be replaced by a
+  list derived from it — two derivations that agree until they do not is the point of it, and
+  a list compared against itself agrees always. It closes when E1's deposit lands, since the
+  path currently names a snapshot of that sweep rather than the sweep. `e2.e1_extra` is
+  separate and small: two screen files read whole, and eight front files read for their first
+  line alone.
 - **License**: none chosen yet.
 
 ## Known limits
