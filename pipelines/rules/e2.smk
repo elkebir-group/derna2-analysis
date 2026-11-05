@@ -29,6 +29,7 @@ rule e2_forced_motifs:
         sets=expand(str(INPUTS / "motifs" / "{name}.txt"), name=E2["motif_sets"]),
         table=INPUTS / "codon_usage_human.csv",
         recorded=source("e2") / "e3-probe" / "forced.jsonl",
+        ok=source_ok("e2"),
     output:
         DERIVED / "e2" / "forced_motifs.jsonl",
     params:
@@ -43,6 +44,7 @@ rule e2_forced_motifs:
 rule e2_probe_table:
     input:
         [source("e2") / d / "summary.csv" for d in E2["probe_dirs"]],
+        ok=source_ok("e2"),
     output:
         tsv=DERIVED / "e2" / "probe.tsv",
         fit=DERIVED / "e2" / "probe_fit.txt",
@@ -59,6 +61,7 @@ rule e2_probe_table:
 rule e2_fig3_cells:
     input:
         [source("e2") / b / "summary.csv" for b in E2_BANDS],
+        ok=source_ok("e2"),
     output:
         DERIVED / "e2" / "fig3_cells.json",
     params:
@@ -83,6 +86,7 @@ rule e2_fig3_planned:
     input:
         source("e2") / "screen" / "binding.jsonl",
         source("e2") / "grid" / "summary.csv",
+        ok=source_ok("e2"),
     output:
         DERIVED / "e2" / "fig3_planned.json",
     params:
@@ -97,6 +101,7 @@ rule e2_fig3_strip:
     input:
         [source("e2") / "screen" / "binding.jsonl"]
         + [source("e2") / b / "summary.csv" for b in E2_BANDS],
+        ok=source_ok("e2"),
     output:
         DERIVED / "e2" / "fig3_strip.json",
     params:
@@ -135,6 +140,7 @@ E2_ENV = (
 rule e2_composite_auc:
     input:
         finished=source("e2") / "FINISHED.tsv",
+        ok=source_ok("e2"),
     output:
         E2_CACHE / "auc01_fin.json",
     shell:
@@ -151,6 +157,9 @@ rule e2_composite_data:
         auc=E2_CACHE / "auc01_fin.json",
         sets=expand(str(INPUTS / "motifs" / "{name}.txt"), name=E2["motif_sets"]),
         names=INPUTS / "motifs" / "names.json",
+        # This step reads the deposit through E2_ENV rather than through a declared path,
+        # so the stamp is what makes its checksums a precondition of the figure.
+        ok=source_ok("e2"),
     output:
         data=E2_CACHE / "composite-data.json",
         # The host's census at build time: not pinned, and nothing reads it. See the file's
@@ -173,6 +182,10 @@ rule e2_composite_dcai:
 # Panels (c)-(g): one protein's four fronts, and the four designs at the floor with their
 # folds laid out and aligned. This step needs ViennaRNA.
 rule e2_composite_example:
+    input:
+        # `example_coords.py` reads the deposit through E2_ENV, and picks its structure
+        # files with a glob rather than by name, so no declared path would cover them.
+        ok=source_ok("e2"),
     output:
         E2_CACHE / f"example-{E2_SLUG}.json",
     params:
@@ -249,6 +262,7 @@ E2_SUPP_ENV = (
 rule e2_supp_admits:
     input:
         finished=source("e2") / "FINISHED.tsv",
+        ok=source_ok("e2"),
         sets=expand(str(INPUTS / "motifs" / "{name}.txt"), name=E2["motif_sets"][:3]),
         # The population panel (d) counts over, which the composite plate derives from E1's
         # sweep and asserts against.
@@ -263,6 +277,7 @@ rule e2_supp_admits:
 rule e2_supp_presence:
     input:
         finished=source("e2") / "FINISHED.tsv",
+        ok=source_ok("e2"),
         sets=expand(str(INPUTS / "motifs" / "{name}.txt"), name=E2["motif_sets"][:3]),
     output:
         E2_SUPP / "presence.json",
@@ -274,6 +289,7 @@ rule e2_supp_presence:
 rule e2_supp_cost:
     input:
         finished=source("e2") / "FINISHED.tsv",
+        ok=source_ok("e2"),
         # The denominator for an unconstrained front E2 imported rather than ran, which
         # therefore carries points and no timing.
         timings=INPUTS / "e2" / "f0_timings_imported.json",

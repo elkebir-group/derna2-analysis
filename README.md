@@ -56,7 +56,7 @@ data/results/
 ├── e1_fig4/                 # Figure 4's frozen snapshot of e1 (pins/e1_fig4-PROVENANCE.md)
 │   ├── sweep.jsonl          # the sweep after the grid's last pass, 2026-10-31: 258,083 rows
 │   └── hull/                # <P>.front.jsonl and <P>.walk.json for the 85 proteins
-├── e2/                      # in progress: no checksum manifest yet
+├── e2/                      # cut 2026-11-05: pins/results-e2.sha256, pins/e2-PROVENANCE.md
 │   ├── e3-probe/            # hull probe round 1: per rung the walk's rows, its measurement
 │   │                        # record and summary.csv; forced.jsonl, the forced-motif census
 │   ├── e3-probe2/           # round 2: the n = 200 load control, n = 150, 250 and 300
@@ -194,8 +194,9 @@ were pre-registered before it ran, in a plan document that is not published here
 Pass 1 (six short-band proteins × F1–F4) is closed with two complete fronts and 22 anytime ones
 (`drivers/e2/E2-GRID-PASS1.md`); pass 2 and the middle band's selection are pending, and the
 long band was chosen from the lattice census (`drivers/e2/calib/`). The three bands' fronts
-are read in place, while they run, by Figure 3's rules (`grid/`, `mid/`, `long/` and `screen/`
-under `data/results/e2/`, no checksum manifest yet). What is here as tables:
+are read by Figure 3's rules from the cut deposit (`grid/`, `mid/`, `long/` and `screen/`
+under `data/results/e2/`, checksummed by `pins/results-e2.sha256`), not in place while they
+run, since the cut of 2026-11-05. What is here as tables:
 
 - **the forced-motif census**: no entry of the four sets is forced by any peptide, so every
   set is satisfiable on every protein; the rejected thresholds `GGGG` and `CCNCCN` are forced
@@ -350,8 +351,8 @@ The figure bundle copied from the host (`paper-e4/`, 664 files, checked against
 | `e3_supp_contacts_verify` | `stamps/e3_supp_contacts.verified` | the histograms against `pins/e3_supp_contacts.outputs` |
 
 `e3_figures` is both figures and the statistics file. Link the bundle's `paper-e4/` at `data/results/e3` and give
-E2's results at `data/results/e2`, since the concatenation arm points at E2's fronts; E2 has no
-checksum manifest yet, so only E3's is checked.
+E2's results at `data/results/e2`, since the concatenation arm points at E2's fronts. Both are
+checked: `pins/results-e3.sha256` and, since the cut of 2026-11-05, `pins/results-e2.sha256`.
 
 ### Figure 1: GLPE_HUMAN with the hbb UTRs
 
@@ -432,28 +433,24 @@ Each of these can be closed, and says what closes it.
   fronts were, on 2026-11-05: four substitutions over 97 of its 191 files, all of them under
   `raw/`, with nothing a rule reads touched and the manifest regenerated
   (`pins/fig1_fronts-PROVENANCE.md`). E1's is partly affected and not frozen yet — one of the
-  seven files under `hull/` names the host, and its 216 KB sweep names it nowhere — and E2 has
-  no deposit to scrub until one is cut. `scrub_host_paths.py` reports before it writes and
+  seven files under `hull/` names the host, and its 216 KB sweep names it nowhere. E2's cut
+  needed no scrub: the 205 root-level files that named the host and the development tooling
+  are run scripts, backups and session notes that no reader can reach, and the cut leaves
+  them behind rather than rewriting them (`pins/e2-PROVENANCE.md`); no file in the deposit
+  names either. `scrub_host_paths.py` reports before it writes and
   exits non-zero on any path its substitutions miss, so this is one command and one reading per
   deposit, at the point each is frozen.
-- **E2 has no deposit.** `e2_fig_composite` and `e2_fig_supp_motif` reproduce their published
-  figures byte for byte, and `pins/e2_composite.outputs` and `pins/e2_supp_motif.outputs` are
-  checkable — but only here, and only against the population their headers name. Both were
-  re-cut on 2026-11-05: the figures were byte-identical to the previous cut, and the caches had
-  moved by the renumbering (the motif files' header comment, the scripts' own paths) and by the
-  provenance fields that track the live tree. A run of the verify targets on a checkout whose
-  deposit has moved since a cut fails by design, and the pin is re-cut with the population it
-  describes. The deeper reason is that what `results_root/e2` names is not a cut deposit. It is
-  a directory of links into the run tree that produced the results, which also holds that
-  run's scripts, logs and working copies, carries the paths of the two hosts it ran on, and
-  is three orders of magnitude larger than what the figures read. There is accordingly no
-  `pins/results-e2.sha256`, and nothing stops a figure here being drawn from a tree that has
-  moved underneath it.
-
-  Cutting it is the same job the E3 bundle was cut by: run the figure rules with the file
-  opens recorded, keep the files they touched, write the manifest from those, and rebuild to
-  check the figures still match their pins. `pipelines/scripts/package_deposit.py` then packs
-  exactly the manifest's files, which is what leaves the logs and host paths behind.
+- **E2's deposit is cut but not yet packed and published.** It was cut on 2026-11-05:
+  `data/results/e2` is now 2,514 files and 2.099 GiB, against the 132 GiB run tree it was
+  cut from, and `pins/results-e2.sha256` names every one of them. All eleven rules that
+  reach the tree now declare `source_ok("e2")`, so the digests are a precondition of every
+  E2 figure rather than a record kept beside it; before the cut there was no
+  `pins/results-e2.sha256` for `check_results` to read, and nothing stopped a figure being
+  drawn from a tree that had moved underneath it. `pins/e2-PROVENANCE.md` records how the
+  cut was chosen and what it was checked against: the thirteen outputs the four E2 and E3
+  pins name were deleted and rebuilt from the cut, and all thirteen came back
+  byte-identical. What remains is to pack it with `package_deposit.py` and publish it; this
+  item closes then.
 - **Two of Figure 3's inputs come from outside any deposit**, `e2.e1_sweep` and `e2.e1_extra`,
   and are set in `host.yaml`. The sweep is E1's own result, read for one thing: the set of
   proteins the screen is scored over, which `composite_data.py` then asserts equal to the
@@ -476,9 +473,11 @@ step that a published checkout cannot repeat, and what stands in for repeating i
   rerun: those came from the scripts in `drivers/fig1/`, and the window rounds from a binary
   that is not part of the command line. The pipeline checks their output (`fig1_so_front`)
   without reproducing it.
-- **E2's grid has no rule**, because its fronts are not deposited. The hull probe ran on a
-  binary that predates the command line, so what is under `drivers/e2/` for it is a record of
-  the run rather than a route to repeat it. The union rows of the forced-motif census came
+- **E2's grid has no rule**, because `derna front --motif` is not in a pinned build yet — not
+  because its fronts are unavailable: they are deposited and checksummed
+  (`pins/results-e2.sha256`). The hull probe ran on a binary that predates the command line,
+  so what is under `drivers/e2/` for it is a record of the run rather than a route to repeat
+  it. The union rows of the forced-motif census came
   from code the plan does not include, and are not checked.
 - **E3's plate is not a run target.** Its figures, its statistics and the refolds of
   concatenation's hull vertices all rerun — `derna check` at `derna2.pin` rebuilds
