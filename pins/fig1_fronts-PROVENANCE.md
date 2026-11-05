@@ -1,15 +1,44 @@
-# Figure 1's three fronts: deposit and binaries, verified 2026-10-25
+# Figure 1's three fronts: deposit and binaries, verified 2026-10-25, rescrubbed 2026-11-05
 
 ## The deposit
 
 `data/results/fig1_fronts` is `experiments/glpe-hbb-fronts/results` of derna2
 `f67a04a6acd62d52116a9889670d7040f4ebf882` (2026-10-12, *experiment(glpe-hbb): raw run
-outputs for audit*). All 191 files are byte-identical to that tree, checked file by file,
-and `pins/results-fig1_fronts.sha256` names the same 191.
+outputs for audit*), scrubbed of the host's paths as described below. It was byte-identical
+to that tree when it was deposited, checked file by file, and
+`pins/results-fig1_fronts.sha256` names the same 191 files throughout. The commit is one of
+the development repository, which the published history does not carry, so it identifies the
+originals rather than offering them.
 
-The deposit is therefore recoverable from the commit, which is what makes rewriting it
-safe: the scrub of the host paths its logs carry (see the README) changes 97 of the 191
-files, and the originals remain at `f67a04a6`.
+## The scrub of 2026-11-05
+
+The run's reports and logs named the filesystem they ran on. Four substitutions, applied
+with `pipelines/scripts/scrub_host_paths.py --apply`, in this order:
+
+    <checkout>/                        -> derna2/
+    <cargo target directory>/          -> target/
+    <run directory>/                   -> run/
+    derna2/<worktree of the checkout>/ -> derna2/
+
+The fourth exists because the first three leave the path that a worktree of the checkout
+reached it by, so a fasta that the repository holds at
+`experiments/scope-25-beam-runtime-quality/fixtures/GLPE_HUMAN_78.fasta` was still named
+through that indirection. Collapsing it is what makes the recorded path the repository's own.
+
+It rewrote **97 of the 191 files, every one of them under `raw/`**: the per-walk JSON
+reports, the per-walk logs, the three arms' `stderr.log` and the three build and test logs.
+No file that a rule reads changed — `front3.jsonl`, `front3_designs.scored.jsonl`, the
+`v<N>.load` files and `mrnafold/compare.jsonl` are byte-identical to the deposited originals,
+and everything outside `raw/` is identical as a tree. `fig1_fronts_tables` accordingly
+rebuilds to the same bytes it did before the scrub
+(`fd52c465731ff6ac6c42d982f4eef2ecb3864e974b1ea0ac6a4679bbb0e0b5a6`).
+
+`pins/results-fig1_fronts.sha256` was regenerated afterwards and all 191 files match it. The
+digests of the originals are the revision of that file immediately before this one in this
+repository's history, whose own sha256 is
+`36c922c7e886abba2581f05acfb0acbc76cb013b4343881756f2eda3bdeb9485`; comparing the two
+revisions names the 97. The deposit is writable by nobody once deposited, and was unfrozen
+for the rewrite and frozen again.
 
 ## The binaries
 

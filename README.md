@@ -428,21 +428,14 @@ Each of these can be closed, and says what closes it.
   own energies). `derna front --report` carries the phase times, so this is a matter of reading
   them from there rather than from a file the dev binary wrote — and the rerun that produces
   those reports is the grid above, so this item closes with that one.
-- **Figure 1's three fronts carry the paths of the host they ran on**, in 97 of the 191 files
-  `pins/results-fig1_fronts.sha256` names: the checkout, the cargo target directory and the
-  run directory. Three substitutions cover every occurrence — the script exits non-zero on any
-  path they miss, and on this deposit it exits zero:
-
-  ```sh
-  .venv/bin/python pipelines/scripts/scrub_host_paths.py <deposit> \
-      '<worktree>/=derna2/' '<target-dir>/=target/' '<run-dir>/=run/'
-  ```
-
-  Nothing is written without `--apply`. **Rewriting the deposit invalidates its manifest**, so
-  the manifest has to be regenerated afterwards and the substitutions recorded beside it. All
-  191 files are byte-identical to derna2 `f67a04a6` (checked file by file;
-  `pins/fig1_fronts-PROVENANCE.md`), so a rewrite loses nothing that cannot be recovered from
-  the commit.
+- **The remaining deposits have not been scrubbed of this host's paths.** Figure 1's three
+  fronts were, on 2026-11-05: four substitutions over 97 of its 191 files, all of them under
+  `raw/`, with nothing a rule reads touched and the manifest regenerated
+  (`pins/fig1_fronts-PROVENANCE.md`). E1's is partly affected and not frozen yet — one of the
+  seven files under `hull/` names the host, and its 216 KB sweep names it nowhere — and E2 has
+  no deposit to scrub until one is cut. `scrub_host_paths.py` reports before it writes and
+  exits non-zero on any path its substitutions miss, so this is one command and one reading per
+  deposit, at the point each is frozen.
 - **E2 has no deposit.** `e2_fig_composite` and `e2_fig_supp_motif` reproduce their published
   figures byte for byte, and `pins/e2_composite.outputs` and `pins/e2_supp_motif.outputs` are
   checkable — but only here, because what `results_root/e2` names is not a cut deposit. It is
