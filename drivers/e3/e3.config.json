@@ -2,9 +2,8 @@
  "out_dir": "{out}",
  "derna2_pin": "{pin}",
  "bins": {
-  "derna": "{bin}/derna",
-  "census": "{bin}/scope37_census",
-  "mfe_fold": "{bin}/mfe_fold",
+  "derna": "{derna2_bin}/derna",
+  "mfe_fold": "{derna2_bin}/mfe_fold",
   "mrnafold": "{bin}/mrnafold_fold_codon_graph"
  },
  "tables": {

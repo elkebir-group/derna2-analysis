@@ -51,7 +51,7 @@ HAVE_SYSTEMD_RUN = subprocess.run(
 # past the merge that made `--front-from` exist and the default constraint the
 # two classes that reach the coding sequence (ADR 0044); the comparator and the
 # folders are frozen once.
-PINNED_BINS = ("derna", "mfe_fold", "mrnafold", "census")
+PINNED_BINS = ("derna", "mfe_fold", "mrnafold")
 
 THREE_LETTER = dict(A="Ala", R="Arg", N="Asn", D="Asp", C="Cys", Q="Gln", E="Glu", G="Gly", H="His",
                     I="Ile", L="Leu", K="Lys", M="Met", F="Phe", P="Pro", S="Ser", T="Thr", W="Trp",
@@ -168,7 +168,7 @@ def read_utrs(path):
 
     The pin is written as DNA because that is how its source documents print
     it. Everything downstream here is RNA: `derna` would read the `T` as `U`
-    itself, but mRNAfold's config and the census's literals want `U`, and one
+    itself, but mRNAfold's config wants `U`, and one
     spelling through the whole driver means no arm can differ from another by a
     conversion that happened in only one place.
     """
@@ -246,10 +246,9 @@ def cell_dir(cfg, cell):
 def residues(cfg, cell):
     """The length of the coding region in residues, the stop codon included.
 
-    The constraint counts a fixed stop codon as coding sequence, so the window
-    a census is told about has to cover it: a pair from the stop into the 3'
-    UTR is `cds-3` and forbidden, and a window three nucleotides short would
-    class it `3-3` and allow it.
+    The constraint counts a fixed stop codon as coding sequence, so a window over the
+    coding region has to cover it: a pair from the stop into the 3' UTR is `cds-3` and
+    forbidden, and a window three nucleotides short would class it `3-3` and allow it.
     """
     return cell["n_aa"] + (1 if cfg["stop"].lower() != "none" else 0)
 
@@ -684,27 +683,24 @@ def a3_one(cfg, cell, index, lam, weights):
 
 # ---- scoring, off every wall -------------------------------------------------------
 
-def census_input(cfg, cell, points, name):
-    """A front file in the shape `scope37_census` reads.
+def designs_input(cfg, cell, points, name):
+    """The sequences of `points`, one per line, for `derna check --designs`.
 
-    The census predates the `derna` result format and takes `mfe_kcal_mol`,
-    `cai` and `sequence`; this is that rename and nothing else.
+    The designs are what is scored and nothing else is read from them: the energy and CAI
+    each came with are the producing tool's claim about its own molecule, and the whole
+    point of this measurement is to compute both again under the constraint.
     """
     path = cell_dir(cfg, cell) / name
-    with path.open("w") as f:
-        for p in points:
-            f.write(json.dumps({"mfe_kcal_mol": reported_mfe(p), "cai": p["cai"],
-                                "sequence": p["sequence"]}) + "\n")
+    path.write_text("".join(p["sequence"] + "\n" for p in points))
     return path
 
 
 def reported_mfe(point):
     """The energy a point came with, whichever arm produced it.
 
-    A `derna` point calls it `mfe` and a comparator row carries the energy
-    recovered from its score as `mfe_kcal_mol`. The census only compares this
-    number against the constrained energy it folds for itself, so what it needs
-    is each arm's own claim about its own design.
+    A `derna` point calls it `mfe` and a comparator row carries the energy recovered from
+    its score as `mfe_kcal_mol`. What reads this is each arm's own claim about its own
+    design, against which a fold computed here is compared.
     """
     return point["mfe"] if "mfe" in point else point["mfe_kcal_mol"]
 
@@ -723,38 +719,40 @@ def read_points(path):
     return out
 
 
-def census(cfg, cell, front, out, coding_only):
-    """Each molecule folded freely and under the constraint.
+def score_designs(cfg, cell, designs, out):
+    """Each given molecule folded freely and under the constraint.
 
-    This is what scores the two arms whose points are not `derna` results: the
-    constraint is applied to a design that was not made under it, which is the
-    measurement A1 and A3 exist for. `derna check` cannot do it -- it takes
-    nothing about the molecule, by design, so it cannot be pointed at a front
-    whose header says there were no flanks.
+    This scores the two arms whose points are not `derna` results: the constraint is
+    applied to a design that was not made under it, which is the measurement A1 and A3
+    exist for. `derna check --designs` takes the molecule on the command line, because
+    these sequences carry no header to read it from, and refuses any sequence that is not
+    a molecule of that description.
     """
-    argv = [cfg["bins"]["census"], "--front", str(front), "--out", str(out),
-            "--residues", str(residues(cfg, cell)), "--utr5", cell["utr5"],
-            "--utr3", cell["utr3"], "--region", cfg["forbid"],
-            "--threads", str(cfg["score_threads"])]
-    if coding_only:
-        argv.append("--coding-only")
+    u5, u3 = flank_files(cfg, cell)
+    argv = [cfg["bins"]["derna"], "check", "--designs", str(designs),
+            "--protein", str(cell["fasta_path"]),
+            "--utr5", u5, "--utr3", u3, "--forbid", cfg["forbid"],
+            "--stop", cfg["stop"], "--out", str(out),
+            "--threads", str(cfg["score_threads"]), "--force"]
     subprocess.run(pinned(cfg.get("score_cores"), argv), check=True)
-    return read_census(out)
+    return read_scored(out)
 
 
-def read_census(path):
-    """The census's rows, in this experiment's vocabulary.
+def read_scored(path):
+    """A check's point rows, in this experiment's vocabulary.
 
-    The binary's output keys carry the older wording for the constrained
-    energy. They are renamed on the way in so that nothing downstream of here,
-    and nothing in the paper's tables, has two names for one quantity.
+    The result names the constrained energy `mfe`, the free fold `free_mfe` and the
+    verdict `modular`. They are renamed on the way in so that nothing downstream of here,
+    and nothing in the paper's tables, has two names for one quantity, and so that a row
+    from this route reads the same as one from the deposit.
     """
-    rename = {"guarded_kcal_mol": "constrained_kcal_mol", "guarded_matches": "separable"}
+    rename = {"mfe": "constrained_kcal_mol", "free_mfe": "free_kcal_mol",
+              "gap": "gap_kcal_mol", "modular": "separable"}
     out = []
-    for line in Path(path).open():
-        if line.strip():
-            rec = json.loads(line)
-            out.append({rename.get(k, k): v for k, v in rec.items()})
+    for i, rec in enumerate(read_points(path)):
+        row = {rename.get(k, k): v for k, v in rec.items()}
+        row.setdefault("index", i)
+        out.append(row)
     return out
 
 
@@ -771,12 +769,15 @@ def check(cfg, front, out):
     return read_points(out)
 
 
+# The scored files keep the name the deposit's rows were written under, so a re-run's
+# output sits beside a deposited copy under the same name rather than looking like a
+# different artefact.
 def score_a1(cfg, cell):
     points = read_points(cell_dir(cfg, cell) / "a1.jsonl")
     if not points:
         return []
-    front = census_input(cfg, cell, points, "a1.census-in.jsonl")
-    return census(cfg, cell, front, cell_dir(cfg, cell) / "a1.census.jsonl", coding_only=False)
+    designs = designs_input(cfg, cell, points, "a1.designs.txt")
+    return score_designs(cfg, cell, designs, cell_dir(cfg, cell) / "a1.census.jsonl")
 
 
 def score_a3(cfg, cell, results):
@@ -790,8 +791,8 @@ def score_a3(cfg, cell, results):
                if r["cell"] == cell["cell"] and r["arm"] == "A3" and r.get("design")]
     if not designs:
         return []
-    front = census_input(cfg, cell, designs, "a3.census-in.jsonl")
-    return census(cfg, cell, front, cell_dir(cfg, cell) / "a3.census.jsonl", coding_only=False)
+    seqs = designs_input(cfg, cell, designs, "a3.designs.txt")
+    return score_designs(cfg, cell, seqs, cell_dir(cfg, cell) / "a3.census.jsonl")
 
 
 def score_cell(cfg, cell, results, sink):
@@ -820,9 +821,9 @@ def score_cell(cfg, cell, results, sink):
 def so_share(rows):
     """The share of points that are structurally optimal, and the gaps.
 
-    One function over both scorers, because the share is the headline and it
-    has to be the same quantity for every arm. A census row carries the two
-    energies; a checked `derna` point carries the verdict and the gap. A point
+    One function over both scorers, because the share is the headline and it has to be the
+    same quantity for every arm. A scored given design carries the two energies; a checked
+    `derna` point carries the verdict and the gap. A point
     whose gap a beam only bounded counts as not structurally optimal and is
     counted separately, since a bound that refutes is a refutation.
     """
