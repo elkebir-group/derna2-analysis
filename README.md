@@ -438,7 +438,12 @@ Each of these can be closed, and says what closes it.
   deposit, at the point each is frozen.
 - **E2 has no deposit.** `e2_fig_composite` and `e2_fig_supp_motif` reproduce their published
   figures byte for byte, and `pins/e2_composite.outputs` and `pins/e2_supp_motif.outputs` are
-  checkable — but only here, because what `results_root/e2` names is not a cut deposit. It is
+  checkable — but only here, and only against the population their headers name. Both were
+  re-cut on 2026-11-05: the figures were byte-identical to the previous cut, and the caches had
+  moved by the renumbering (the motif files' header comment, the scripts' own paths) and by the
+  provenance fields that track the live tree. A run of the verify targets on a checkout whose
+  deposit has moved since a cut fails by design, and the pin is re-cut with the population it
+  describes. The deeper reason is that what `results_root/e2` names is not a cut deposit. It is
   a directory of links into the run tree that produced the results, which also holds that
   run's scripts, logs and working copies, carries the paths of the two hosts it ran on, and
   is three orders of magnitude larger than what the figures read. There is accordingly no

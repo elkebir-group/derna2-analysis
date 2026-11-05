@@ -34,9 +34,19 @@
 # the front came from -- a different build on a loaded host -- which
 # inputs/e2/f0_timings_imported.json states, `cost.json` names under
 # `imported_unconstrained_timings`, and every row it affects carries as `f0_timing`.
-4e0f07c665084a86fd0cdeb0ff03932a5c989d33793bc84647a9bc2c3203cb1a  e2/supp/admits.json
-550539acd697c5db135d565c0ca28488b5113b9fc50876e7ce807f3c324a0934  e2/supp/presence.json
-2026979540e138893c0b8ad86973ca538cf3d209e4d99063dd110c86fc1dcb62  e2/supp/cost.json
+#
+# Re-cut 2026-11-05, same population, and every difference accounted for exactly. The
+# figure's PDF and PNG are byte-identical to the previous cut's. The three caches and the
+# table moved only by the renumbering: the motif set files carry a `# E2 set I` comment where
+# they carried `# E3 set I`, the caches digest the scripts that wrote them and those scripts
+# were renamed from `pipelines/scripts/e3/` to `e2/`, and the table's first line names the
+# script that generated it. Each of the four was reproduced to the byte: rebuilding from the
+# pre-renumbering motif files and substituting the pre-renumbering script digests gives back
+# the digest the previous cut named, for admits.json, presence.json, cost.json and
+# tab_supp_motifs.tex alike. Not one measured number changed.
+6355eedf2c259e54a8df16d8abdf32820665f778fb583e291b51a48e195303b7  e2/supp/admits.json
+cec3ba72fa185d14e8b5e9d0c7ccabee783487ef1da71b9422746e9500d7e398  e2/supp/presence.json
+c88a7bba7dfe4d86909c2176ffa5baadc8726e5fa5c4474ae075aa0be9cf8540  e2/supp/cost.json
 c52258654b0f62b254750face953dc5b0ae5cbcbef45d2abb930f458fb4b9a43  figures/fig_supp_motif.pdf
 ba74e84eaf28755dda3d6c6f8f918213ef51c47f7e780a1affaba09bd376ad01  figures/fig_supp_motif.png
-b58915418482000164e6c9dc0c56c769338aba9441b31f619435a6f48b6ac480  figures/tab_supp_motifs.tex
+3c30bd40a95586acc8019445430a5bda5cceff73a74cdbdacfa43be0b245be63  figures/tab_supp_motifs.tex
