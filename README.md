@@ -338,7 +338,7 @@ The figure bundle copied from the host (`paper-e4/`, 664 files, checked against
 |---|---|---|
 | `e3_hull_input` | `e3/hullcheck/<cell>.in.jsonl` | one cell's concatenation hull vertices as a derna result file |
 | `e3_refold_deposit` | `e3/hullcheck/<cell>.out.jsonl` | the deposited refold of one cell, which is what the figures read; needs no binary |
-| `e3_refold` | the same file | `derna check` of those vertices, which carries the positions of each design's CDS–UTR pairs; runs the binary of `e3.derna_bin` (built at `e3.derna_pin`). The deposit is preferred, so recomputing one is `--force-run e3_refold` |
+| `e3_refold` | the same file | `derna check` of those vertices, which carries the positions of each design's CDS–UTR pairs; runs the `derna` built at `derna2.pin`. The deposit is preferred, so recomputing one is `--force-run e3_refold` |
 | `e3_cand_input` | `e3/cand/<cell>.{conc,mrf}.in.jsonl` | the main figure's instance (`e3.story`): the best concatenation design and the best mRNAfold design at the CAI floor, as derna result files |
 | `e3_cand_refold` | `e3/cand/<cell>.{conc,mrf}.out.jsonl` | `derna check` of those, the whole-mRNA structure and CDS–UTR pairs panel (e) draws |
 | `e3_fig_story` | `figures/fig_e3_story.pdf` | the main figure: UTR elements violated, modular designs per method, DERNA2's windows by state, the instance's fronts, and its three designs |
@@ -416,28 +416,8 @@ arguments.
 
 ## Open items
 
-- **Figure 1's run targets are partly a record rather than a route.** Its two fronts rerun
-  through `derna front` and check against the deposit (`fig1_runs`), and the overview figures
-  refold their modular design with `mfe_fold`. What does not rerun is panel (b)'s scoring and
-  the window search: those came from the scripts in `drivers/fig1/`, and the window rounds in
-  particular came from a binary that is not part of the command line. The pipeline checks
-  their output (`fig1_so_front`) without reproducing it.
-- **Figure 1's three fronts** have no run target. Their raw outputs record the host paths of
-  the checkout, the cargo target directory and the run directory they ran in — 97 files, every
-  one named by `pins/results-fig1_fronts.sha256` and so every one published. Three
-  substitutions cover all of them:
+Each of these can be closed, and says what closes it.
 
-  ```sh
-  .venv/bin/python pipelines/scripts/scrub_host_paths.py <deposit> \
-      '<worktree>/=derna2/' '<target-dir>/=target/' '<run-dir>/=run/'
-  ```
-
-  The script reports what it would rewrite and exits non-zero on any host path the
-  substitutions miss; `--apply` rewrites the files in place. **Rewriting the deposit
-  invalidates its manifest**, so the manifest has to be regenerated afterwards and the
-  substitutions recorded beside it. All 191 files are byte-identical to derna2 `f67a04a6`
-  (checked file by file; `pins/fig1_fronts-PROVENANCE.md`), so a rewrite loses nothing that
-  cannot be recovered from the commit.
 - **The whole-front experiment (E1) is in progress.** Its deposit has no checksum manifest
   until the grid finishes, and `e1.pin` reads `pending` until the commit it runs at is chosen.
   Rows of the first host's pilot (`acfaae60`) are not part of the grid.
@@ -446,18 +426,51 @@ arguments.
   `hull/<protein>.walk.json`, which the sweep rows do not carry, and the walk's rescored front
   points where `sweep.jsonl` has them (30 of the 83 walks are not rescored and use the walk's
   own energies). `derna front --report` carries the phase times, so this is a matter of reading
-  them from there rather than from a file the dev binary wrote.
+  them from there rather than from a file the dev binary wrote — and the rerun that produces
+  those reports is the grid above, so this item closes with that one.
+- **Figure 1's three fronts carry the paths of the host they ran on**, in 97 of the 191 files
+  `pins/results-fig1_fronts.sha256` names: the checkout, the cargo target directory and the
+  run directory. Three substitutions cover every occurrence — the script exits non-zero on any
+  path they miss, and on this deposit it exits zero:
+
+  ```sh
+  .venv/bin/python pipelines/scripts/scrub_host_paths.py <deposit> \
+      '<worktree>/=derna2/' '<target-dir>/=target/' '<run-dir>/=run/'
+  ```
+
+  Nothing is written without `--apply`. **Rewriting the deposit invalidates its manifest**, so
+  the manifest has to be regenerated afterwards and the substitutions recorded beside it. All
+  191 files are byte-identical to derna2 `f67a04a6` (checked file by file;
+  `pins/fig1_fronts-PROVENANCE.md`), so a rewrite loses nothing that cannot be recovered from
+  the commit.
 - **Figure 3's inputs are not all deposited.** `e2_fig_composite` reproduces the published
   figure byte for byte on this host, and `pins/e2_composite.outputs` is checkable here, but two
   of its inputs sit outside E2's deposit (`e2.e1_sweep`, `e2.e1_extra`) and the short2 and mid
   bands' fronts are read at absolute host paths, which the cache's provenance records as such.
   Depositing all three is what makes the manifest checkable elsewhere.
-- **E2's grid** has no rule: its fronts are not deposited. The hull probe ran on a binary that
-  predates the command line, so what is under `drivers/e2/` for it is a record of the run
-  rather than a route to repeat it. The union rows of the forced-motif census came from code
-  the plan does not include, and are not checked.
-- **E3** has a driver, inputs and UTRs here but no pin or rule of its own; its refolds rerun
-  through `derna check`.
-- **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold) are described in
-  `pins/comparators-PROVENANCE.md`, not automated.
 - **License**: none chosen yet.
+
+## Known limits
+
+These are properties of how the results were made, not work that is pending. Each names a
+step that a published checkout cannot repeat, and what stands in for repeating it.
+
+- **Part of Figure 1 is checked rather than reproduced.** Its two fronts rerun through
+  `derna front` and check against the deposit (`fig1_runs`), and the overview figures refold
+  their modular design with `mfe_fold`. Panel (b)'s scoring and the window search do not
+  rerun: those came from the scripts in `drivers/fig1/`, and the window rounds from a binary
+  that is not part of the command line. The pipeline checks their output (`fig1_so_front`)
+  without reproducing it.
+- **E2's grid has no rule**, because its fronts are not deposited. The hull probe ran on a
+  binary that predates the command line, so what is under `drivers/e2/` for it is a record of
+  the run rather than a route to repeat it. The union rows of the forced-motif census came
+  from code the plan does not include, and are not checked.
+- **E3's plate is not a run target.** Its figures, its statistics and the refolds of
+  concatenation's hull vertices all rerun — `derna check` at `derna2.pin` rebuilds
+  `e3_story_stats` and `e3_supp_contacts` byte-identical to their pins — but the census those
+  read is the deposit's, produced by `drivers/e3/drive_e3.py`. The build the deposited refolds
+  were made with is not a commit of the public repository and is identified by its bytes in
+  `pins/e3-PROVENANCE.md`.
+- **The comparator builds** (LinearDesign, LinearCDSfold, CDSfold, mRNAfold) are frozen once
+  and identified by their checksums rather than rebuilt; `pins/comparators-PROVENANCE.md`
+  records how each was made and why one of the two mRNAfold builds is the parallel one.

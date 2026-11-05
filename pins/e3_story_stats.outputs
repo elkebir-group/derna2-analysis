@@ -2,8 +2,8 @@
 # e3_story_stats_verify checks a build against it.
 #
 # The file is plain text: a function of the deposit (pinned by results-e3.sha256), E2's
-# unconstrained fronts the concatenation arm points at, and the refolds of `derna check` at the pin
-# (config e3.derna_pin). It holds every number the paper's UTRs subsection quotes: the share of
+# unconstrained fronts the concatenation arm points at, and the refolds of `derna check`
+# (pins/e3-PROVENANCE.md names the build the deposited ones were made with). It holds every number the paper's UTRs subsection quotes: the share of
 # concatenation designs that are modular (84% are not), the proteins with a modular design per
 # method and UTR pair, the windows of DERNA2's search by state, and the instance of the main figure
 # (P26436 on the BNT UTRs at CAI >= 0.9), including the window that contains the cutoff and the

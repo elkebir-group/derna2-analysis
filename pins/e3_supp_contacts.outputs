@@ -3,7 +3,8 @@
 #
 # The histograms are plain data: a function of the deposit (pinned by results-e3.sha256), E2's
 # unconstrained fronts the concatenation arm points at, and the refolds of the hull vertices
-# by `derna check` at the pin (config e3.derna_pin). The figure's bytes are matplotlib's
+# by `derna check` (pins/e3-PROVENANCE.md names the build the deposited refolds were made
+# with). The figure's bytes are matplotlib's
 # through usetex and are not pinned.
 #
 # Cut 2026-11-04: 11831 non-modular concatenation designs over 150 cells (HBB 2829, mRNA-1273

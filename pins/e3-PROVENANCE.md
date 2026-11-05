@@ -16,14 +16,19 @@ the positions of the CDS–UTR base pairs. Those come from the refolds, which ar
 
 ## The binary
 
-`derna` at the pin `db5982d8` of config `e3.derna_pin`. The deposited refolds were made with
-that build; a rerun uses the `derna` the pipeline builds, so its rows carry its own commit.
-The build the deposit was made with hashes to:
+The deposited refolds were made by a `derna` built before the command line was published,
+from a commit of the development repository that the public repository's history does not
+carry. A commit that cannot be fetched is not a pin, so that build is identified here by
+its bytes and nowhere else:
 
     41c91ffbd477571a3425de418b40b70de0fb2d595471e6869f697dfd20ef5646  derna
 
-It is not pinned by a manifest here, so this file is its only record. A commit does not identify
-a binary, so a rebuild at the same pin in another working tree may differ.
+A rerun uses the `derna` the pipeline builds at `derna2.pin`, and its rows carry that
+commit instead. The rows it writes are the deposited rows: `e3_story_stats` and
+`e3_supp_contacts` rebuild byte-identical to `pins/e3_story_stats.outputs` and
+`pins/e3_supp_contacts.outputs` from refolds made with a `derna` built from the public
+repository (checked 2026-11-04). So nothing here needs the older build; it is recorded
+because the deposited rows name it.
 
 ## The refolds
 

@@ -122,8 +122,10 @@ fig1:
 # bundle's paper-e4/ (results_root/e3, against pins/results-e3.sha256). The refolds of
 # concatenation's hull vertices come from `derna check`, the binary `derna2` above builds.
 e3:
-  # The commit the deposited refolds were made at, which the rows carry.
-  derna_pin: db5982d8
+  # A rerun builds `derna` at `derna2.pin`, like every other run target, and reproduces the
+  # deposited refolds' rows. The build those rows were made with is not a commit of the
+  # public repository and is identified by its checksum instead, in pins/e3-PROVENANCE.md.
+  #
   # The deposited rows carry a `source` path from the host that ran them: the concatenation
   # arm points at E2's unconstrained fronts, and the middle band at files of this deposit.
   # Each recorded prefix is rewritten to where that tree is on this host. They are
