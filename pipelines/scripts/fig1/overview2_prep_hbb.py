@@ -8,7 +8,7 @@ cd_symmetric_guarded_front.scored, d_so_front); MRNAFOLD_COMPARE the fig1_fronts
 mrnafold/compare.jsonl. Forbidden motif: CUCGAG (XhoI). Hull vertices of the coding-only front
 are computed from its points. The designs follow overview2_prep_arms.py: d2 is mRNAfold's
 design (CDS-UTR pairs discouraged) that contains the motif, CAI nearest CAI_TARGET; d1 the
-concatenation hull vertex nearest d2 in CAI with another sequence; d3 the structurally optimal
+concatenation hull vertex nearest d2 in CAI with another sequence; d3 the modular
 design nearest d2 in CAI, refolded because the front stores energies only.
 
 LAYOUT_JSON (a JSON object: the UTR pair's name for the title, and any placement overview2.py
@@ -53,7 +53,7 @@ def main():
 
     so = [dict(r) for r in read_jsonl(res / "d_so_front.jsonl")]
     if any(hits(r["sequence"]) for r in so):
-        sys.exit("a structurally optimal design carries the motif: the front is not motif-free")
+        sys.exit("a modular design carries the motif: the front is not motif-free")
     front = read_jsonl(res / "a_cdsonly_front.jsonl")
     hv = set(hull_vertices([(r["cai_log"], r["mfe_kcal_mol"]) for r in front]))
     a0 = [dict(r, hull_vertex=(r["cai_log"], r["mfe_kcal_mol"]) in hv) for r in front]

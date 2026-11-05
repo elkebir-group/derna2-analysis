@@ -1,5 +1,5 @@
 # The overview figure: GLPE_HUMAN (78 aa) with the hbb UTRs. drivers/fig1/FIG1.md describes
-# the instance, the guard and how the structurally optimal front was found.
+# the instance, the constraint and how the modular front was found.
 
 FIG1 = config["fig1"]
 FIG1_RUNS = RUNS / "fig1"
@@ -34,7 +34,7 @@ rule fig1_plot:
         "{PY} {SCRIPTS}/fig1/plot.py {params.results} {output[0]}"
 
 
-# The structurally optimal front reassembled from its window reports; fails unless it
+# The modular front reassembled from its window reports; fails unless it
 # equals the deposited front point for point.
 rule fig1_so_front:
     input:

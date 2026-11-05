@@ -1,4 +1,4 @@
-"""Assemble the structurally optimal front from its window reports and check it against the
+"""Assemble the modular front from its window reports and check it against the
 deposited front.
 
     python so_front.py WINDOWS_DIR DEPOSITED_FRONT OUT_JSONL

@@ -66,14 +66,14 @@ data/results/
 ├── fig1/
 │   ├── a_cdsonly_front.jsonl                    # exact CDS-only front, hull vertices marked
 │   ├── b_cdsonly_with_utrs.scored.jsonl         # those designs folded with the UTRs
-│   ├── cd_symmetric_guarded_front.scored.jsonl  # exact guarded front
-│   ├── d_so_front.jsonl                         # exact structurally optimal front
+│   ├── cd_symmetric_guarded_front.scored.jsonl  # exact constrained front
+│   ├── d_so_front.jsonl                         # exact modular front
 │   ├── so_windows/          # the window walks that found it, by round
 │   └── top_exhaustive/      # the stretch above the most adapted seed, by enumeration
 ├── fig1_hba/                # not deposited yet: the overview figure for the hba UTR pair
 │   ├── run3-hba/            # the GLPE arms' results for that pair (a0 CDS-only front and its
 │   │                        # refolds, a2 masking front, a3 mRNAfold)
-│   └── xhoi/so.jsonl        # the structurally optimal front with XhoI forbidden
+│   └── xhoi/so.jsonl        # the modular front with XhoI forbidden
 └── fig1_fronts/
     ├── <arm>/               # unguarded, symmetric, no_clamp, unpaired: report.json, the front
     │                        # and its hull vertices re-scored; front3.jsonl and its designs
@@ -323,7 +323,7 @@ and the committed motif sets, and are closed wherever the deposit is.
 Four fronts per protein and UTR pair, all re-scored on the whole molecule by one folder: the
 CDS designed alone with the UTRs pasted on afterwards, the UTRs inside the DP with CDS–UTR pairs
 forbidden (`--forbid 5-cds,cds-3`; 5′–3′ pairs allowed), mRNAfold with the UTRs in its energy
-model, and the structurally optimal front. Instances: the short band's proteins
+model, and the modular front. Instances: the short band's proteins
 (`inputs/e3/`, with their source checksums), each with up to five UTR pairs used in practice
 (`inputs/utrs/utrs.fasta` and its provenance); the middle and long bands wait on E2's
 selections. The stop codon is a recorded dimension of every cell. The driver is
@@ -356,21 +356,21 @@ checksum manifest yet, so only E3's is checked.
 ### Figure 1: GLPE_HUMAN with the hbb UTRs
 
 One real instance (P15421, 78 aa; hbb UTRs, 50 nt 5′ and 132 nt 3′) carrying both
-contributions: the exact CDS-only front, what attaching the UTRs does to its designs, a guarded
-front with no CDS–UTR pairs, and the exact structurally optimal front under that guard (free
-MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
+contributions: the exact CDS-only front, what attaching the UTRs does to its designs, a
+constrained front with no CDS–UTR pairs, and the exact modular front under that constraint
+(free MFE = constrained MFE). `drivers/fig1/FIG1.md` describes the method.
 
 | Rule | Output | Content |
 |---|---|---|
-| `fig1_so_front` | `fig1/so_front.jsonl` | the structurally optimal front reassembled from its window reports; fails unless the windows settle the whole log-CAI range and the front equals the deposited one |
+| `fig1_so_front` | `fig1/so_front.jsonl` | the modular front reassembled from its window reports; fails unless the windows settle the whole log-CAI range and the front equals the deposited one |
 | `fig1_plot` | `figures/fig1_glpe_hbb.pdf` | panels a–d |
 | `fig1_figures` | | the two above |
 | `fig1_overview_designs` | `fig1/overview_designs.json` | the overview figure's three designs at CAI ≈ 0.87: mRNAfold's design (CDS–UTR pairs discouraged, from the `fig1_fronts` deposit) with the forbidden XhoI site, a hull vertex of the concatenation front (what a weighted sum returns) and the nearest modular design, refolded with the pinned `fold_seq`; fails unless the refold matches the deposited energy with no CDS–UTR pair and no modular design contains XhoI |
 | `fig1_overview` | `figures/fig1_overview.pdf` | the paper's overview figure; needs a LaTeX install (Times) for its text |
-| `fig1_front` | `runs/fig1/{arm}/front.jsonl` | the CDS-only (`cdsonly`) or symmetric-guarded (`symmetric`) front, re-walked |
+| `fig1_front` | `runs/fig1/{arm}/front.jsonl` | the CDS-only (`cdsonly`) or symmetric-constrained (`symmetric`) front, re-walked |
 | `fig1_check_front` | `runs/fig1/{arm}/check.txt` | that front against the deposited one, energy at every log-CAI level |
 | `fig1_runs` | | both fronts, re-walked and checked |
-| `fig1_overview2_prep_hbb` | `fig1/overview2_hbb/` | the revised overview's inputs for the hbb pair from the fig1 and fig1_fronts deposits, hull vertices computed, and its three designs picked as `fig1_overview_designs` does; the structurally optimal design refolded with the pinned `fold_seq` and checked against its recorded energy, no CDS–UTR pair and no XhoI site |
+| `fig1_overview2_prep_hbb` | `fig1/overview2_hbb/` | the revised overview's inputs for the hbb pair from the fig1 and fig1_fronts deposits, hull vertices computed, and its three designs picked as `fig1_overview_designs` does; the modular design refolded with the pinned `fold_seq` and checked against its recorded energy, no CDS–UTR pair and no XhoI site |
 | `fig1_overview2_prep_hba` | `fig1/overview2_hba/` | the same for the hba pair, from `fig1_hba/` |
 | `fig1_overview2_plot` | `figures/fig1_overview2_{pair}.pdf` | the revised overview figure: (a) the problem, with the AlphaFold model of the protein (`inputs/structures/`); (b) the fronts with a table of what each front guarantees (UTRs, motifs, complete, modular) and a one-row marker legend (square modular, circle not; filled on the hull, open off it); (c)–(e) the three designs' RNApuzzler structures; layout settings fixed per pair in `config.yaml` (`fig1.overview2`) |
 | `fig1_overview2` | | the revised overview figure for both pairs; needs ViennaRNA and a LaTeX install with Times and the `pifont` ZapfDingbats font for the table's marks (on EL7, `texlive-times` and `texlive-zapfding`); the PDF carries no creation date, so a rebuild on the same TeX fonts is byte for byte the same |
@@ -379,9 +379,9 @@ MFE = guarded MFE). `drivers/fig1/FIG1.md` describes the method.
 
 The same instance with three fronts drawn together: the exact plain front (114 points, 23 hull
 vertices); the exact front under each of three CDS–UTR constraints (`5-cds,cds-3`: 117 points,
-none structurally optimal; `5-cds,5-3`: 119 points, 42 structurally optimal; `5-5,5-cds,5-3`:
+none modular; `5-cds,5-3`: 119 points, 42 modular; `5-5,5-cds,5-3`:
 119 points, none, since the hbb 5′ UTR pairs with itself); and, per constrained hull vertex,
-the first structurally optimal design a lazy k-best walk finds (21 of 22 vertices under
+the first modular design a lazy k-best walk finds (21 of 22 vertices under
 `5-cds,cds-3`, 22 of 22 under `5-cds,5-3`). mRNAfold is run at each vertex's weight. The deposit
 is derna2's `experiment/glpe-hbb-fronts-data` at `f67a04a6` (merged as derna2 PR #398), built
 from `1b3739b`; `drivers/fig1-fronts/README.md` describes the runs. The scripts there carry the
@@ -389,7 +389,7 @@ paths of the host they ran on and are not pipeline steps.
 
 | Rule | Output | Content |
 |---|---|---|
-| `fig1_fronts_tables` | `fig1_fronts/tables.md` | per front: points, hull vertices, structurally optimal points and wall; per front-3 walk: λ, the vertex's energy, rank found, the design's energy and the walk's cost; mRNAfold against each vertex |
+| `fig1_fronts_tables` | `fig1_fronts/tables.md` | per front: points, hull vertices, modular points and wall; per front-3 walk: λ, the vertex's energy, rank found, the design's energy and the walk's cost; mRNAfold against each vertex |
 
 ### The proteins
 

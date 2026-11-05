@@ -1,6 +1,6 @@
-"""The overview figure's structurally optimal front, assembled from its window reports.
+"""The overview figure's modular front, assembled from its window reports.
 
-The front was found by capped window walks between adjacent known structurally optimal
+The front was found by capped window walks between adjacent known modular
 designs (seeds), plus a ceiling walk above the most adapted seed. Each report's last line
 lists the designs it found; the front is the non-dominated set of seeds and finds.
 """

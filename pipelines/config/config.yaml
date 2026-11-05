@@ -99,7 +99,7 @@ fig1:
         margin_c: 16
         inset2_pad: 0.005
         label_at: {d2: [-4, -3, right, top]}
-    # hba reads the GLPE arms' results for that pair and the structurally optimal front with
+    # hba reads the GLPE arms' results for that pair and the modular front with
     # XhoI forbidden, neither deposited yet. The front below is settled to CAI 0.969 only; the
     # final figure takes the complete run.
     hba:

@@ -46,7 +46,7 @@ def main():
 
     so = [dict(r, mfe_kcal_mol=r["mfe"]) for r in so_rows if r.get("record") == "point"]
     if any(r["violations"] or hits(r["sequence"]) or r["gap"] != 0 for r in so):
-        sys.exit("an A5 design carries a motif or is not structurally optimal")
+        sys.exit("an A5 design carries a motif or is not modular")
     front = [r for r in read_jsonl(arms / "a0" / "front.jsonl") if r.get("record") == "point"]
     hv = set(hull_vertices([(r["cai_log"], r["mfe"]) for r in front]))
     a0 = [dict(r, hull_vertex=(r["cai_log"], r["mfe"]) in hv) for r in front]

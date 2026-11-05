@@ -1,5 +1,5 @@
 # Figure 1's three fronts on GLPE_HUMAN with the hbb UTRs: the plain front, the front under
-# each of three CDS–UTR constraints, and a structurally optimal design per constrained hull
+# each of three CDS–UTR constraints, and a modular design per constrained hull
 # vertex. drivers/fig1-fronts/README.md describes the runs and reads the tables below.
 
 

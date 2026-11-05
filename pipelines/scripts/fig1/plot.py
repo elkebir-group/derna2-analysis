@@ -5,8 +5,9 @@
 a  exact CDS-only front in (log-CAI, MFE), its hull vertices marked: the only points a
    weight sweep can reach.
 b  the same designs folded alone and with the UTRs attached (free fold).
-c  the symmetric-guarded front (no CDS-UTR pairs) against the free fold of the same designs.
-d  the guarded front and the structurally optimal front (free MFE = guarded MFE).
+c  the symmetric-constrained front (no CDS-UTR pairs) against the free fold of the same
+   designs.
+d  the constrained front and the modular front (free MFE = constrained MFE).
 """
 
 import sys
@@ -67,6 +68,10 @@ def main():
         pb.plot(x, y, color=color, marker=marker, markersize=2, linewidth=1, label=label)
     pb.set_title("b  the same designs, UTRs attached", loc="left")
 
+    # The five labels below read "guarded" and "structurally optimal" where prose here says
+    # "constrained" and "modular". They are the drawn plate's own text, so rewording them
+    # changes the figure as it appears in the paper, which is a decision about the paper and
+    # not a rewording of this repository. Left as published, deliberately.
     for field, color, marker, label in [
         ("mfe_kcal_mol", SLOTS[2], "^", "guarded MFE"),
         ("free_mfe_kcal_mol", SLOTS[1], "s", "free MFE"),

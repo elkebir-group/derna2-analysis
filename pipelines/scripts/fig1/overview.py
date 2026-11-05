@@ -124,7 +124,7 @@ def gap(edge, pts):
 
 
 def load_mrnafold(path):
-    # the guarded arm, with its CAI under our codon weights
+    # the constrained arm, with its CAI under our codon weights
     return [dict(r, cai_log=r["theirs_cai_log"]) for r in read_jsonl(path) if r["arm"] == "guard"]
 
 
