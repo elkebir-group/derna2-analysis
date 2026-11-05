@@ -25,7 +25,9 @@ rna_python: null
 # build (host.yaml).
 derna2:
   repo: https://github.com/elkebir-group/derna2.git
-  pin: main
+  # A commit, not a branch: a moving ref would make two runs of this pipeline incomparable
+  # without either of them saying so.
+  pin: c9b146d
   bin_dir: null
 
 # Whole-front runtime (E1). Grid: drivers/e1/e1.config.json, the configuration of the run on
