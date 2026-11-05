@@ -18,8 +18,8 @@ CELL        the instance of (d) and (e), a protein on a UTR pair, and CAI_FLOOR 
     differ from DERNA2's, the CDS-UTR pairs, and the whole-molecule folds with the Kozak site
 
 "DERNA2" is the output with window enumeration: the masked front's modular designs, which it
-starts from, and the modular designs it adds. Element annotation and the 1-based `violations` reading follow
-drafts/e3-plate (annotate_utr.py, plot_pairs.py).
+starts from, and the modular designs it adds. The element annotation and the 1-based
+`violations` reading were drafted elsewhere and are implemented here.
 """
 import glob
 import json
@@ -77,7 +77,7 @@ def nondominated(pts):
     return out
 
 
-# ---- element annotation, as drafts/e3-plate/annotate_utr.py ----
+# ---- element annotation ----
 def find_pyr(s, w=14, k=12):
     hits = [(i, i + w) for i in range(len(s) - w + 1) if sum(c in "CU" for c in s[i:i + w]) >= k]
     out = []
@@ -194,7 +194,7 @@ def element_census(cells, head, hull):
             share[pair][1] += 1
             hit = set()
             for i, j in x.get("violations") or []:
-                a, b = min(i, j) - 1, max(i, j) - 1  # 1-based, as drafts/e3-plate verified
+                a, b = min(i, j) - 1, max(i, j) - 1  # 1-based in the result rows
                 if a < l5 <= b < cend and m5[a]:
                     hit |= m5[a]
                 elif l5 <= a < cend <= b and 0 <= b - cend < len(m3) and m3[b - cend]:

@@ -1,5 +1,4 @@
-# E2: the price of motif-freedom, as five nested exact fronts per instance. The design is
-# drivers/e2/E2-PLAN.md. The grid needs `derna front --motif`, which is not in a pinned
+# E2: the price of motif-freedom, as five nested exact fronts per instance. The grid needs `derna front --motif`, which is not in a pinned
 # build yet, so only what has run is here: the forced-motif census and the hull probe.
 
 E2 = config["e2"]

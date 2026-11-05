@@ -188,8 +188,8 @@ figure are checked against the digests in `pins/e1_fig4.outputs`. The protein of
 What excluding motifs costs: the exact Pareto front over every design, then over the designs
 that avoid each of four cumulative motif sets (`inputs/motifs/`: manufacturing sites,
 processing signals, repeats, internal initiation), five nested fronts per instance, no UTRs.
-No other tool can express the constraint, so there are no comparator arms. Design and
-pre-registered rules: `drivers/e2/E2-PLAN.md`. The grid runs `derna front --motif` at derna2
+No other tool can express the constraint, so there are no comparator arms. The grid's rules
+were pre-registered before it ran, in a plan document that is not published here. It runs `derna front --motif` at derna2
 `06605630` (`drivers/e2/E2-PIN.md`), in 4 h rounds that stop at a gap boundary and resume.
 Pass 1 (six short-band proteins × F1–F4) is closed with two complete fronts and 22 anytime ones
 (`drivers/e2/E2-GRID-PASS1.md`); pass 2 and the middle band's selection are pending, and the
@@ -326,10 +326,10 @@ forbidden (`--forbid 5-cds,cds-3`; 5′–3′ pairs allowed), mRNAfold with the
 model, and the structurally optimal front. Instances: the short band's proteins
 (`inputs/e3/`, with their source checksums), each with up to five UTR pairs used in practice
 (`inputs/utrs/utrs.fasta` and its provenance); the middle and long bands wait on E2's
-selections. The stop codon is a recorded dimension of every cell. Design:
-`drivers/e3/E3-PLAN.md`; driver `drivers/e3/drive_e3.py`. The grid runs on derna2 builds that
-follow `xg` arm by arm, so E3 has no single pin, and its results stay on the host until it
-does; the grid has no rule here.
+selections. The stop codon is a recorded dimension of every cell. The driver is
+`drivers/e3/drive_e3.py`, and its design was pre-registered in a plan document that is not
+published here. The grid ran against a development build per arm rather than one commit, so
+it has no pin and no rule here; what is published is the figure bundle below.
 
 The figure bundle copied from the host (`paper-e4/`, 664 files, checked against
 `pins/results-e3.sha256`) is read by two figures, the main one and a supplement one, which are rules:

@@ -1,5 +1,4 @@
-# E1: what the whole Pareto front costs each method. The grid is drivers/e1/e1.config.json;
-# the design is drivers/e1/E1-PLAN.md.
+# E1: what the whole Pareto front costs each method. The grid is drivers/e1/e1.config.json.
 
 E1 = config["e1"]
 E1_RUNS = RUNS / "e1"

@@ -48,7 +48,7 @@ e1_fig4:
   pin: 8603d37d
   focus: P47211
 
-# The price of motif-freedom (E2). Design: drivers/e2/E2-PLAN.md. The nested fronts need
+# The price of motif-freedom (E2). The nested fronts need
 # `derna front --motif`, not in a pinned build yet; what is here is the forced-motif census
 # and the hull probe, read from the results without a checksum manifest while it runs.
 e2:
@@ -77,17 +77,14 @@ e2:
   e1_sweep: null
   e1_extra: null
 
-# E3 (UTR-aware design, four fronts per instance) and E5 (the combined ladder and its MASS
-# summary) are plans: drivers/e3/E3-PLAN.md, drivers/e5/E5-PLAN.md. Neither has a driver,
-# a pin or a result yet, so neither has a rule.
-
 # Overview figure (GLPE_HUMAN with hbb UTRs).
 fig1:
   # `pins/fig1.sha256` identifies four binaries by their bytes: they predate the command line
   # and their source commit was never recorded, so nothing here checks or rebuilds them, and
-  # what reruns runs `derna`. See README "Open items".
-  # the overview figure's forbidden motif: a restriction site that one of mRNAfold's designs
-  # contains and no modular design does, so the deposited modular front is also motif-free
+  # what reruns runs `derna`. See README "Known limits".
+  #
+  # The overview figure's forbidden motif: a restriction site that one of mRNAfold's designs
+  # contains and no modular design does, so the deposited modular front is also motif-free.
   overview_motif: {name: XhoI, site: CTCGAG}
   # The revised overview figure (overview2.py), one per UTR pair. `layout` goes into the design
   # file: the title's name for the UTR pair, and any placement fixed for that pair instead of
