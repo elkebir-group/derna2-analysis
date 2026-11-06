@@ -465,7 +465,20 @@ Each of these can be closed, and says what closes it.
   result against the manifest again, 2,514 files both times. No tar is committed — each is
   built on demand — so publication is the one step left, and it closes for all of them
   together.
-- **License**: none chosen yet.
+
+## License
+
+BSD 3-Clause (`LICENSE`), the same licence and copyright holder as
+[elkebir-group/derna2](https://github.com/elkebir-group/derna2). It covers this project's own
+work: the pipeline, the library, the tests, the vendored drivers, and the manifests and
+provenance notes under `pins/`.
+
+It does **not** cover the input sequences under `inputs/`, which are redistributed unmodified
+so a figure can be rebuilt from the bytes it was drawn from. `NOTICE` names each source and
+its terms: 77 UniProtKB/Swiss-Prot accessions under CC BY 4.0, UTRs extracted from four NCBI
+RefSeq records, and UTRs read from a CureVac patent sequence listing and a GSRS record. Each
+one's `PROVENANCE` note under `inputs/` remains the authoritative record of how it was
+obtained; `NOTICE` states only the terms.
 
 ## Known limits
 

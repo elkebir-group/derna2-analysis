@@ -1,0 +1,66 @@
+DERNA2 analysis
+Copyright (c) 2026, El-Kebir Group
+
+The code in this repository — the pipeline under `pipelines/`, the library in
+`derna2_analysis/`, the tests, and the drivers vendored from the DERNA2
+repository under `drivers/` — is licensed under the BSD 3-Clause License; see
+LICENSE. So are the manifests under `pins/` and the provenance notes beside
+them, which are this project's own records of what it measured.
+
+What follows is not licensed by the above, because it is not ours. None of it is
+code, and none of it is modified here: these are input sequences, redistributed
+so that a published figure can be reproduced from the same bytes it was drawn
+from. Each one's `PROVENANCE` note under `inputs/` is the authoritative record of
+where it came from and how it was extracted; this file names the terms.
+
+  Protein sequences from UniProtKB/Swiss-Prot
+  ------------------------------------------
+  77 accessions, under `inputs/uniprot/`, with copies of some under
+  `inputs/e1-natives/` and `inputs/e3/` where an experiment reads them from its
+  own directory. Each file is UniProt's own FASTA for that accession,
+  byte-unmodified.
+
+    Copyright (c) the UniProt Consortium. UniProt applies the Creative Commons
+    Attribution 4.0 International (CC BY 4.0) License to all copyrightable
+    parts of its databases. https://www.uniprot.org/ — CC BY 4.0 is an
+    attribution licence, so redistribution is permitted with credit, which this
+    notice gives.
+
+  Untranslated regions derived from NCBI RefSeq
+  --------------------------------------------
+  Records in `inputs/utrs/utrs.fasta` extracted from RefSeq entries
+  NM_000518.5 (HBB), NM_000558.5 (HBA1), NM_000414.4 (HSD17B4) and NM_002795.3
+  (PSMB3), retrieved by NCBI efetch on 2026-10-19 and cut to the span each
+  record's own CDS feature annotates.
+
+    NCBI "places no restrictions on the use or distribution of the data
+    contained therein", while noting that a submitter or country of origin may
+    claim rights in all or part of a submission, and that NCBI cannot give
+    unrestricted permission on their behalf.
+    https://www.ncbi.nlm.nih.gov/home/about/policies/
+
+  Untranslated regions read from patent and regulatory documents
+  -------------------------------------------------------------
+  The remaining records in `inputs/utrs/utrs.fasta` were extracted from
+  published documents rather than from a sequence database: a CureVac patent
+  sequence listing (US 11,241,493 B2, SEQ ID NO: 148, corroborated against
+  US 2022/0233568 A1) and a GSRS record for BNT162b2. Patent specifications and
+  their sequence listings are published public documents. `inputs/utrs/PROVENANCE.md`
+  states, per record, whether its span is stated by the source or produced by
+  arithmetic, and which boundaries rest on secondary sources.
+
+  Other sequences
+  ---------------
+  `inputs/prt/` (five Cas orthologs), `inputs/P0DTC2.fasta`, and the derived
+  fragments `inputs/e3/eGFP.fasta` and `inputs/e3/RBD.fasta`. Their provenance
+  notes under `inputs/` record what each is; this notice makes no claim over
+  them beyond that record.
+
+The deposits themselves are not in this repository. They are the recorded
+results of runs described in `pins/*-PROVENANCE.md`, built by this project, and
+they carry the licence above when published. A deposit that embeds a
+third-party input embeds it under that input's terms, as named here.
+
+The algorithms this analysis measures are described in the published
+literature, and the references in README.md are scholarly debts rather than
+licence conditions.
