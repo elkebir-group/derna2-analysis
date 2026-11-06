@@ -1,5 +1,6 @@
-# The corpus is a copy out of the gitignored _cpp mirror, reproducible with
-# `just sync-cpp` plus the <= 500 aa filter — third-party data, not ours to vendor.
+# The corpus is a copy of the uniprotSeq corpus of DERNA
+# (https://github.com/elkebir-group/derna, data/uniprotSeq/, commit adecda82)
+# with the <= 500 aa filter applied — third-party data, not ours to vendor.
 corpus/
 # Full front records: every design's sequence, per protein. The tables derived
 # from them (lattice.jsonl, binding.jsonl, f0/summary.csv) are what results
@@ -15,7 +16,7 @@ binding.jsonl
 *.log
 *.out
 
-# The 501-700 aa band: a second corpus out of the same mirror, same filter at a
+# The 501-700 aa band: a second corpus out of the same source, same filter at a
 # different cut, and its full front records.
 corpus-l/
 f0-l/*.jsonl

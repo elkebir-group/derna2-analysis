@@ -495,3 +495,16 @@ from four NCBI RefSeq records, UTRs read from a CureVac patent sequence listing 
 record, and the AlphaFold DB model of P15421 under CC BY 4.0. Each one's `PROVENANCE` note
 under `inputs/` remains the authoritative record of how it was obtained; `NOTICE` states
 only the terms.
+
+DERNA2 and the refolds in this analysis compute free energy with the Turner 2004
+nearest-neighbor parameters, as compiled in the Nearest Neighbor Database (NNDB):
+
+- Mittal, A., Turner, D. H. & Mathews, D. H. NNDB: an expanded database of nearest neighbor
+  parameters for predicting stability of nucleic acid secondary structures. *Journal of
+  Molecular Biology* 436, 168549 (2024). doi:10.1016/j.jmb.2024.168549
+- Turner, D. H. & Mathews, D. H. NNDB: the nearest neighbor parameter database for predicting
+  stability of nucleic acid secondary structure. *Nucleic Acids Research* 38, D280–D282
+  (2010). doi:10.1093/nar/gkp892
+- Mathews, D. H. et al. Incorporating chemical modification constraints into a dynamic
+  programming algorithm for prediction of RNA secondary structure. *Proceedings of the
+  National Academy of Sciences* 101, 7287–7292 (2004). doi:10.1073/pnas.0401799101

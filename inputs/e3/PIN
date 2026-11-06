@@ -9,11 +9,10 @@ a373041e3a52a45b93f6c6104ec0c9bbca272dd3  P01241.fasta (git blob at source commi
 32eae86bbb532b8395e80f2271f21af06841f294  eGFP.fasta (git blob at source commit)
 5677da699986bbc5b9b1c8d7ab9af59ae8ac273d  RBD.fasta (git blob at source commit)
 
-Mirror proteins (E2 short band), copied 2026-10-20 from the derna C++ mirror
+uniprotSeq proteins (E2 short band), copied 2026-10-20 from the uniprotSeq corpus of DERNA
 Source repo: https://github.com/elkebir-group/derna at adecda8277add8c0b75512434bd729f30b8fd7d6
 Path in repo: data/uniprotSeq/<accession>.fasta
-Copied because that mirror is gitignored and re-cloned per host, so on another host it
-need not be this revision.
+Copied so that each id names these bytes, whatever revision of that repository is current.
 
 The sha256 below are of the file contents, and each names the copy under inputs/e3/ — all
 sixteen verify against it. They were recorded with the directory the run read them from, on

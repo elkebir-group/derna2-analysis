@@ -1,9 +1,11 @@
 # The six therapeutic natives
 
-The screen's 55 UniProt proteins are the LinearDesign set, capped at 500 aa and
-reproducible from the `_cpp` mirror. These six are the realistic mRNA targets
-added beside them, and they are **not** in that mirror, so their provenance is
-recorded here rather than being implicit in a path.
+The screen's 55 UniProt proteins are the LinearDesign set, capped at 500 aa, as
+distributed in the `uniprotSeq` corpus of DERNA
+(https://github.com/elkebir-group/derna, `data/uniprotSeq/`, commit `adecda82`).
+These six are the realistic mRNA targets added beside them, and they are **not**
+in that corpus, so their provenance is recorded here rather than being implicit
+in a path.
 
 | input | residues | source |
 |---|---|---|

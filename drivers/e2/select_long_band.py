@@ -37,7 +37,7 @@ THE RULE, fixed before any front in this band exists:
   4. Final tie: alphabetical by identifier. Arbitrary, fixed, and independent of
      every measured quantity, so the data cannot steer it.
 
-A reversed synthetic sequence in the mirror is excluded by rule 1 and named in
+A reversed synthetic sequence in the source corpus is excluded by rule 1 and named in
 the report, because a band characterizing real proteins cannot reach its tenth
 instance by admitting a sequence that is not one.
 """
