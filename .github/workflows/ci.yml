@@ -69,7 +69,12 @@ jobs:
       # published figure's digest unreproducible. Style here is therefore subordinate to
       # provenance, and `ruff` is run by hand when a file is touched for another reason.
       - name: Tests
-        run: pytest -q
+        # `-rs` names every skip in the summary. A skip nobody reads is a test that is not
+        # running: this suite skips `tests/test_overview2.py` wholesale through
+        # `pytest.importorskip("RNA")`, which hides five tests rather than one, and it skips
+        # a Figure 1 stamp check unless FIG1_WINDOW_BIN is set. Both are legitimate and both
+        # should be visible in the log rather than summed into a count.
+        run: pytest -q -rs
 
       - name: The workflow parses and every rule resolves
         # `--list` loads the Snakefile, all eight rule files and the committed config, and

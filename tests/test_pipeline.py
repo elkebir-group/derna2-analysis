@@ -37,9 +37,6 @@ def readme_targets():
 # that run.sh reaches snakemake at all, and that a target names a rule -- are kept
 # unconditional, so a checkout without deposits still checks them.
 HAS_DEPOSITS = (ROOT / "data" / "results" / "e1" / "sweep.jsonl").exists()
-needs_deposits = pytest.mark.skipif(
-    not HAS_DEPOSITS, reason="no deposits here: a dry run cannot resolve its input files"
-)
 
 
 @needs_snakemake
