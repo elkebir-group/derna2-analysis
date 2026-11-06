@@ -75,11 +75,10 @@ e2:
   figure: {width_in: 7.3, height_in: 3.0, subset: finished}
   # The motif supplement plate: nine panels in two rows at the text width.
   supp_figure: {width_in: 6.5, height_in: 3.0}
-  # Panel (a)'s two inputs from outside E2's deposit: E1's sweep, which names the proteins
-  # the screen is scored over, and the auxiliary tree of E1 instances screened for this
-  # figure. Set in host.yaml until both are deposited.
-  e1_sweep: null
-  e1_extra: null
+  # Panel (a)'s two inputs from outside E2's deposit are E1's sweep, which names the
+  # proteins the screen is scored over, and the auxiliary tree of E1 instances screened for
+  # this figure. Both are deposited, so the rules resolve them through `source` and there is
+  # nothing to set here; see pins/e1-PROVENANCE.md.
 
 # Overview figure (GLPE_HUMAN with hbb UTRs).
 fig1:

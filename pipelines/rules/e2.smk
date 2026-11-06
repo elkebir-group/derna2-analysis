@@ -125,11 +125,14 @@ E2_SLUG = f"{E2_EXAMPLE['cell']}-c{round(E2_EXAMPLE['floor'] * 100):02d}-{E2_EXA
 #
 # E2_E1_SWEEP and E2_E1_EXTRA are panel (a)'s only reach outside E2's deposit: the screen
 # is scored over the proteins E1 ran, and its motif census over an auxiliary tree of E1
-# instances screened for this figure. Neither is deposited yet, so this chain reproduces on
-# a host that has both and nowhere else; depositing them is what closes it.
+# instances screened for this figure. Both are deposited and checksummed since 2026-11-05
+# (pins/results-e1.sha256, pins/results-e1_extra.sha256), so they resolve through `source`
+# like every other deposit and need no host override. The rules reading them declare both
+# stamps.
 E2_ENV = (
     f'E2_DEPOSIT="{source("e2")}" E2_CACHE="{E2_CACHE}" '
-    f'E2_E1_SWEEP="{E2["e1_sweep"]}" E2_E1_EXTRA="{E2["e1_extra"]}" '
+    f'E2_E1_SWEEP="{source("e1") / "sweep.jsonl"}" '
+    f'E2_E1_EXTRA="{source("e1_extra")}" '
     f'E2_MOTIF_NAMES="{INPUTS / "motifs" / "names.json"}" '
     f'E2_CORPUS="{INPUTS / "e2" / "corpus.json"}"'
 )
@@ -160,6 +163,8 @@ rule e2_composite_data:
         # This step reads the deposit through E2_ENV rather than through a declared path,
         # so the stamp is what makes its checksums a precondition of the figure.
         ok=source_ok("e2"),
+        ok_e1=source_ok("e1"),
+        ok_e1_extra=source_ok("e1_extra"),
     output:
         data=E2_CACHE / "composite-data.json",
         # The host's census at build time: not pinned, and nothing reads it. See the file's
@@ -244,7 +249,7 @@ E2_SUPP_ENV = (
     f'E2_MOTIF_EFFECTS="{INPUTS / "motifs" / "effects.json"}" '
     f'E2_F0_TIMINGS="{INPUTS / "e2" / "f0_timings_imported.json"}" '
     f'E2_CORPUS="{INPUTS / "e2" / "corpus.json"}" '
-    f'E2_E1_EXTRA="{E2.get("e1_extra", "")}" '
+    f'E2_E1_EXTRA="{source("e1_extra")}" '
     # The grid ran on two hosts, and its early rounds recorded the host only through the
     # home directory in each line's environment.
     f'E2_FIRST_HOST="{E2["hosts"]["first"]}" '
@@ -263,6 +268,7 @@ rule e2_supp_admits:
     input:
         finished=source("e2") / "FINISHED.tsv",
         ok=source_ok("e2"),
+        ok_e1_extra=source_ok("e1_extra"),
         sets=expand(str(INPUTS / "motifs" / "{name}.txt"), name=E2["motif_sets"][:3]),
         # The population panel (d) counts over, which the composite plate derives from E1's
         # sweep and asserts against.
@@ -278,6 +284,7 @@ rule e2_supp_presence:
     input:
         finished=source("e2") / "FINISHED.tsv",
         ok=source_ok("e2"),
+        ok_e1_extra=source_ok("e1_extra"),
         sets=expand(str(INPUTS / "motifs" / "{name}.txt"), name=E2["motif_sets"][:3]),
     output:
         E2_SUPP / "presence.json",
@@ -290,6 +297,7 @@ rule e2_supp_cost:
     input:
         finished=source("e2") / "FINISHED.tsv",
         ok=source_ok("e2"),
+        ok_e1_extra=source_ok("e1_extra"),
         # The denominator for an unconstrained front E2 imported rather than ran, which
         # therefore carries points and no timing.
         timings=INPUTS / "e2" / "f0_timings_imported.json",
@@ -307,6 +315,7 @@ rule e2_fig_supp_motif:
         # Panel (d)'s 24 tick labels are read from here, so a rename there is a change to
         # the figure and has to rebuild it.
         names=INPUTS / "motifs" / "names.json",
+        ok_e1_extra=source_ok("e1_extra"),
     output:
         pdf=FIGURES / "fig_supp_motif.pdf",
         png=FIGURES / "fig_supp_motif.png",
@@ -327,6 +336,7 @@ rule e2_supp_table:
         names=INPUTS / "motifs" / "names.json",
         # The table's two editorial columns, so neither is written into the script.
         effects=INPUTS / "motifs" / "effects.json",
+        ok_e1_extra=source_ok("e1_extra"),
     output:
         FIGURES / "tab_supp_motifs.tex",
     shell:

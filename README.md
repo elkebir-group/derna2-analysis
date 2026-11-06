@@ -49,10 +49,15 @@ data/results/
 │   ├── work.jsonl           # correctness, peak RSS, instructions: 3,465 rows, one per cell
 │   ├── time.jsonl           # wall-clock and CPU time on a reserved socket: 3,918 rows (retries)
 │   └── structures.jsonl     # every design: sequence, tool structure, re-folded structure
-├── e1/                      # in progress: no checksum manifest yet
-│   ├── sweep.jsonl          # one row per λ, per front point and per cell, stamped with its pin
-│   └── hull/                # derna2's hull vertices and replay λs per instance (partial if the
-│                            # walk was stopped)
+├── e1/                      # frozen 2026-11-05: pins/results-e1.sha256, pins/e1-PROVENANCE.md
+│   ├── sweep.jsonl          # one row per λ, per front point and per cell, stamped with its pin:
+│   │                        # 258,083 rows, every one 8603d37d
+│   └── hull/                # 367 files: per instance the walk's front, its vertices and its
+│                            # report, and the same three again for the derna2-walk arm
+├── e1_extra/                # frozen 2026-11-05: pins/results-e1_extra.sha256 and its provenance
+│   ├── f0/                  # the unconstrained front of the 8 E1 instances E2 never screened
+│   ├── corpus/              # the sequence each of those fronts was designed for
+│   └── *-e2extra.jsonl      # that screen's motif occurrences and its codon-lattice census
 ├── e1_fig4/                 # Figure 4's frozen snapshot of e1 (pins/e1_fig4-PROVENANCE.md)
 │   ├── sweep.jsonl          # the sweep after the grid's last pass, 2026-10-31: 258,083 rows
 │   └── hull/                # <P>.front.jsonl and <P>.walk.json for the 85 proteins
@@ -111,6 +116,15 @@ Three conventions hold across them and are not re-argued per figure.
 `pipelines/run.sh` runs `pipelines/Snakefile` with `pipelines/config/config.yaml`, then
 `pipelines/config/host.yaml` if it exists (copy `host.example.yaml`). A target is a rule name or
 an output path relative to the repository root.
+
+**What is checked automatically, and what is not.** `.github/workflows/ci.yml` runs the test
+suite, resolves the workflow (`snakemake --list`, which evaluates every rule file and the
+committed config with no `host.yaml` present), and asserts every manifest in `pins/` is well
+formed. It does **not** run the verify targets: each one checks a built figure against a
+digest, and every one needs a deposit that this repository does not carry. So a green run
+says the code and the configuration hold together, not that a figure still reproduces. That
+check is `pipelines/run.sh -- <stamp>` on a host with the deposits — `results_<exp>.ok` for a
+deposit, `<name>.verified` for a figure's outputs — and nothing else substitutes for it.
 
 ```bash
 pipelines/run.sh --dry-run                                     # what would run
@@ -419,76 +433,38 @@ arguments.
 
 Each of these can be closed, and says what closes it.
 
-- **The whole-front experiment (E1) is in progress**, and its deposit has no checksum
-  manifest until the grid finishes. `e1.pin` is now `8603d37d`, the pin every row of the
-  grid's sweep carries; it selects rows and drives no build, which is why it may name a
-  commit the public history does not carry. What remains open is the grid itself: on the
-  sweep of 2026-10-31, the last pass to have run, the cells not finished per arm are DERNA2
-  2, mRNAfold 19, LinearDesign 21, LinearCDSfold 50, DERNA1 57, of 85 proteins. The deposit
-  freezes when those close.
+- **Two deposits still name the hosts they ran on.** Measured 2026-11-05, counting files
+  that contain a `/home/<user>` or `/scratch/<user>` path: **E2 610 of 2,514** and **E3 311
+  of 665**. The others are clean: E1 0 of 368, `e1_extra` 0 of 22, `e1_fig4` 0 of 171,
+  `fig1` 0 of 55, and `fig1_fronts` 0 of 191 after its scrub. The paths are run directories
+  (`paper-e3/passcache`, `paper-e4/bin-6d42ff3f/...`), worktrees, and **two other users'
+  home directories** — `/home/melkebir/projects/derna2/...` and `/home/xinyu/e4/...` — so
+  this is not only one machine's layout but other people's.
 
-  Until 2026-11-05 `data/results/e1` pointed at the first host's pilot instead: 437 rows and
-  9 instances, all of them `P0DTC2_pNN` ladder rungs stamped `acfaae60`, last written
-  2026-10-16, while the grid's 258,083 rows over 85 proteins sat unread beside it. Those
-  rungs are prefixes of one protein and not instances, so they are not part of the grid, and
-  `e1_figures` is in the `all` target — a default run would have drawn E1 from them. The link
-  now names the grid's output. The three figures had never been built, because `e1.pin` read
-  `pending` and no row carries that, and the overview cannot be drawn from the pilot at all
-  (no finished walk of P47211 under `acfaae60`).
-- **The overview figure reads a wall time the result format does not carry.**
-  `e1_plot_overview` takes the pruned hull search's wall (`sweep_s`) from
-  `hull/<protein>.walk.json`, which the sweep rows do not carry, and the walk's rescored front
-  points where `sweep.jsonl` has them (30 of the 83 walks are not rescored and use the walk's
-  own energies). `derna front --report` carries the phase times, so this is a matter of reading
-  them from there rather than from a file the dev binary wrote — and the rerun that produces
-  those reports is the grid above, so this item closes with that one.
-- **The remaining deposits have not been scrubbed of this host's paths.** Figure 1's three
-  fronts were, on 2026-11-05: four substitutions over 97 of its 191 files, all of them under
-  `raw/`, with nothing a rule reads touched and the manifest regenerated
-  (`pins/fig1_fronts-PROVENANCE.md`). E1's is partly affected and not frozen yet — one of the
-  seven files under `hull/` names the host, and its 216 KB sweep names it nowhere. E2's cut
-  needed no scrub: the 205 root-level files that named the host and the development tooling
-  are run scripts, backups and session notes that no reader can reach, and the cut leaves
-  them behind rather than rewriting them (`pins/e2-PROVENANCE.md`); no file in the deposit
-  names either. `scrub_host_paths.py` reports before it writes and
-  exits non-zero on any path its substitutions miss, so this is one command and one reading per
-  deposit, at the point each is frozen.
-- **E2's deposit is cut and packed, and waits only on publication.** It was cut on 2026-11-05:
-  `data/results/e2` is now 2,514 files and 2.099 GiB, against the 132 GiB run tree it was
-  cut from, and `pins/results-e2.sha256` names every one of them. All eleven rules that
-  reach the tree now declare `source_ok("e2")`, so the digests are a precondition of every
-  E2 figure rather than a record kept beside it; before the cut there was no
-  `pins/results-e2.sha256` for `check_results` to read, and nothing stopped a figure being
-  drawn from a tree that had moved underneath it. `pins/e2-PROVENANCE.md` records how the
-  cut was chosen and what it was checked against: the thirteen outputs the four E2 and E3
-  pins name were deleted and rebuilt from the cut, and all thirteen came back
-  byte-identical. It packs and reconstitutes: `package_deposit` writes
-  `deposit/e2.tar` from the manifest alone, verifying every file against its digest on the
-  way in, and the unpacked tar verifies against the manifest again — 2,514 files both times.
-  What remains is publishing it, which is where every deposit here stands: no experiment's
-  tar is committed, since `package_deposit` builds one on demand from the manifest. So this
-  is not a debt particular to E2, and it closes for all of them together, when the deposits
-  are published.
-- **Two of Figure 3's inputs come from outside any deposit**, `e2.e1_sweep` and `e2.e1_extra`,
-  and are set in `host.yaml`. The sweep is E1's own result, read for one thing: the set of
-  proteins the screen is scored over, which `composite_data.py` then asserts equal to the
-  committed `inputs/e2/corpus.json`. That assertion is why the sweep cannot be replaced by a
-  list derived from it — two derivations that agree until they do not is the point of it, and
-  a list compared against itself agrees always. It closes when E1's deposit lands, since the
-  path currently names a snapshot of that sweep rather than the sweep. `e2.e1_extra` is
-  separate and small: two screen files read whole, and eight front files read for their first
-  line alone.
+  `scrub_host_paths.py ROOT OLD=NEW ... --apply` reports before it writes and exits non-zero
+  on any path its substitutions miss, so each deposit is one command and one reading. What
+  makes it more than that is what Figure 1's fronts needed: rewriting a frozen deposit
+  invalidates its manifest, so the manifest is regenerated, the substitutions are recorded in
+  the deposit's provenance file, and the pinned outputs are rebuilt to prove nothing a rule
+  reads moved (`pins/fig1_fronts-PROVENANCE.md` is the worked example).
+- **Every deposit is cut and checksummed; none is published.** As of 2026-11-05 all seven
+  have a manifest in `pins/` and a provenance file beside it, and every rule that reads one
+  declares its stamp, so a deposit's digests are a precondition of the figures drawn from it
+  rather than a record kept beside them. Two of those manifests are new and replaced a
+  directory of links into a live run tree, where nothing stopped a figure being drawn from a
+  tree that had moved underneath it:
 
-  `e2.e1_sweep` names the grid's final sweep (2026-10-31) since 2026-11-05; it had named the
-  10-27 snapshot. The sweep is read for one thing only, the set of its rows' `protein`
-  values, so the change is a no-op and was checked as one: all eleven outputs of
-  `pins/e2_composite.outputs` and `pins/e2_supp_motif.outputs` rebuild byte-identical from
-  it. One consequence is left deliberately. `draft_panel_a.py` unions `P22301` and `P41159`
-  into E1's instance list by name, because they post-dated the 10-27 snapshot; both are in
-  the 10-31 sweep, so the union is now inert. It stays because `composite_data.py` records
-  that script's own sha256 in its provenance, so deleting a line that changes nothing would
-  still change `composite-data.json` and force a pin re-cut. It goes when a re-cut is
-  wanted for another reason.
+  | deposit | files | size | cut from |
+  |---|---|---|---|
+  | `e1` | 368 | 1.364 GiB | the grid's output tree |
+  | `e2` | 2,514 | 2.099 GiB | a 132 GiB run tree |
+  | `e1_extra` | 22 | 169.0 MiB | the auxiliary screen |
+
+  `package_deposit` writes `deposit/<exp>.tar` from a manifest alone, verifying every file
+  against its digest on the way in; E2's was checked by unpacking it and verifying the
+  result against the manifest again, 2,514 files both times. No tar is committed — each is
+  built on demand — so publication is the one step left, and it closes for all of them
+  together.
 - **License**: none chosen yet.
 
 ## Known limits
@@ -496,6 +472,22 @@ Each of these can be closed, and says what closes it.
 These are properties of how the results were made, not work that is pending. Each names a
 step that a published checkout cannot repeat, and what stands in for repeating it.
 
+- **E1's arms did not finish the same instances, and the figures say so rather than
+  averaging over it.** The grid is deposited as finished, with its timeouts as results: on
+  the sweep of 2026-10-31 the cells not finished per arm are DERNA2 2, mRNAfold 19,
+  LinearDesign 21, LinearCDSfold 50 and DERNA1 57, of 85 proteins. `e1_plot_overview` prints
+  those counts as `cells not finished per arm` and measures the pruning speed-up on the 68
+  it can. A reader comparing two arms is therefore not comparing them over the same
+  instances, and the instances the slower arms dropped are the longest ones, so an arm's
+  mean over what it finished flatters it. `pins/e1-PROVENANCE.md` records the counts beside
+  the deposit.
+- **The overview figure reads a wall time the result format does not carry.**
+  `e1_plot_overview` takes the pruned hull search's wall (`sweep_s`) from
+  `hull/<protein>.walk.json`, which the sweep rows do not carry, and the walk's rescored
+  front points where `sweep.jsonl` has them. `derna front --report` carries the phase times,
+  so reading them from there rather than from a file the development binary wrote would need
+  the grid to be rerun — and the grid is deposited as finished, so no rerun is coming. This
+  is accordingly a property of the deposit rather than work pending.
 - **Part of Figure 1 is checked rather than reproduced.** Its two fronts rerun through
   `derna front` and check against the deposit (`fig1_runs`), and the overview figures refold
   their modular design with `mfe_fold`. Panel (b)'s scoring and the window search do not

@@ -32,13 +32,25 @@ def readme_targets():
     return sorted(set(re.findall(r"^\| `([a-z0-9_]+)` \|", text, flags=re.M)))
 
 
+# A dry run resolves input *files*, so every assertion about its exit status needs the
+# deposits, which the repository does not carry. The assertions that do not need them --
+# that run.sh reaches snakemake at all, and that a target names a rule -- are kept
+# unconditional, so a checkout without deposits still checks them.
+HAS_DEPOSITS = (ROOT / "data" / "results" / "e1" / "sweep.jsonl").exists()
+needs_deposits = pytest.mark.skipif(
+    not HAS_DEPOSITS, reason="no deposits here: a dry run cannot resolve its input files"
+)
+
+
 @needs_snakemake
 def test_run_sh_with_no_arguments_reaches_snakemake():
     # The empty-array expansion under `set -u` fails on bash before 4.4; the default
-    # invocation is the one a reader tries first.
+    # invocation is the one a reader tries first. Reaching the DAG is what that tests, and
+    # it holds with or without deposits; the exit status does not.
     got = dry_run()
-    assert got.returncode == 0, got.stderr[-2000:]
-    assert "Building DAG of jobs" in got.stdout
+    assert "Building DAG of jobs" in got.stdout, got.stderr[-2000:]
+    if HAS_DEPOSITS:
+        assert got.returncode == 0, got.stderr[-2000:]
 
 
 @needs_snakemake
@@ -60,7 +72,11 @@ def readme_path_targets():
 @pytest.mark.parametrize("target", readme_path_targets())
 def test_every_readme_path_target_has_a_rule(target):
     got = dry_run(target)
-    assert got.returncode == 0, got.stderr[-2000:]
+    # Without deposits snakemake still reports an unknown path as a missing *rule*, which is
+    # the half of this that does not depend on the data being present.
+    assert "MissingRuleException" not in got.stderr, got.stderr[-2000:]
+    if HAS_DEPOSITS:
+        assert got.returncode == 0, got.stderr[-2000:]
 
 
 def test_the_readme_has_path_examples():

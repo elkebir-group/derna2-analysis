@@ -19,13 +19,13 @@ rule e1_runs:
 
 # ---- figures ------------------------------------------------------------------------
 
-# The E1 grid is still running, so its deposit has no checksum manifest yet; the figure
-# reads only rows stamped with this pin. Drawn from this checkout's runs, it waits for the
-# run's summary.
+# The figure reads only rows stamped with `e1.pin`: a sweep file accumulates across re-pins,
+# and rows of two pins must not be mixed. `source_ok` is the deposit's checksums, or the
+# run's own summary when the figures are drawn from this checkout's runs.
 rule e1_plot_fronts:
     input:
         sweep=source("e1") / "sweep.jsonl",
-        ok=lambda w: [] if config["figures_from"] == "deposit" else E1_RUNS / "summary.txt",
+        ok=source_ok("e1"),
     output:
         pdf=FIGURES / "e1_fronts.pdf",
         png=FIGURES / "e1_fronts.png",
@@ -42,7 +42,7 @@ rule e1_plot_overview:
     input:
         sweep=source("e1") / "sweep.jsonl",
         walks=source("e1") / "hull",
-        ok=lambda w: [] if config["figures_from"] == "deposit" else E1_RUNS / "summary.txt",
+        ok=source_ok("e1"),
     output:
         pdf=FIGURES / "e1_overview.pdf",
         png=FIGURES / "e1_overview.png",
@@ -57,7 +57,7 @@ rule e1_plot_overview:
 rule e1_fig2_data:
     input:
         sweep=source("e1") / "sweep.jsonl",
-        ok=lambda w: [] if config["figures_from"] == "deposit" else E1_RUNS / "summary.txt",
+        ok=source_ok("e1"),
     output:
         DERIVED / "e1" / "fig2.json",
     params:

@@ -14,10 +14,6 @@
 #   lcds_dir: /path/to/LinearCDSfold
 # fig1:
 #   bin_dir: /scratch/<user>/fig1-glpe-hbb/bin
-# e2:
-#   # Until these are deposited, the composite figure's panel (a) reads them here.
-#   e1_sweep: /scratch/<user>/e2-out-<date>/sweep.jsonl
-#   e1_extra: /scratch/<user>/e3-claims-out/e2-extra
 
 # Where ViennaRNA 2.7.2 can be imported, for fig1_overview and e2_composite_example. Needed
 # only where the venv cannot install it (CentOS 7 and older glibc); see README's Install.
