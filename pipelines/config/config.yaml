@@ -90,7 +90,7 @@ e2:
 fig1:
   # `pins/fig1.sha256` identifies four binaries by their bytes: they predate the command line
   # and their source commit was never recorded, so nothing here checks or rebuilds them, and
-  # what reruns runs `derna`. See README "Known limits".
+  # what reruns runs `derna`.
   #
   # The overview figure's forbidden motif: a restriction site that one of mRNAfold's designs
   # contains and no modular design does, so the deposited modular front is also motif-free.
