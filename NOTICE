@@ -8,17 +8,32 @@ LICENSE. So are the manifests under `pins/` and the provenance notes beside
 them, which are this project's own records of what it measured.
 
 What follows is not licensed by the above, because it is not ours. None of it is
-code, and none of it is modified here: these are input sequences, redistributed
-so that a published figure can be reproduced from the same bytes it was drawn
-from. Each one's `PROVENANCE` note under `inputs/` is the authoritative record of
-where it came from and how it was extracted; this file names the terms.
+code: these are input sequences, redistributed so that a published figure can be
+reproduced from the same bytes it was drawn from. Most are byte-unmodified, and
+where one is not — a header replaced, a fragment cut — this file says so, because
+a sequence does not stop being someone's data when its header is rewritten. Each
+one's `PROVENANCE` note under `inputs/` is the authoritative record of where it
+came from and how it was extracted; this file names the terms.
 
   Protein sequences from UniProtKB/Swiss-Prot
   ------------------------------------------
-  77 accessions, under `inputs/uniprot/`, with copies of some under
+  79 of the 85 proteins this project designs are UniProt sequences.
+
+  77 of them are under `inputs/uniprot/`, with copies of some under
   `inputs/e1-natives/` and `inputs/e3/` where an experiment reads them from its
-  own directory. Each file is UniProt's own FASTA for that accession,
+  own directory. Each of those files is UniProt's own FASTA for that accession,
   byte-unmodified.
+
+  Two more are UniProt sequences whose files do not look like it, and are named
+  here so the attribution is not lost with the header:
+
+    inputs/P0DTC2.fasta     the sequence is UniProtKB P0DTC2 (SPIKE_SARS2),
+                            1,273 residues, identical to UniProt's; only the
+                            FASTA header was replaced by a bare `>P0DTC2`.
+    inputs/e3/RBD.fasta     residues 319-541 of that same entry in UniProt
+                            numbering, as inputs/e3/PROVENANCE-e2-screen.md
+                            records -- a fragment of UniProt data, not a
+                            separate sequence.
 
     Copyright (c) the UniProt Consortium. UniProt applies the Creative Commons
     Attribution 4.0 International (CC BY 4.0) License to all copyrightable
@@ -51,10 +66,12 @@ where it came from and how it was extracted; this file names the terms.
 
   Other sequences
   ---------------
-  `inputs/prt/` (five Cas orthologs), `inputs/P0DTC2.fasta`, and the derived
-  fragments `inputs/e3/eGFP.fasta` and `inputs/e3/RBD.fasta`. Their provenance
-  notes under `inputs/` record what each is; this notice makes no claim over
-  them beyond that record.
+  The remaining six of the 85: the five Cas orthologs in `inputs/prt/`
+  (PRT-03 to PRT-07) and `inputs/e3/eGFP.fasta`, an engineered variant of
+  Aequorea victoria GFP at 239 residues. Their origin is not recorded in this
+  repository beyond the provenance notes under `inputs/`, so this notice makes
+  no claim over them and asserts no terms on anyone's behalf. Anyone
+  redistributing them should establish their provenance first.
 
 The deposits themselves are not in this repository. They are the recorded
 results of runs described in `pins/*-PROVENANCE.md`, built by this project, and
