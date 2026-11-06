@@ -470,6 +470,20 @@ citations, the vocabulary, the host paths in four deposits, E1's and E2's deposi
   built on demand — so publication is the one step left, and it closes for all of them
   together.
 
+  **There is no DOI yet, and this README gives none rather than a template.** The venue is
+  the Illinois Data Bank, as for `elkebir-group/H2-opt-analysis`: a deposit there is cited
+  by DOI and unpacked under `results_root`. IDB attaches a *reserved* DOI when a dataset is
+  submitted for curation — it is fixed from that point, can be cited in the paper, and
+  activates when review completes and the dataset is published — so the identifier can be
+  settled before the data is public, and the data need not be public before the paper is
+  accepted. A draft dataset has no DOI at all.
+
+  `tests/test_doi.py` enforces the "real or absent" half of that, and exists because the
+  placeholder has shipped once: H2-opt-analysis is public and still points readers at
+  `10.13012/B2IDB-XXXXXXX_V1`, which returns HTTP 404. The test is silent while no DOI is
+  written and fails the moment an unfilled one is, which is the only moment at which saying
+  so helps.
+
 ## License
 
 BSD 3-Clause (`LICENSE`), the same licence and copyright holder as
