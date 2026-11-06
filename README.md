@@ -433,7 +433,7 @@ arguments.
 
 One, and it says what closes it. What used to be here — E3's dead pin, the dangling
 citations, the vocabulary, the host paths in four deposits, E1's and E2's deposits, Figure
-3's two outside inputs, the licence — is either closed or recorded as a limit below.
+3's two outside inputs — is closed.
 
 - **Every deposit is cut and checksummed; none is published.** As of 2026-11-05 all seven
   have a manifest in `pins/` and a provenance file beside it, and every rule that reads one
@@ -484,16 +484,14 @@ citations, the vocabulary, the host paths in four deposits, E1's and E2's deposi
   written and fails the moment an unfilled one is, which is the only moment at which saying
   so helps.
 
-## License
+## Copyright and data credits
 
-BSD 3-Clause (`LICENSE`), the same licence and copyright holder as
-[elkebir-group/derna2](https://github.com/elkebir-group/derna2). It covers this project's own
-work: the pipeline, the library, the tests, the vendored drivers, and the manifests and
-provenance notes under `pins/`.
+Copyright (c) 2026, El-Kebir Group. All rights reserved.
 
-It does **not** cover the input sequences under `inputs/`, which are redistributed unmodified
-so a figure can be rebuilt from the bytes it was drawn from. `NOTICE` names each source and
-its terms: 77 UniProtKB/Swiss-Prot accessions under CC BY 4.0, UTRs extracted from four NCBI
-RefSeq records, and UTRs read from a CureVac patent sequence listing and a GSRS record. Each
-one's `PROVENANCE` note under `inputs/` remains the authoritative record of how it was
-obtained; `NOTICE` states only the terms.
+The input sequences under `inputs/` are not this project's work; they are redistributed
+unmodified so a figure can be rebuilt from the bytes it was drawn from. `NOTICE` names each
+source and its terms: 77 UniProtKB/Swiss-Prot accessions under CC BY 4.0, UTRs extracted
+from four NCBI RefSeq records, UTRs read from a CureVac patent sequence listing and a GSRS
+record, and the AlphaFold DB model of P15421 under CC BY 4.0. Each one's `PROVENANCE` note
+under `inputs/` remains the authoritative record of how it was obtained; `NOTICE` states
+only the terms.

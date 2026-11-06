@@ -3,7 +3,6 @@ message: "If you use this analysis or its deposited results, please cite it as b
 title: "DERNA2 analysis: the paper's experiments, deposits and figures"
 version: 0.1.0
 repository-code: "https://github.com/elkebir-group/derna2-analysis"
-license: BSD-3-Clause
 authors:
   - family-names: Gu
     given-names: Xinyu
@@ -15,7 +14,6 @@ references:
   - type: software
     title: "DERNA2: full Pareto fronts of modular mRNA designs with UTRs"
     repository-code: "https://github.com/elkebir-group/derna2"
-    license: BSD-3-Clause
     notes: "The implementation this analysis measures; its results are pinned here by commit."
     authors:
       - family-names: Gu

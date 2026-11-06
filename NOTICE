@@ -1,19 +1,19 @@
 DERNA2 analysis
-Copyright (c) 2026, El-Kebir Group
+Copyright (c) 2026, El-Kebir Group. All rights reserved.
 
 The code in this repository — the pipeline under `pipelines/`, the library in
 `derna2_analysis/`, the tests, and the drivers vendored from the DERNA2
-repository under `drivers/` — is licensed under the BSD 3-Clause License; see
-LICENSE. So are the manifests under `pins/` and the provenance notes beside
-them, which are this project's own records of what it measured.
+repository under `drivers/` — is this project's own work, as are the manifests
+under `pins/` and the provenance notes beside them.
 
-What follows is not licensed by the above, because it is not ours. None of it is
-code: these are input sequences, redistributed so that a published figure can be
-reproduced from the same bytes it was drawn from. Most are byte-unmodified, and
-where one is not — a header replaced, a fragment cut — this file says so, because
-a sequence does not stop being someone's data when its header is rewritten. Each
-one's `PROVENANCE` note under `inputs/` is the authoritative record of where it
-came from and how it was extracted; this file names the terms.
+What follows is not this project's work. None of it is code: these are input
+sequences and one predicted structure, redistributed so that a published figure
+can be reproduced from the same bytes it was drawn from. Most are
+byte-unmodified, and where one is not — a header replaced, a fragment cut — this
+file says so, because a sequence does not stop being someone's data when its
+header is rewritten. Each one's `PROVENANCE` note under `inputs/` is the
+authoritative record of where it came from and how it was extracted; this file
+names the terms.
 
   Protein sequences from UniProtKB/Swiss-Prot
   ------------------------------------------
@@ -64,6 +64,18 @@ came from and how it was extracted; this file names the terms.
   states, per record, whether its span is stated by the source or produced by
   arithmetic, and which boundaries rest on secondary sources.
 
+  Predicted structure from the AlphaFold Protein Structure Database
+  -----------------------------------------------------------------
+  inputs/structures/AF-P15421-F1-model_v6.pdb is the AlphaFold DB model of
+  UniProtKB P15421 (GLPE_HUMAN), byte-unmodified; its header carries the
+  database's own citation and terms.
+
+    Jumper, J. et al. Highly accurate protein structure prediction with
+    AlphaFold. Nature 596, 583-589 (2021). doi:10.1038/s41586-021-03819-2.
+    Varadi, M. et al. AlphaFold Protein Structure Database. Nucleic Acids
+    Research (2022). AlphaFold DB data are available under the Creative Commons
+    Attribution 4.0 International (CC BY 4.0) License. https://alphafold.ebi.ac.uk/
+
   Other sequences
   ---------------
   The remaining six of the 85: the five Cas orthologs in `inputs/prt/`
@@ -74,8 +86,7 @@ came from and how it was extracted; this file names the terms.
   redistributing them should establish their provenance first.
 
 The deposits themselves are not in this repository. They are the recorded
-results of runs described in `pins/*-PROVENANCE.md`, built by this project, and
-they carry the licence above when published. A deposit that embeds a
+results of runs described in `pins/*-PROVENANCE.md`, built by this project. A deposit that embeds a
 third-party input embeds it under that input's terms, as named here.
 
 The algorithms this analysis measures are described in the published
