@@ -28,7 +28,18 @@
 # draw: its provenance block digests this script set, which the renumbering rewrote, and the
 # live deposit's fronts and parsed finished rows, which the grid keeps rewriting. No plotted
 # number changed.
-f0f5ca218606aa3a7b097deded27a7d2fb859a781c95e55311dfcfba5692ffc7  e2/composite/composite-data.json
+#
+# Re-cut 2026-11-06, after the host-path scrub of E2's and E3's deposits. Only
+# `composite-data.json` moved, and only in its provenance: 135 of
+# `provenance.fronts.<cell>_<nest>.path`, which spelled an absolute path on the host that
+# ran the grid and now spell `data/results/e2/<round file>`, and 49 of the sibling
+# `.sha256` fields, which are the digests of those front files -- all 49 of them among the
+# 610 files the scrub rewrote, and all 131 unchanged digests among the files it did not
+# touch, with no exception in either direction. Every one of the 180 recorded digests
+# equals the file now on disk. The plate and its two other caches are byte-identical:
+# fig3_e2_composite.pdf, .png, dcai-at-mfe.json and example-Q6PF06-c80-none.json did not
+# move, so no measured value changed and nothing drawn changed.
+39618d9c312e3513abd5f954207d2843f8c96bb9fccff5b536994fbf7777d9cf  e2/composite/composite-data.json
 e0af9092f7be6cc3e141b8fb1aaff762dd810c6535af384cea6eb2f896635429  e2/composite/dcai-at-mfe.json
 03e0975191437c55b45ec88149fb63265cfd3f1c657386e7dbb5b7e18356537a  e2/composite/example-Q6PF06-c80-none.json
 6f137f4b8dbdfc917ba8d8ec30ae67188b9b0a4ae26a70afdad994fee8e0cc4d  figures/fig3_e2_composite.pdf

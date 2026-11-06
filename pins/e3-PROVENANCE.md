@@ -53,3 +53,26 @@ depend on the host it ran on.
 They were deposited on 2026-11-04. Before that they lived only where they had been computed,
 which is how the 110 short-band ones came to exist on one machine and nowhere else, and why the
 figures could be rebuilt in exactly one place.
+
+## The scrub of 2026-11-06
+
+This deposit named the hosts it ran on: 311 of its 664 files carried a `/home/<user>` or
+`/scratch/<user>` path. Those paths were run directories and **another user's home directory** (`/home/xinyu/e4`, 24 occurrences). Substitutions, applied with
+`pipelines/scripts/scrub_host_paths.py --apply`, which reports before it writes and exits
+non-zero on any path its substitutions miss:
+
+    /scratch/xinyugu4/paper-e4 -> results/e3   (this deposit's own tree)
+    /scratch/xinyugu4/paper-e3 -> results/e2   (E2's fronts, which this reads)
+    /home/xinyu/e4             -> run/e3       (the same experiment on another
+                                                host; kept distinct from the
+                                                deposit rather than conflated)
+
+Afterwards no file here contains either string, checked independently of the tool, and
+`pins/results-e3.sha256` was regenerated: exactly 311 of its 664 digests moved, which is
+the same count as the files that carried a path.
+
+**The paths were not only cosmetic, and that is what made this more than a rewrite.**
+The `source`, `front_from`, `census` and `from` fields of the `a0.jsonl` rows are paths the readers **open**, and they point into E2's tree as well as this one. The repository already had the mechanism for that -- `e3common.relocate` rewrites a recorded prefix to wherever the tree is mounted -- but the prefixes it was given, `e3.recorded_prefixes` in the config, were themselves this host's directories. They are now the deposits' own names, so the committed configuration no longer spells anyone's filesystem either. `run/e3` is deliberately not relocatable: it appears only in `derived_from` fields, which record what a row came from and are never opened.
+
+What the rewrite is checked against: every figure and table this deposit feeds rebuilt
+**byte-identical** -- fig_e3_story.pdf, story_stats.txt and supp_contacts.json. No pin of E3's moved.

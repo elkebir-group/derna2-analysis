@@ -431,22 +431,10 @@ arguments.
 
 ## Open items
 
-Each of these can be closed, and says what closes it.
+One, and it says what closes it. What used to be here — E3's dead pin, the dangling
+citations, the vocabulary, the host paths in four deposits, E1's and E2's deposits, Figure
+3's two outside inputs, the licence — is either closed or recorded as a limit below.
 
-- **Two deposits still name the hosts they ran on.** Measured 2026-11-05, counting files
-  that contain a `/home/<user>` or `/scratch/<user>` path: **E2 610 of 2,514** and **E3 311
-  of 665**. The others are clean: E1 0 of 368, `e1_extra` 0 of 22, `e1_fig4` 0 of 171,
-  `fig1` 0 of 55, and `fig1_fronts` 0 of 191 after its scrub. The paths are run directories
-  (`paper-e3/passcache`, `paper-e4/bin-6d42ff3f/...`), worktrees, and **two other users'
-  home directories** — `/home/melkebir/projects/derna2/...` and `/home/xinyu/e4/...` — so
-  this is not only one machine's layout but other people's.
-
-  `scrub_host_paths.py ROOT OLD=NEW ... --apply` reports before it writes and exits non-zero
-  on any path its substitutions miss, so each deposit is one command and one reading. What
-  makes it more than that is what Figure 1's fronts needed: rewriting a frozen deposit
-  invalidates its manifest, so the manifest is regenerated, the substitutions are recorded in
-  the deposit's provenance file, and the pinned outputs are rebuilt to prove nothing a rule
-  reads moved (`pins/fig1_fronts-PROVENANCE.md` is the worked example).
 - **Every deposit is cut and checksummed; none is published.** As of 2026-11-05 all seven
   have a manifest in `pins/` and a provenance file beside it, and every rule that reads one
   declares its stamp, so a deposit's digests are a precondition of the figures drawn from it
@@ -459,6 +447,22 @@ Each of these can be closed, and says what closes it.
   | `e1` | 368 | 1.364 GiB | the grid's output tree |
   | `e2` | 2,514 | 2.099 GiB | a 132 GiB run tree |
   | `e1_extra` | 22 | 169.0 MiB | the auxiliary screen |
+
+  None of them names a host. E2's 610 files of 2,514 and E3's 311 of 664 did until
+  2026-11-06, between them naming run directories, worktrees and two other users' home
+  directories; `pins/e2-PROVENANCE.md` and `pins/e3-PROVENANCE.md` record the substitutions,
+  and `e3.recorded_prefixes` in the config no longer spells a filesystem either. That scrub
+  also fixed something it exposed: `FINISHED.tsv`'s `round_file` column and E3's
+  `source`/`front_from`/`census` fields are **opened**, not merely recorded, so spelled
+  absolutely they resolved only on the machine that wrote them — four rules failed when the
+  paths changed, which is how it was found. They are relative now and resolved against the
+  deposit, by readers that still accept the absolute spelling. Every figure and table
+  rebuilt byte-identical; the two pins that moved say what moved and why.
+
+  All seven are frozen: every file a manifest names is mode 444 and every deposit directory
+  2555, so a deposited file cannot be modified in place. (Of `fig1`'s tree only the 27 files
+  its manifest names are frozen; the other 28 in that directory are the binaries
+  `fig1.bin_dir` points at, which are not part of the deposit.)
 
   `package_deposit` writes `deposit/<exp>.tar` from a manifest alone, verifying every file
   against its digest on the way in; E2's was checked by unpacking it and verifying the

@@ -94,3 +94,27 @@ from it, which would make the figure's population unauditable.
 No row of this deposit carries a build stamp. Attribution runs through this file and
 `pins/e3-PROVENANCE.md`, not through the rows, so rows from this build cannot be told apart
 from another's by inspection alone.
+
+## The scrub of 2026-11-06
+
+This deposit named the hosts it ran on: 610 of its 2,514 files carried a `/home/<user>` or
+`/scratch/<user>` path. Those paths were run directories, worktrees of the checkout, and **another user's home directory** (`/home/melkebir/projects/derna2`, 96 occurrences), so the deposit disclosed a third party's account and layout as well as this host's. Substitutions, applied with
+`pipelines/scripts/scrub_host_paths.py --apply`, which reports before it writes and exits
+non-zero on any path its substitutions miss:
+
+    /scratch/xinyugu4/paper-e3        -> results/e2   (this deposit's own tree)
+    /home/melkebir/projects/derna2    -> derna2       (the second host's checkout)
+    /scratch/xinyugu4/wt-f6-carry     -> derna2       (worktrees of that checkout)
+    /scratch/xinyugu4/wt-midslice-secs-> derna2
+    /scratch/xinyugu4/wt-carry15      -> derna2
+    /scratch/xinyugu4/wt-levers2      -> derna2
+
+Afterwards no file here contains either string, checked independently of the tool, and
+`pins/results-e2.sha256` was regenerated: exactly 610 of its 2,514 digests moved, which is
+the same count as the files that carried a path.
+
+**The paths were not only cosmetic, and that is what made this more than a rewrite.**
+`FINISHED.tsv`'s `round_file` column is a path the pipeline **opens**, not a note about where a file once was. Spelled absolutely, it resolves only on the machine that wrote it, so a reader who unpacked the published tar anywhere else could not have run `e2_composite_auc`, `e2_supp_cost` or `e2_supp_presence` at all -- the scrub turned that latent defect into three failing rules, which is how it was found. The column is now relative to the deposit root, and `auc01_fin.py` and `supp_common.py` resolve it against this deposit; both accept the absolute spelling too, so a tree cut before today still loads. `supp_common.py` had already noticed half of this -- its digest over the column uses the basename, precisely because an absolute path 'moves when the deposit is mounted anywhere else' -- and kept opening the path.
+
+What the rewrite is checked against: every figure and table this deposit feeds rebuilt
+**byte-identical** -- fig3_e2_composite.pdf and .png, fig_supp_motif.pdf and .png, tab_supp_motifs.tex, tab_supp_proteins.tex, and the caches dcai-at-mfe.json and example-Q6PF06-c80-none.json. Two pins were re-cut, and their headers say what moved: `e2_composite.outputs` for composite-data.json, whose 135 recorded front paths and 49 front digests are provenance of which file each measurement came from, and `e2_supp_motif.outputs` for one leaf in each of three caches, the sha256 of the script that gained the resolver. No measured value in any of them changed.

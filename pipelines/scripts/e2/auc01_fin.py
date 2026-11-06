@@ -62,11 +62,25 @@ def load(path):
 
 F0PATH = {os.path.basename(p)[:-6]: p for d in ("f0", "f0-l", "f0-five", "f0-xl")
           for p in glob.glob(f"{E}/screen/{d}/*.jsonl")}
+
+def deposit_path(recorded):
+    """A path this deposit's own table recorded, resolved against this deposit.
+
+    The tables spell these as the run wrote them, which was an absolute path on the host
+    that ran it. A published deposit cannot carry that -- it names someone's filesystem,
+    and a reader who unpacks the tar anywhere else cannot resolve it -- so the scrub of
+    2026-11-06 made the column relative to the deposit root. Both spellings are accepted:
+    a tree cut before that scrub still loads, and one cut after it loads wherever it is
+    mounted. Defined in both this file and supp_common.py, because the two run under different
+    environments and neither can import the other's module.
+    """
+    return recorded if os.path.isabs(recorded) else os.path.join(E, recorded)
+
 FR = {c: {"F0": {"pts": load(F0PATH[c]), "status": "complete"}} for c in FINISHED}
 for c in FINISHED:
     for n in REPORTED[c]:
         d = tsv[c][n]
-        FR[c][n] = {"pts": load(d["round_file"]), "status": d["status"],
+        FR[c][n] = {"pts": load(deposit_path(d["round_file"])), "status": d["status"],
                     "share": float(d["share"]), "span": float(d["unvisited_span"])}
 
 

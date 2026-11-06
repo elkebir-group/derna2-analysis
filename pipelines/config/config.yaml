@@ -129,11 +129,17 @@ e3:
   # The deposited rows carry a `source` path from the host that ran them: the concatenation
   # arm points at E2's unconstrained fronts, and the middle band at files of this deposit.
   # Each recorded prefix is rewritten to where that tree is on this host. They are
-  # configuration rather than literals in the readers because they name one past run's
-  # filesystem, and a second run on another host records its own.
+  # configuration rather than literals in the readers because a run records whatever
+  # filesystem it ran on, and a second run on another host records its own.
+  #
+  # Since the scrub of 2026-11-06 these are the deposits' own names rather than this host's
+  # directories: the deposited rows no longer spell an absolute path, so what they record is
+  # already relative and `relocate` maps it to wherever the trees are mounted. A deposit cut
+  # before that scrub records an absolute path instead, and setting these back to it is how
+  # such a tree is read.
   recorded_prefixes:
-    e2_fronts: /scratch/xinyugu4/paper-e3
-    deposit: /scratch/xinyugu4/paper-e4
+    e2_fronts: results/e2
+    deposit: results/e3
   # The instance of the main figure's (d) and (e): a protein on a UTR pair, and the CAI floor at
   # which each method's best design is drawn.
   story:

@@ -44,9 +44,16 @@
 # pre-renumbering motif files and substituting the pre-renumbering script digests gives back
 # the digest the previous cut named, for admits.json, presence.json, cost.json and
 # tab_supp_motifs.tex alike. Not one measured number changed.
-6355eedf2c259e54a8df16d8abdf32820665f778fb583e291b51a48e195303b7  e2/supp/admits.json
-cec3ba72fa185d14e8b5e9d0c7ccabee783487ef1da71b9422746e9500d7e398  e2/supp/presence.json
-c88a7bba7dfe4d86909c2176ffa5baadc8726e5fa5c4474ae075aa0be9cf8540  e2/supp/cost.json
+#
+# Re-cut 2026-11-06, after the host-path scrub. Three of the six moved -- admits.json,
+# cost.json and presence.json -- by exactly one leaf each,
+# `provenance.scripts.supp_common.py`, because that script gained the resolver that reads
+# FINISHED.tsv's round-file column whether it is spelled absolute (a deposit cut before the
+# scrub) or relative to the deposit (one cut after it). No number in any of the three
+# changed, and fig_supp_motif.pdf, .png and tab_supp_motifs.tex are byte-identical.
+4b75f1103e3670b51954b8d22703a528ca21da1e54667f2cbf4e64884a393117  e2/supp/admits.json
+e9d518679343564ab0afbe2b620802d6fb1c5b06977b01eb4161d9369225e538  e2/supp/presence.json
+e3997e029b93b221a4160d88a6d68fed1f1dfee4b370d59f610cb6cf129c95a2  e2/supp/cost.json
 c52258654b0f62b254750face953dc5b0ae5cbcbef45d2abb930f458fb4b9a43  figures/fig_supp_motif.pdf
 ba74e84eaf28755dda3d6c6f8f918213ef51c47f7e780a1affaba09bd376ad01  figures/fig_supp_motif.png
 3c30bd40a95586acc8019445430a5bda5cceff73a74cdbdacfa43be0b245be63  figures/tab_supp_motifs.tex

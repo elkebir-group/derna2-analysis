@@ -69,6 +69,20 @@ def names():
             for k, v in raw.items()}
 
 
+
+def deposit_path(recorded):
+    """A path this deposit's own table recorded, resolved against this deposit.
+
+    The tables spell these as the run wrote them, which was an absolute path on the host
+    that ran it. A published deposit cannot carry that -- it names someone's filesystem,
+    and a reader who unpacks the tar anywhere else cannot resolve it -- so the scrub of
+    2026-11-06 made the column relative to the deposit root. Both spellings are accepted:
+    a tree cut before that scrub still loads, and one cut after it loads wherever it is
+    mounted. Defined in both this file and auc01_fin.py, because the two run under different
+    environments and neither can import the other's module.
+    """
+    return recorded if os.path.isabs(recorded) else os.path.join(E, recorded)
+
 def finished():
     """{cell: {nest: round_file}} for every cell the table reports as done, and its digest.
 
@@ -89,7 +103,8 @@ def finished():
     tsv = {}
     for f in rows:
         cell, nest = f[0].rsplit("_", 1)
-        tsv.setdefault(cell, {})[nest] = {"path": f[3], "status": f[2], "band": f[1]}
+        tsv.setdefault(cell, {})[nest] = {"path": deposit_path(f[3]), "status": f[2],
+                                          "band": f[1]}
     # The round file is keyed by its BASENAME. The table spells it as an absolute path, so
     # a digest over the column moves when the deposit is mounted anywhere else, and three
     # pinned caches would change with no number in them changing. The basename is what
