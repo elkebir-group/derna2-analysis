@@ -440,7 +440,7 @@ Each of these can be closed, and says what closes it.
   names either. `scrub_host_paths.py` reports before it writes and
   exits non-zero on any path its substitutions miss, so this is one command and one reading per
   deposit, at the point each is frozen.
-- **E2's deposit is cut but not yet packed and published.** It was cut on 2026-11-05:
+- **E2's deposit is cut and packed, and waits only on publication.** It was cut on 2026-11-05:
   `data/results/e2` is now 2,514 files and 2.099 GiB, against the 132 GiB run tree it was
   cut from, and `pins/results-e2.sha256` names every one of them. All eleven rules that
   reach the tree now declare `source_ok("e2")`, so the digests are a precondition of every
@@ -449,8 +449,13 @@ Each of these can be closed, and says what closes it.
   drawn from a tree that had moved underneath it. `pins/e2-PROVENANCE.md` records how the
   cut was chosen and what it was checked against: the thirteen outputs the four E2 and E3
   pins name were deleted and rebuilt from the cut, and all thirteen came back
-  byte-identical. What remains is to pack it with `package_deposit.py` and publish it; this
-  item closes then.
+  byte-identical. It packs and reconstitutes: `package_deposit` writes
+  `deposit/e2.tar` from the manifest alone, verifying every file against its digest on the
+  way in, and the unpacked tar verifies against the manifest again — 2,514 files both times.
+  What remains is publishing it, which is where every deposit here stands: no experiment's
+  tar is committed, since `package_deposit` builds one on demand from the manifest. So this
+  is not a debt particular to E2, and it closes for all of them together, when the deposits
+  are published.
 - **Two of Figure 3's inputs come from outside any deposit**, `e2.e1_sweep` and `e2.e1_extra`,
   and are set in `host.yaml`. The sweep is E1's own result, read for one thing: the set of
   proteins the screen is scored over, which `composite_data.py` then asserts equal to the
