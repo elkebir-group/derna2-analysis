@@ -36,14 +36,23 @@ jobs:
         # on the only machine that runs the suite unattended would retire the check while
         # leaving the file in place.
         #
-        # The preamble is `\usepackage[T1]{fontenc}\usepackage{times}\usepackage{textcomp}`
-        # plus amsmath, so: latex itself, the PSNFSS Times support in fonts-recommended, and
-        # dvipng for matplotlib's raster path.
+        # The package list is the union of TWO preambles, which is the part worth writing
+        # down: the repository asks for `[T1]{fontenc}`, `times`, `textcomp` and `amsmath`,
+        # and matplotlib's texmanager then injects `type1cm`, `[utf8]{inputenc}`,
+        # `geometry`, `underscore` and a font package of its own (`mathptmx` for serif
+        # Times). Resolving only the repository's half leaves latex failing on
+        # `type1cm.sty`, which is what the second CI run did.
+        #
+        # Each file resolved to its Ubuntu package rather than guessed: type1cm.sty is in
+        # texlive-latex-extra, underscore.sty in texlive-latex-recommended, and geometry.sty,
+        # inputenc.sty, fontenc.sty and textcomp.sty in texlive-latex-base; times/mathptmx
+        # come from the PSNFSS support in texlive-fonts-recommended. dvipng is matplotlib's
+        # raster path, and cm-super supplies Type 1 Computer Modern for T1.
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            texlive-latex-base texlive-latex-recommended texlive-fonts-recommended \
-            dvipng cm-super
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended dvipng cm-super
 
       - name: Install
         # The pipeline extra brings snakemake, which the workflow check below needs.
