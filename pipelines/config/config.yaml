@@ -34,7 +34,11 @@ derna2:
 # the second host. `pin` stamps every row with the derna2 commit that produced it; the rows
 # of the deposit carry the commit its own run was made at.
 e1:
-  pin: pending
+  # The pin every row of the grid's sweep is stamped with, and the only rows the figures
+  # read: a sweep file accumulates across re-pins, so two pins' rows must not be mixed. It
+  # selects rows and does not drive a build, which is why it names a commit of the
+  # development repository that the public history does not carry. Nothing builds from it.
+  pin: 8603d37d
   # The comparators, which are frozen once and never rebuilt, in one directory. derna2's own
   # two binaries come from `derna2` above. Set `bin_dir` in host.yaml.
   bin_dir: data/derived/bin/e1

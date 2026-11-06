@@ -419,9 +419,22 @@ arguments.
 
 Each of these can be closed, and says what closes it.
 
-- **The whole-front experiment (E1) is in progress.** Its deposit has no checksum manifest
-  until the grid finishes, and `e1.pin` reads `pending` until the commit it runs at is chosen.
-  Rows of the first host's pilot (`acfaae60`) are not part of the grid.
+- **The whole-front experiment (E1) is in progress**, and its deposit has no checksum
+  manifest until the grid finishes. `e1.pin` is now `8603d37d`, the pin every row of the
+  grid's sweep carries; it selects rows and drives no build, which is why it may name a
+  commit the public history does not carry. What remains open is the grid itself: on the
+  sweep of 2026-10-31, the last pass to have run, the cells not finished per arm are DERNA2
+  2, mRNAfold 19, LinearDesign 21, LinearCDSfold 50, DERNA1 57, of 85 proteins. The deposit
+  freezes when those close.
+
+  Until 2026-11-05 `data/results/e1` pointed at the first host's pilot instead: 437 rows and
+  9 instances, all of them `P0DTC2_pNN` ladder rungs stamped `acfaae60`, last written
+  2026-10-16, while the grid's 258,083 rows over 85 proteins sat unread beside it. Those
+  rungs are prefixes of one protein and not instances, so they are not part of the grid, and
+  `e1_figures` is in the `all` target — a default run would have drawn E1 from them. The link
+  now names the grid's output. The three figures had never been built, because `e1.pin` read
+  `pending` and no row carries that, and the overview cannot be drawn from the pilot at all
+  (no finished walk of P47211 under `acfaae60`).
 - **The overview figure reads a wall time the result format does not carry.**
   `e1_plot_overview` takes the pruned hull search's wall (`sweep_s`) from
   `hull/<protein>.walk.json`, which the sweep rows do not carry, and the walk's rescored front
@@ -465,6 +478,17 @@ Each of these can be closed, and says what closes it.
   path currently names a snapshot of that sweep rather than the sweep. `e2.e1_extra` is
   separate and small: two screen files read whole, and eight front files read for their first
   line alone.
+
+  `e2.e1_sweep` names the grid's final sweep (2026-10-31) since 2026-11-05; it had named the
+  10-27 snapshot. The sweep is read for one thing only, the set of its rows' `protein`
+  values, so the change is a no-op and was checked as one: all eleven outputs of
+  `pins/e2_composite.outputs` and `pins/e2_supp_motif.outputs` rebuild byte-identical from
+  it. One consequence is left deliberately. `draft_panel_a.py` unions `P22301` and `P41159`
+  into E1's instance list by name, because they post-dated the 10-27 snapshot; both are in
+  the 10-31 sweep, so the union is now inert. It stays because `composite_data.py` records
+  that script's own sha256 in its provenance, so deleting a line that changes nothing would
+  still change `composite-data.json` and force a pin re-cut. It goes when a re-cut is
+  wanted for another reason.
 - **License**: none chosen yet.
 
 ## Known limits
