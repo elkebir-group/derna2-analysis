@@ -22,10 +22,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-BIN2 = "/scratch/xinyugu4/paper-e1-bin/run_design_per_lambda"
-BIN1 = "/scratch/xinyugu4/paper-e2-bin/derna1"
-TABLE1 = "/scratch/xinyugu4/paper-e2-bin/derna1_codon_usage_human.csv"
-PARAMS = ("/home/xinyugu4/derna2/docs/reference/_cpp/"
+BIN2 = "run/paper-e1-bin/run_design_per_lambda"
+BIN1 = "run/paper-e2-bin/derna1"
+TABLE1 = "run/paper-e2-bin/derna1_codon_usage_human.csv"
+PARAMS = ("derna2/docs/reference/_cpp/"
           "derna-main/data/InputFiles")
 PIN = ["taskset", "-c", "0-26:2"]
 

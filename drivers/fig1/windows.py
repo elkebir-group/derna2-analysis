@@ -4,7 +4,7 @@ Usage: windows.py STAIR.jsonl OUTDIR JOBS [k ...]   (k = window index; -1 = bott
 import json, subprocess, sys, os, math, csv, collections
 from concurrent.futures import ThreadPoolExecutor
 S = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-R = '/home/xinyugu4/derna2'
+R = 'derna2'
 BIN = f'{S}/bin/scope37_window'
 FA = f'{R}/experiments/scope-25-beam-runtime-quality/fixtures/GLPE_HUMAN_78.fasta'
 U5 = open(f'{R}/experiments/scope-19-utr-support/m5/hbb5.txt').read().strip()

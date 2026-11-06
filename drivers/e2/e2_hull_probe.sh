@@ -6,11 +6,11 @@
 # E-cores carry another session's builds.
 set -u
 
-BIN=/home/melkebir/projects/derna2/motif-work/bin/tip          # commit 5d12df5f
-MOTIFS=/home/melkebir/projects/derna2/e3-plan/experiments/paper-benchmark/motifs/probe-all-sets.bare.txt
-FA=/home/melkebir/projects/derna2/motif-work/inputs/fa
-ICOUNT=/home/melkebir/projects/derna2/motif-work/tools/icount.py
-OUT=/home/melkebir/projects/derna2/e3-plan/experiments/paper-benchmark/e3-probe
+BIN=derna2/motif-work/bin/tip          # commit 5d12df5f
+MOTIFS=derna2/e3-plan/experiments/paper-benchmark/motifs/probe-all-sets.bare.txt
+FA=derna2/motif-work/inputs/fa
+ICOUNT=derna2/motif-work/tools/icount.py
+OUT=derna2/e3-plan/experiments/paper-benchmark/e3-probe
 CORES=16-27          # E-cores; the P-cores carry E1 and the motif-speed timing
 BUDGET=3600          # per rung, seconds
 MEMMAX=24G

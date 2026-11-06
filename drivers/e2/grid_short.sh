@@ -20,9 +20,9 @@ BIN=${BIN:?set BIN to the pinned binary}
 PINNAME=${PINNAME:?set PINNAME to the pinned commit}   # no apostrophe: inside
 # ${VAR:?word} an unescaped ' opens a quote that swallows the rest of the file,
 # which cost three failed launches reported as unbound variables far below.
-CORPUS=/scratch/xinyugu4/paper-e3/screen/corpus
-SETS=/home/xinyugu4/derna2/experiments/paper-benchmark/motifs
-OUT=/scratch/xinyugu4/paper-e3/grid
+CORPUS=run/paper-e3/screen/corpus
+SETS=derna2/experiments/paper-benchmark/motifs
+OUT=run/paper-e3/grid
 BUDGET=28800       # the walk's own budget: at the limit it RETURNS the partial front
 PER=$(( BUDGET + 600 ))   # the outer kill, above BUDGET so the graceful stop always fires first
 # No --max-rss-gb. The flag is not a dormant ceiling: `budget.max_rss_gb.is_some()`

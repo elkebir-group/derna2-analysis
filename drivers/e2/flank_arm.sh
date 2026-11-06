@@ -33,7 +33,7 @@
 # runs -- and this arm publishes a front comparison, not a wall, so the narrower
 # width costs it nothing it claims.
 set -u
-P=/scratch/xinyugu4/paper-e3
+P=run/paper-e3
 CLAIM=$P/grid/.claims
 OUT=$P/flank/out
 BIN=$P/bin/derna_549074e9

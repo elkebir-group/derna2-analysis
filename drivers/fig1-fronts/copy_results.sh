@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Copy the small results from a run directory into results/ for commit.
-# Usage: copy_results.sh RUN_ROOT   (e.g. /scratch/xinyugu4/glpe-hbb-fronts)
+# Usage: copy_results.sh RUN_ROOT   (e.g. run/glpe-hbb-fronts)
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN="$1"

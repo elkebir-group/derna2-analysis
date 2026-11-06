@@ -1,5 +1,5 @@
 import csv, math, collections
-T='/home/xinyugu4/derna2/packages/derna-codon-dp/data/codon_usage_human.csv'
+T='derna2/packages/derna-codon-dp/data/codon_usage_human.csv'
 rows=list(csv.reader(open(T)))
 hdr=rows[0]; rows=rows[1:]
 def build():

@@ -128,12 +128,12 @@ def select(pool):
 
 def options(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    S = "/scratch/xinyugu4/paper-e3/screen"
+    S = "run/paper-e3/screen"
     ap.add_argument("--binding", default=os.path.join(S, "binding-l.jsonl"),
                     help="the screened half of the pool")
     ap.add_argument("--inherited", default=os.path.join(S, "binding-five.jsonl"),
                     help="the inherited half, once screen_occurs has run on it")
-    ap.add_argument("--inherited-fronts", default="/scratch/xinyugu4/paper-e3/e2/out/hull",
+    ap.add_argument("--inherited-fronts", default="run/paper-e3/e2/out/hull",
                     help="where the five land, checked only to report what is missing")
     return ap.parse_args(argv)
 

@@ -69,7 +69,7 @@ def table(binding, lattice):
 
 def options(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    S = "/scratch/xinyugu4/paper-e3/screen"
+    S = "run/paper-e3/screen"
     ap.add_argument("--binding", default=os.path.join(S, "binding-l.jsonl"))
     ap.add_argument("--lattice", default=os.path.join(S, "lattice-l.jsonl"))
     ap.add_argument("--label", default="501-700 aa")

@@ -7,9 +7,9 @@
 # same conda g++ E1 used for mRNAfold.
 set -euo pipefail
 
-SRC=/home/xinyugu4/derna2/docs/reference/_cpp/derna-main
-OUT=/scratch/xinyugu4/paper-e2-bin
-CXX=/scratch/xinyugu4/cxx-env/bin/x86_64-conda-linux-gnu-g++
+SRC=derna2/docs/reference/_cpp/derna-main
+OUT=run/paper-e2-bin
+CXX=run/cxx-env/bin/x86_64-conda-linux-gnu-g++
 
 mkdir -p "$OUT"
 

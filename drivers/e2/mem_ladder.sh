@@ -26,7 +26,7 @@
 # trend in length. No --max-rss-gb: its presence reconfigures the walk and does
 # not bound the peak.
 set -u
-P=/scratch/xinyugu4/paper-e3
+P=run/paper-e3
 C=$P/grid/.claims
 MO=$P/motifs
 S=$1

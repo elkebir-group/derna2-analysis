@@ -19,7 +19,7 @@
 # short budget measures it. If construction has not finished, the figure is a
 # LOWER bound, which still refutes n^2.00 if it lands well above 20.5 GB.
 set -u
-P=/scratch/xinyugu4/paper-e3
+P=run/paper-e3
 C=$P/grid/.claims
 MO=$P/motifs
 S=$1

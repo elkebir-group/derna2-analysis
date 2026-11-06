@@ -66,7 +66,7 @@ their energies.
 
 ## Reproduce
 
-Frozen binaries and run logs: `/scratch/xinyugu4/fig1-glpe-hbb/` (checksums in
+Frozen binaries and run logs: `run/fig1-glpe-hbb/` (checksums in
 `results/BINARIES.sha256`). The scripts in `scripts/` were run from a working directory given by
 `FIG1_WORK` (binaries under its `bin/`), and carry absolute paths to a derna2 checkout; set both
 before re-running.

@@ -39,7 +39,7 @@
 # sessions' pinned work. The readouts are occurrence counts, which contention
 # cannot perturb.
 set -u
-P=/scratch/xinyugu4/paper-e3
+P=run/paper-e3
 BIN=$P/bin/derna_06605630
 CORPUS=$P/screen/corpus-xl
 OUT=$P/screen/f0-xl

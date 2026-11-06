@@ -10,7 +10,7 @@ REPO="$(cd "$HERE/../.." && pwd)"
 ROOT="$1"
 shift
 ARMS=("${@:-unguarded symmetric no_clamp unpaired}")
-BIN="${BIN:-/scratch/xinyugu4/glpe-hbb-fronts/bin}"
+BIN="${BIN:-run/glpe-hbb-fronts/bin}"
 FASTA="$REPO/experiments/scope-25-beam-runtime-quality/fixtures/GLPE_HUMAN_78.fasta"
 UTR5="$(cat "$REPO/experiments/scope-19-utr-support/m5/hbb5.txt")"
 UTR3="$(cat "$REPO/experiments/scope-19-utr-support/m5/hbb3.txt")"

@@ -19,8 +19,8 @@
 # the screen's readouts are the occurrence counts, which load cannot perturb.
 set -u
 
-BIN=/home/melkebir/projects/derna2/e2/bin/derna     # derna2 at 8603d37d
-HERE=/home/melkebir/projects/derna2/e3-plan/experiments/paper-benchmark
+BIN=derna2/e2/bin/derna     # derna2 at 8603d37d
+HERE=derna2/e3-plan/experiments/paper-benchmark
 CORPUS=$HERE/screen/corpus-l
 OUT=$HERE/screen/f0-l
 CORES=24              # E2 holds core 24 alone; 16-23 and 25-27 belong to peers

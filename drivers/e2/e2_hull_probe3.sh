@@ -7,13 +7,13 @@
 # Waits for round 2 to finish first: two walks on the same cores would spoil
 # both walls.
 set -u
-BASE=/home/melkebir/projects/derna2/e3-plan/experiments/paper-benchmark
+BASE=derna2/e3-plan/experiments/paper-benchmark
 until grep -q '^=== done' "$BASE/e3-probe2.run.log"; do sleep 60; done
 
-BIN=/home/melkebir/projects/derna2/motif-work/bin/tip          # commit 5d12df5f
-MOTIFS=/home/melkebir/projects/derna2/motif-work/inputs/p8.txt
-ICOUNT=/home/melkebir/projects/derna2/motif-work/tools/icount.py
-FA=/home/melkebir/projects/derna2/motif-work/inputs/fa
+BIN=derna2/motif-work/bin/tip          # commit 5d12df5f
+MOTIFS=derna2/motif-work/inputs/p8.txt
+ICOUNT=derna2/motif-work/tools/icount.py
+FA=derna2/motif-work/inputs/fa
 OUT=$BASE/e2-probe3
 CORES=16-27
 MEMMAX=24G

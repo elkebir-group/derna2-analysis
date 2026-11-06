@@ -7,10 +7,10 @@
 #   - intermediate rungs 150 and 250, so the fit gets its third and fourth
 #     points without another hour-plus run.
 set -u
-BIN=/home/melkebir/projects/derna2/motif-work/bin/tip          # commit 5d12df5f
-BASE=/home/melkebir/projects/derna2/e3-plan/experiments/paper-benchmark
+BIN=derna2/motif-work/bin/tip          # commit 5d12df5f
+BASE=derna2/e3-plan/experiments/paper-benchmark
 MOTIFS=$BASE/motifs/probe-all-sets.bare.txt
-ICOUNT=/home/melkebir/projects/derna2/motif-work/tools/icount.py
+ICOUNT=derna2/motif-work/tools/icount.py
 OUT=$BASE/e3-probe2
 CORES=16-27
 MEMMAX=24G
@@ -37,7 +37,7 @@ run() {  # label n fasta budget
   echo "=== $label exit $code wall ${wall}s rss ${rss}kB vertices $verts" >&2
 }
 
-FA=/home/melkebir/projects/derna2/motif-work/inputs/fa
+FA=derna2/motif-work/inputs/fa
 run control200 200 "$FA/P31645_200.fasta"        1800
 run n150       150 "$OUT/../e3-probe/fa/P31645_150.fasta" 1800
 run n250       250 "$OUT/../e3-probe/fa/P31645_250.fasta" 3600

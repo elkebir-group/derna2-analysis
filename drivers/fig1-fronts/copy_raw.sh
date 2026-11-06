@@ -4,7 +4,7 @@
 # raw mRNAfold outputs and precheck, and its configs as one compressed tar; the
 # gate and launcher logs; the interactive page. Frozen binaries are left out:
 # they rebuild from the commit recorded in bin/BUILT_FROM.txt.
-# Usage: copy_raw.sh RUN_ROOT   (e.g. /scratch/xinyugu4/glpe-hbb-fronts)
+# Usage: copy_raw.sh RUN_ROOT   (e.g. run/glpe-hbb-fronts)
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUN="$1"

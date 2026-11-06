@@ -166,7 +166,7 @@ def report_tiers(spellable, aa):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--census",
-                    default="/scratch/xinyugu4/paper-e3/screen/lattice-xl.jsonl")
+                    default="run/paper-e3/screen/lattice-xl.jsonl")
     args = ap.parse_args()
 
     spellable, aa = census(args.census)

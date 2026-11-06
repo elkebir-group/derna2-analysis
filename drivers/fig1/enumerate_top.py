@@ -1,7 +1,7 @@
 import csv,math,collections,json,os
 # FIG1_WORK: the working directory the run used (binaries in bin/, outputs beside them).
 W = os.environ.get('FIG1_WORK', 'work')
-R='/home/xinyugu4/derna2'
+R='derna2'
 by=collections.defaultdict(list)
 for r in list(csv.reader(open(f'{R}/packages/derna-codon-dp/data/codon_usage_human.csv')))[1:]: by[r[0]].append((r[1].replace('T','U'),float(r[2])))
 prot=''.join(l.strip() for l in open(f'{R}/experiments/scope-25-beam-runtime-quality/fixtures/GLPE_HUMAN_78.fasta') if not l.startswith('>'))[:78]

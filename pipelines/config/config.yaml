@@ -60,12 +60,18 @@ e2:
   # Cumulative order F1..F4, files under inputs/motifs/.
   motif_sets: [set1-manufacturing, set2-processing, set3-repeats, set4-initiation]
   probe_dirs: [e3-probe, e3-probe2]
-  # The grid ran on two hosts. Its early rounds did not record which, so a round is
-  # attributed by a home directory only one of them wrote; `second_marker` is that path.
+  # The grid ran on two hosts. A round that records `host=` is attributed by it; 44 of the
+  # 662 build lines do. The rest were attributed by `second_marker`, a directory only one
+  # host wrote, and that route is retired: measured 2026-11-06, the path it named matched
+  # **0 of 654** unlabelled lines, before the deposit scrub and after, so every unlabelled
+  # round was already attributed to `first` and nothing changes by emptying it. It is empty
+  # rather than deleted because the mechanism is still the only way a future two-host run
+  # with unlabelled rounds could be told apart, and it named a person's home directory,
+  # which a published repository should not.
   hosts:
     first: ada
     second: tamazirt
-    second_marker: /home/melkebir
+    second_marker: ""
   # The composite figure's example: protein, CAI floor, and which design (`none` = the
   # rung optima themselves). Panels (c)-(g) are this instance.
   example: {cell: Q6PF06, floor: 0.80, alt: none}

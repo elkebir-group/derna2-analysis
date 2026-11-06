@@ -52,7 +52,10 @@ rule e3_refold_deposit:
     wildcard_constraints:
         cell="[A-Za-z0-9]+__[a-z0-9]+",
     shell:
-        "cp {input.out} {output}"
+        # `cp` gives a new file the source's mode, and a deposit is frozen read-only, so a
+        # plain copy lands here at 0444 and the next run cannot rewrite its own output —
+        # snakemake stops with ProtectedOutputException. A derived file is not a deposit.
+        "cp {input.out} {output} && chmod 644 {output}"
 
 
 # One cell's concatenation hull vertices as a derna result file.

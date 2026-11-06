@@ -17,7 +17,7 @@
 # own preflight refuses that, so a round that starts early would abort the whole
 # round rather than corrupt a front -- this wait is what keeps it from happening.
 set -u
-P=/scratch/xinyugu4/paper-e3
+P=run/paper-e3
 OUT=$P/grid
 BIN=$P/bin/derna_06605630
 PINNAME=06605630

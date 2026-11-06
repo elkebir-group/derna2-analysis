@@ -27,9 +27,9 @@
 set -u
 BIN=${BIN:?set BIN to the pinned binary}
 PINNAME=${PINNAME:?set PINNAME to the pinned commit}
-CORPUS=/scratch/xinyugu4/paper-e3/screen/corpus
-SETS=/scratch/xinyugu4/paper-e3/motifs
-OUT=/scratch/xinyugu4/paper-e3/grid
+CORPUS=run/paper-e3/screen/corpus
+SETS=run/paper-e3/motifs
+OUT=run/paper-e3/grid
 THREADS=${THREADS:-4}
 # PASS1=1 runs only cells with NO front yet and never resumes one. Pass 1 buys
 # breadth -- a 4 h front for every cell -- and pass 2 returns to the unfinished

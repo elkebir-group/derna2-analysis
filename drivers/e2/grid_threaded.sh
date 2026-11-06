@@ -24,9 +24,9 @@
 set -u
 BIN=${BIN:?set BIN to the pinned binary}
 PINNAME=${PINNAME:?set PINNAME to the pinned commit}
-CORPUS=/scratch/xinyugu4/paper-e3/screen/corpus
-SETS=/scratch/xinyugu4/paper-e3/motifs   # durable copy, NOT the branch-switched repo path
-OUT=/scratch/xinyugu4/paper-e3/grid
+CORPUS=run/paper-e3/screen/corpus
+SETS=run/paper-e3/motifs   # durable copy, NOT the branch-switched repo path
+OUT=run/paper-e3/grid
 THREADS=4
 BUDGET=64800              # 18 h: the dearest projection is 13.7 h, which is a
 PER=$(( BUDGET + 600 ))   # forecast rather than a runaway, so the budget covers it

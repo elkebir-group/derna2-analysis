@@ -98,16 +98,16 @@ from another's by inspection alone.
 ## The scrub of 2026-11-06
 
 This deposit named the hosts it ran on: 610 of its 2,514 files carried a `/home/<user>` or
-`/scratch/<user>` path. Those paths were run directories, worktrees of the checkout, and **another user's home directory** (`/home/melkebir/projects/derna2`, 96 occurrences), so the deposit disclosed a third party's account and layout as well as this host's. Substitutions, applied with
+`/scratch/<user>` path. Those paths were run directories, worktrees of the checkout, and **another user's home directory** (the second host's checkout, 96 occurrences), so the deposit disclosed a third party's account and layout as well as this host's. Substitutions, applied with
 `pipelines/scripts/scrub_host_paths.py --apply`, which reports before it writes and exits
 non-zero on any path its substitutions miss:
 
-    /scratch/xinyugu4/paper-e3        -> results/e2   (this deposit's own tree)
-    /home/melkebir/projects/derna2    -> derna2       (the second host's checkout)
-    /scratch/xinyugu4/wt-f6-carry     -> derna2       (worktrees of that checkout)
-    /scratch/xinyugu4/wt-midslice-secs-> derna2
-    /scratch/xinyugu4/wt-carry15      -> derna2
-    /scratch/xinyugu4/wt-levers2      -> derna2
+    <run root>/paper-e3            -> results/e2   (this deposit's own tree)
+    <second host's checkout>       -> derna2       (the second host's checkout)
+    <run root>/wt-f6-carry         -> derna2       (worktrees of that checkout)
+    <run root>/wt-midslice-secs    -> derna2
+    <run root>/wt-carry15          -> derna2
+    <run root>/wt-levers2          -> derna2
 
 Afterwards no file here contains either string, checked independently of the tool, and
 `pins/results-e2.sha256` was regenerated: exactly 610 of its 2,514 digests moved, which is

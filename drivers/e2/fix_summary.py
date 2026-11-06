@@ -69,7 +69,7 @@ def repair_row(fields, width, core_at=6):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("path", nargs="?",
-                    default="/scratch/xinyugu4/paper-e3/grid/summary.csv")
+                    default="run/paper-e3/grid/summary.csv")
     ap.add_argument("--apply", action="store_true",
                     help="rewrite the file; without it, only report")
     args = ap.parse_args()

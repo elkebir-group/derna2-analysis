@@ -57,13 +57,13 @@ figures could be rebuilt in exactly one place.
 ## The scrub of 2026-11-06
 
 This deposit named the hosts it ran on: 311 of its 664 files carried a `/home/<user>` or
-`/scratch/<user>` path. Those paths were run directories and **another user's home directory** (`/home/xinyu/e4`, 24 occurrences). Substitutions, applied with
+`/scratch/<user>` path. Those paths were run directories and **another user's home directory** (another host's run directory, 24 occurrences). Substitutions, applied with
 `pipelines/scripts/scrub_host_paths.py --apply`, which reports before it writes and exits
 non-zero on any path its substitutions miss:
 
-    /scratch/xinyugu4/paper-e4 -> results/e3   (this deposit's own tree)
-    /scratch/xinyugu4/paper-e3 -> results/e2   (E2's fronts, which this reads)
-    /home/xinyu/e4             -> run/e3       (the same experiment on another
+    <run root>/paper-e4  -> results/e3   (this deposit's own tree)
+    <run root>/paper-e3  -> results/e2   (E2's fronts, which this reads)
+    <other host>/e4      -> run/e3       (the same experiment on another
                                                 host; kept distinct from the
                                                 deposit rather than conflated)
 

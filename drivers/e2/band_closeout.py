@@ -33,7 +33,7 @@ import json
 import os
 import sys
 
-BAND = "/scratch/xinyugu4/paper-e3/screen/f0-l"
+BAND = "run/paper-e3/screen/f0-l"
 FRAG = os.path.join(BAND, "summary.d")
 COLUMNS = ("protein", "aa", "exit", "wall_s", "points", "hull", "gaps")
 # the driver's wall is not rebuildable; the walk's own is, and they differ

@@ -11,8 +11,8 @@
 # the screen's readouts are the occurrence counts, which load cannot perturb.
 set -u
 
-BIN=/scratch/xinyugu4/paper-e3/bin/derna_8603d37d   # the local build; a binary built elsewhere may not link here
-HERE=/scratch/xinyugu4/paper-e3
+BIN=run/paper-e3/bin/derna_8603d37d   # the local build; a binary built elsewhere may not link here
+HERE=run/paper-e3
 CORPUS=$HERE/screen/corpus
 OUT=$HERE/screen/f0
 CORES=1,3,5,7,9,11,13,15   # socket 1, NUMA node1; a mask from another host means nothing

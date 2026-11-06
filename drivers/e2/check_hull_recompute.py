@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from convert_e1_front import COLLINEAR_RELATIVE, upper_hull  # noqa: E402
 
-DEFAULT_GLOB = "/scratch/xinyugu4/paper-e3/grid/*.jsonl"
+DEFAULT_GLOB = "run/paper-e3/grid/*.jsonl"
 
 
 def points_of(path):

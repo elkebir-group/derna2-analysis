@@ -173,9 +173,9 @@ def e1_measured(path):
 
 if __name__ == "__main__":
     main(sys.argv[1] if len(sys.argv) > 1
-         else "/scratch/xinyugu4/paper-e1/time.jsonl")
+         else "run/paper-e1/time.jsonl")
     e1 = (sys.argv[2] if len(sys.argv) > 2
-          else "/scratch/xinyugu4/paper-e2/sweep.jsonl")
+          else "run/paper-e2/sweep.jsonl")
     try:
         e1_measured(e1)
     except OSError:

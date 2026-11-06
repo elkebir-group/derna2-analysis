@@ -59,3 +59,28 @@ pipeline runs (`fig1_fronts_tables`).
 re-scorer. The **work** pass ran an earlier `drive.py`, from `c7bdbd32`, before the time
 pass's concurrency, contamination and retry changes; its `measure.py` was the same.
 `e3/measure.py` and `e1/isolate.sh` are the same files as `e1/`'s.
+
+## Host paths, and why these files are no longer byte-identical
+
+These drivers are vendored as the record of how each run was invoked, and the rule above is
+that they stay byte-identical to the commit that produced the deposited results. On
+2026-11-06 that rule was broken deliberately, in 33 of them, for one reason: they spelled
+absolute paths on the machines that ran them, including **another contributor's home
+directory**, 21 times. A published repository should not carry someone's account name and
+directory layout, and no reading of byte-identity outweighs that.
+
+Three substitutions, the same shape as the deposits' scrub (`pins/e2-PROVENANCE.md`):
+
+    <contributor's checkout>/derna2 -> derna2
+    <this host's checkout>/derna2   -> derna2
+    <run root>/                     -> run/
+
+Only the leading path changed. Every tree name the drivers referred to — `paper-e3`,
+`glpe-hbb-fronts`, `paper-e2-bin` and the rest — is kept, because which run directory a
+driver read is provenance and the user it belonged to is not. Nothing else in these files
+was touched: no flag, no value, no comment, no commit stamp.
+
+Nothing in the pipeline reads a changed file. The two drivers a rule does read,
+`e1/drive_e1.py` and `e1/e1.config.json`, carried no host path and are untouched; the
+rendered-config check (`tests/test_pipeline.py`) passes as before, and all 14 manifests and
+output pins verify unchanged.
