@@ -15,6 +15,8 @@
 # fig1:
 #   bin_dir: /scratch/<user>/fig1-glpe-hbb/bin
 
-# Where ViennaRNA 2.7.2 can be imported, for fig1_overview and e2_composite_example. Needed
-# only where the venv cannot install it (CentOS 7 and older glibc); see README's Install.
+# Where ViennaRNA 2.7.2 can be imported. Used by fig1_overview, fig1_overview2_plot,
+# e2_composite_example and e3_fig_story, for structure layouts rather than for folding.
+# Needed only where the venv cannot install it (CentOS 7 and older glibc). See README's
+# Install.
 # rna_python: /path/to/venv-with-viennarna/bin/python3

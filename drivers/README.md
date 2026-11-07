@@ -11,7 +11,7 @@ not part of the published tool. What each one does, and the configuration it doe
 is unchanged. A reader comparing a driver with its source commit should expect to find the
 difference in the argument lists and in how a result file is read — `derna design` for a
 design at one weight, `derna front` for a walk, `derna check` for a verdict, `mfe_fold` for
-the free fold of one sequence — and nowhere else.
+the free fold of one sequence.
 
 | Directory | Source in derna2 | Content |
 |---|---|---|

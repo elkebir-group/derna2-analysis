@@ -70,7 +70,7 @@ def corner_lambda(kind, corner, eps):
 
 # Peak RSS per n² (kB), measured in the Scope 24 benchmark; the admission gate's
 # estimate when an arm does not set its own.
-RSS_K = {"lineardesign": 33.0, "derna": 11.0, "lcds": 7.0, "cdsfold": 33.0, "mrnafold": 4.0}
+RSS_K = {"lineardesign": 33.0, "derna": 11.0, "lcds": 7.0, "mrnafold": 4.0}
 
 THREE_LETTER = dict(A="Ala", R="Arg", N="Asn", D="Asp", C="Cys", Q="Gln", E="Glu", G="Gly", H="His", I="Ile",
                     L="Leu", K="Lys", M="Met", F="Phe", P="Pro", S="Ser", T="Thr", W="Trp", Y="Tyr", V="Val")
@@ -192,8 +192,6 @@ def command(cfg, c, work):
     if kind == "lineardesign":
         argv = [bins["lineardesign"], repr(corner_lambda("lineardesign", c["corner"], cfg["epsilon"])), "0", bins["lineardesign_table"]]
         return argv, bins["lineardesign_dir"], str(ext(stem, ".stdin")), parse_lineardesign
-    if kind == "cdsfold":
-        return [bins["cdsfold"], str(fasta)], str(work), None, parse_cdsfold
     if kind == "mrnafold":
         lam = corner_lambda("mrnafold", c["corner"], cfg["epsilon"])
         threads = c.get("threads", 1)
@@ -245,15 +243,6 @@ def parse_lineardesign(stdout):
     mfe = re.search(r"folding free energy:\s*([-0-9.]+)", stdout)
     cai = re.search(r"mRNA CAI:\s*([0-9.]+)", stdout)
     return dict(seq=seq.group(1), mfe_reported=float(mfe.group(1)), cai_reported=float(cai.group(1)))
-
-
-def parse_cdsfold(stdout):
-    """CDSfold's output format is not yet verified against a build: `selftest`
-    must pass for this arm before its rows are read. It reports MFE only, so
-    its CAI is a tie-break and never a loss."""
-    seqs = re.findall(r"^([ACGU]{30,})$", stdout, re.M)
-    mfe = re.search(r"(-?\d+\.\d+)\s*kcal", stdout) or re.search(r"MFE[^-\d]*(-?\d+\.?\d*)", stdout)
-    return dict(seq=max(seqs, key=len), mfe_reported=float(mfe.group(1)), cai_reported=None)
 
 
 def parse_mrnafold(stdout, lam, weights):

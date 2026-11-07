@@ -4,7 +4,7 @@
 
 SWEEP_JSONL holds the sweep rows; only those stamped with PIN are read. WALK_DIR holds the
 walk reports `<protein>.walk.json`, read for `sweep_s`, the wall time of the pruned hull
-search (the sweep rows do not carry it; see "Open items" in the README).
+search, which the sweep rows do not carry.
 
 Panels: (a) one instance: its front with the hull vertices marked, the steps between
 neighbouring designs, and each method's wall time; (b) the share of each front that a λ

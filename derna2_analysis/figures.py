@@ -22,13 +22,12 @@ SLOTS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#625
 # One-hue ordinal ramp (blue 250 / 450 / 650) for beam widths, narrow to wide.
 WIDTH_RAMP = ["#86b6ef", "#2a78d6", "#104281"]
 
-# arm -> (label, color, marker). Exact serial methods take slots 1-5 in this order.
+# arm -> (label, color, marker). Exact serial methods take slots 1-4 in this order.
 METHODS = {
     "derna-exact-30": ("derna2", SLOTS[0], "o"),
     "lineardesign": ("LinearDesign", SLOTS[1], "s"),
     "lcds-exact": ("LinearCDSfold", SLOTS[2], "^"),
     "mrnafold": ("mRNAfold", SLOTS[3], "D"),
-    "cdsfold": ("CDSfold", SLOTS[4], "v"),
     "derna-exact-20": ("derna2, loop cap 20", SLOTS[5], "P"),
     "derna-threaded": ("derna2, 8 threads", SLOTS[6], "X"),
     "mrnafold-threaded": ("mRNAfold, 8 threads", SLOTS[7], "h"),

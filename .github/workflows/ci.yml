@@ -5,7 +5,7 @@
 # more for E3 and Figure 1 — which this repository does not carry and a runner cannot fetch.
 # So this workflow proves the code and the configuration still hold together; it cannot prove
 # that a figure still reproduces. That check is `pipelines/run.sh -- <stamp>` on a host that
-# has the deposits, and README's "Open items" says which ones are published.
+# has the archived results, which the README's Data section describes.
 name: ci
 
 on:

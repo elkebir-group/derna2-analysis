@@ -31,9 +31,8 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-# The drivers are vendored verbatim from the derna2 repository (drivers/README.md):
-# keeping them byte-identical to the commit that produced the deposited results
-# matters more than restyling them.
+# The drivers came from the derna2 repository (drivers/README.md). Keeping them close to
+# the code that produced the results matters more than restyling them.
 extend-exclude = ["drivers"]
 
 [tool.ruff.lint]

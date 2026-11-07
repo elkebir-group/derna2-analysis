@@ -13,10 +13,12 @@ figures_from: deposit
 
 # The drivers under drivers/ are standard-library Python, run outside the venv's packages.
 driver_python: python3
-# The two rules that fold a sequence (fig1_overview, e2_composite_example) import ViennaRNA.
-# Null runs them in the environment snakemake itself runs in. On a host where ViennaRNA has
-# no installable wheel (CentOS 7 and older glibc), name a Python whose ViennaRNA 2.7.2
-# bindings come from elsewhere here, with the rest of requirements.lock installed beside it.
+# Four rules import ViennaRNA, for structure layouts rather than for folding: fig1_overview,
+# fig1_overview2_plot (through overview_draw.py), e2_composite_example and e3_fig_story.
+# DERNA2 does every fold. Null runs them in the environment snakemake itself runs in. On a
+# host where ViennaRNA has no installable wheel (CentOS 7 and older glibc), name a Python
+# whose ViennaRNA 2.7.2 bindings come from elsewhere here, with the rest of
+# requirements.lock installed beside it.
 rna_python: null
 
 # The method itself. The pipeline's run targets build these two binaries at `pin` and run

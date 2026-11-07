@@ -196,6 +196,6 @@ rule fig1_overview2_plot:
     params:
         data=lambda w: DERIVED / "fig1" / f"overview2_{w.pair}",
     shell:
-        "{PY} {SCRIPTS}/fig1/overview2.py {params.data} {params.data}/mrnafold.jsonl "
+        "{RNA_PY} {SCRIPTS}/fig1/overview2.py {params.data} {params.data}/mrnafold.jsonl "
         "{input.designs} {input.fasta} {params.data}/u5.txt {params.data}/u3.txt "
         "{input.structure} {output[0]}"
